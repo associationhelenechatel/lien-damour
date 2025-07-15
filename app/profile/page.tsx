@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation"
 import { getUser } from "@/lib/auth"
-import Dashboard from "@/components/dashboard"
+import ProfileEditor from "@/components/profile-editor"
 
-export default async function Home() {
+export default async function ProfilePage() {
   const user = await getUser()
 
   if (!user) {
     redirect("/login")
   }
 
-  return <Dashboard user={user} />
+  return <ProfileEditor user={user} />
 }
