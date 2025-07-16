@@ -1,43 +1,43 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { TreePine, LogOut, Settings } from "lucide-react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { familyData } from "@/lib/family-data"
-import FamilyTreeFlow from "@/components/family-tree-flow"
+import { useState, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { TreePine, LogOut, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { familyData } from "@/lib/family-data";
+import FamilyTreeFlow from "@/components/family-tree-flow";
 
 interface DashboardProps {
   user: {
-    id: string
-    name: string
-    email: string
-    role: string
-  }
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
 }
 
 export default function Dashboard({ user }: DashboardProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const router = useRouter()
+  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
   const handleLogout = () => {
-    localStorage.removeItem("user")
-    router.push("/login")
-  }
+    localStorage.removeItem("user");
+    router.push("/login");
+  };
 
   const filteredMembers = useMemo(() => {
-    if (!searchTerm) return familyData
+    if (!searchTerm) return familyData;
 
     // Strict search - only match first name and last name
     return familyData.filter((member) => {
-      const nameParts = member.name.toLowerCase().split(" ")
-      const searchLower = searchTerm.toLowerCase()
+      const nameParts = member.name.toLowerCase().split(" ");
+      const searchLower = searchTerm.toLowerCase();
 
       // Check if search term matches any part of the name
-      return nameParts.some((namePart) => namePart.includes(searchLower))
-    })
-  }, [searchTerm])
+      return nameParts.some((namePart) => namePart.includes(searchLower));
+    });
+  }, [searchTerm]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -50,8 +50,12 @@ export default function Dashboard({ user }: DashboardProps) {
                 <TreePine className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">Family Directory</h1>
-                <p className="text-sm text-slate-600">Welcome back, {user.name}</p>
+                <h1 className="text-xl font-bold text-slate-900">
+                  Family Directory
+                </h1>
+                <p className="text-sm text-slate-600">
+                  Welcome back, {user?.name}
+                </p>
               </div>
             </div>
 
@@ -73,17 +77,23 @@ export default function Dashboard({ user }: DashboardProps) {
 
       {/* Full height tree container */}
       <div className="h-[calc(100vh-64px)]">
-        <FamilyTreeFlow members={filteredMembers} searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        <FamilyTreeFlow
+          members={filteredMembers}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
       </div>
 
       {filteredMembers.length === 0 && searchTerm && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-20">
           <div className="text-center">
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No family members found</h3>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">
+              No family members found
+            </h3>
             <p className="text-slate-600">Try adjusting your search terms</p>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

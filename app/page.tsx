@@ -1,13 +1,13 @@
-import { redirect } from "next/navigation"
-import { getUser } from "@/lib/auth"
-import Dashboard from "@/components/dashboard"
+import { redirect } from "next/navigation";
+import { getUser } from "@/lib/auth";
+import Dashboard from "@/components/dashboard";
 
 export default async function Home() {
-  const user = await getUser()
+  const user = await getUser();
 
-  if (!user) {
-    redirect("/login")
-  }
+  // if (!user) {
+  //   redirect("/login");
+  // }
 
-  return <Dashboard user={user} />
+  return <Dashboard user={user} />;
 }
