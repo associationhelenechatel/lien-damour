@@ -87,8 +87,6 @@ function FamilyMemberNode({ data }: NodeProps) {
     onFocus(member.id);
   };
 
-  console.log(`Rendering node ${member.name} - isFocused: ${isFocused}`);
-
   return (
     <>
       {/* Connection handles */}

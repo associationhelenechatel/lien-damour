@@ -34,28 +34,64 @@ const nodeTypes = {
   coupleLink: CoupleLinkNode,
 };
 
+// Helper function to get children of a person
+function getChildrenOf(
+  parentId: string,
+  members: FamilyMember[]
+): FamilyMember[] {
+  return members.filter((m) => m.father === parentId || m.mother === parentId);
+}
+
+// Helper function to get parents of a person
+function getParentsOf(
+  childId: string,
+  members: FamilyMember[]
+): FamilyMember[] {
+  const child = members.find((m) => m.id === childId);
+  if (!child) return [];
+
+  const parents: FamilyMember[] = [];
+  if (child.father) {
+    const father = members.find((m) => m.id === child.father);
+    if (father) parents.push(father);
+  }
+  if (child.mother) {
+    const mother = members.find((m) => m.id === child.mother);
+    if (mother) parents.push(mother);
+  }
+  return parents;
+}
+
+// Helper function to find couples (two people who have children together)
+function getCouples(members: FamilyMember[]): Array<[string, string]> {
+  const couples = new Set<string>();
+  const coupleList: Array<[string, string]> = [];
+
+  members.forEach((child) => {
+    if (child.father && child.mother) {
+      const coupleKey = [child.father, child.mother].sort().join("-");
+      if (!couples.has(coupleKey)) {
+        couples.add(coupleKey);
+        coupleList.push([child.father, child.mother]);
+      }
+    }
+  });
+
+  return coupleList;
+}
+
 // Helper function to determine family role for styling
 function getFamilyRole(memberId: string, members: FamilyMember[]): string {
   const member = members.find((m) => m.id === memberId);
   if (!member) return "family";
 
-  const hasChildren = member.children && member.children.length > 0;
-  const hasParents = members.some((m) => m.children?.includes(memberId));
+  const hasChildren = getChildrenOf(memberId, members).length > 0;
+  const hasParents = getParentsOf(memberId, members).length > 0;
 
   if (hasParents && hasChildren) return "parent"; // Has both parents and children
   if (hasParents && !hasChildren) return "child"; // Has parents but no children
   if (!hasParents && hasChildren) return "grandparent"; // No parents but has children
   return "family"; // Default
-}
-
-// Helper function to resolve spouse ID to name
-function getSpouseName(
-  member: FamilyMember,
-  members: FamilyMember[]
-): string | undefined {
-  if (!member.spouse) return undefined;
-  const spouse = members.find((m) => m.id === member.spouse);
-  return spouse?.name;
 }
 
 // Helper function to apply Dagre layout to nodes
@@ -66,13 +102,19 @@ function getLayoutedElements(nodes: Node[], edges: Edge[]) {
   // Configure the layout
   dagreGraph.setGraph({
     rankdir: "TB", // Top to bottom layout
-    nodesep: 100, // Horizontal spacing between nodes
+    nodesep: 200, // Horizontal spacing for couple link nodes
     ranksep: 120, // Vertical spacing between ranks
   });
 
   // Add nodes to dagre graph
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: 200, height: 100 });
+    // Different sizes for different node types
+    const nodeSize =
+      node.type === "coupleLink"
+        ? { width: 26, height: 26 } // Match actual visual size of couple link nodes
+        : { width: 200, height: 100 }; // Standard size for family member nodes
+
+    dagreGraph.setNode(node.id, nodeSize);
   });
 
   // Add edges to dagre graph
@@ -86,11 +128,17 @@ function getLayoutedElements(nodes: Node[], edges: Edge[]) {
   // Apply calculated positions to nodes
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
+    // Calculate center offset based on node type
+    const centerOffset =
+      node.type === "coupleLink"
+        ? { x: 13, y: 13 } // Center couple link nodes (26/2, 26/2)
+        : { x: 100, y: 50 }; // Center family member nodes (200/2, 100/2)
+
     return {
       ...node,
       position: {
-        x: nodeWithPosition.x - 100, // Center the node (width/2)
-        y: nodeWithPosition.y - 50, // Center the node (height/2)
+        x: nodeWithPosition.x - centerOffset.x,
+        y: nodeWithPosition.y - centerOffset.y,
       },
     };
   });
@@ -136,47 +184,33 @@ export default function FamilyTreeFlow({
         relatedMembers.add(focusedMember.id);
         console.log("Added focused member:", focusedMember.name);
 
-        // Add parents - find members who have this person in their children array
-        const parents = members.filter((m) => {
-          const hasChild = m.children && m.children.includes(focusedMember.id);
-          if (hasChild) {
-            console.log(
-              "Found parent:",
-              m.name,
-              "has child:",
-              focusedMember.name
-            );
-          }
-          return hasChild;
-        });
+        // Add parents - find the father and mother of the focused member
+        const parents = getParentsOf(focusedMember.id, members);
         parents.forEach((p) => {
           relatedMembers.add(p.id);
           console.log("Added parent:", p.name);
         });
 
-        // Add children - find members whose IDs are in the focused member's children array
-        if (focusedMember.children) {
-          const children = members.filter((m) => {
-            const isChild = focusedMember.children!.includes(m.id);
-            if (isChild) {
-              console.log("Found child:", m.name, "of:", focusedMember.name);
-            }
-            return isChild;
-          });
-          children.forEach((c) => {
-            relatedMembers.add(c.id);
-            console.log("Added child:", c.name);
-          });
-        }
+        // Add children - find members who have this person as father or mother
+        const children = getChildrenOf(focusedMember.id, members);
+        children.forEach((c) => {
+          relatedMembers.add(c.id);
+          console.log("Added child:", c.name, "of:", focusedMember.name);
+        });
 
-        // Add spouse
-        if (focusedMember.spouse) {
-          const spouse = members.find((m) => m.id === focusedMember.spouse);
-          if (spouse) {
-            relatedMembers.add(spouse.id);
-            console.log("Added spouse:", spouse.name);
+        // Add spouses (people who have children with the focused member)
+        const couples = getCouples(members);
+        couples.forEach(([parent1Id, parent2Id]) => {
+          if (parent1Id === focusedMember.id) {
+            relatedMembers.add(parent2Id);
+            const spouse = members.find((m) => m.id === parent2Id);
+            if (spouse) console.log("Added spouse:", spouse.name);
+          } else if (parent2Id === focusedMember.id) {
+            relatedMembers.add(parent1Id);
+            const spouse = members.find((m) => m.id === parent1Id);
+            if (spouse) console.log("Added spouse:", spouse.name);
           }
-        }
+        });
 
         visibleMembers = members.filter((m) => relatedMembers.has(m.id));
         console.log(
@@ -199,7 +233,6 @@ export default function FamilyTreeFlow({
 
       const isFocused = member.id === focusedNodeId;
       const familyRole = getFamilyRole(member.id, members);
-      const spouseName = getSpouseName(member, members);
 
       console.log(
         `Node ${member.name} (${member.id}) - isFocused: ${isFocused}, role: ${familyRole}`
@@ -215,126 +248,125 @@ export default function FamilyTreeFlow({
           isFocused,
           onFocus: handleNodeFocus,
           familyRole,
-          spouseName,
           allMembers: members,
         },
         draggable: true, // Allow dragging for user adjustment
       });
     });
 
-    // Create couple link nodes for married couples
-    const processedCouples = new Set<string>();
-    visibleMembers.forEach((member) => {
-      if (member.spouse && !processedCouples.has(member.id)) {
-        const spouse = visibleMembers.find((m) => m.id === member.spouse);
-        if (spouse) {
-          const coupleKey = [member.id, spouse.id].sort().join("-");
-          processedCouples.add(member.id);
-          processedCouples.add(spouse.id);
+    // Create couple link nodes for people who have children together
+    const couples = getCouples(visibleMembers);
+    couples.forEach(([parent1Id, parent2Id]) => {
+      // Check if both parents are visible
+      const parent1 = visibleMembers.find((m) => m.id === parent1Id);
+      const parent2 = visibleMembers.find((m) => m.id === parent2Id);
 
-          const linkId = `link-${coupleKey}`;
+      if (parent1 && parent2) {
+        const coupleKey = [parent1Id, parent2Id].sort().join("-");
+        const linkId = `link-${coupleKey}`;
 
-          nodes.push({
-            id: linkId,
-            type: "coupleLink",
-            position: { x: 0, y: 0 }, // Initial position, will be overridden by Dagre layout
-            data: {
-              coupleKey,
-            },
-            draggable: true,
-          });
-        }
+        nodes.push({
+          id: linkId,
+          type: "coupleLink",
+          position: { x: 0, y: 0 }, // Initial position, will be overridden by Dagre layout
+          data: {
+            coupleKey,
+          },
+          draggable: true,
+        });
       }
     });
 
     // Create edges based on family relationships
     const visibleMemberIds = new Set(visibleMembers.map((m) => m.id));
-    const processedLinkConnections = new Set<string>();
 
-    visibleMembers.forEach((member) => {
-      // Connect spouses to link nodes
-      if (member.spouse && !processedLinkConnections.has(member.id)) {
-        const spouse = visibleMembers.find((m) => m.id === member.spouse);
-        if (spouse) {
-          const coupleKey = [member.id, spouse.id].sort().join("-");
-          const linkId = `link-${coupleKey}`;
-          processedLinkConnections.add(member.id);
-          processedLinkConnections.add(spouse.id);
+    // Connect spouses to couple link nodes and couple links to children
+    couples.forEach(([parent1Id, parent2Id]) => {
+      const parent1 = visibleMembers.find((m) => m.id === parent1Id);
+      const parent2 = visibleMembers.find((m) => m.id === parent2Id);
 
-          // Determine first and second spouse based on ID order
-          const firstSpouse = member.id < spouse.id ? member : spouse;
-          const secondSpouse = member.id < spouse.id ? spouse : member;
+      if (parent1 && parent2) {
+        const coupleKey = [parent1Id, parent2Id].sort().join("-");
+        const linkId = `link-${coupleKey}`;
 
-          // First spouse connects from right handle to left side of link
-          edges.push({
-            id: `spouse-${firstSpouse.id}-${linkId}`,
-            source: firstSpouse.id,
-            sourceHandle: "spouse-right",
-            target: linkId,
-            targetHandle: "spouse-left",
-            type: "straight",
-            style: {
-              stroke: "#ef4444",
-              strokeWidth: 2,
-              strokeDasharray: "5,5",
-            },
-          });
+        // Determine first and second spouse based on ID order
+        const firstSpouse = parent1Id < parent2Id ? parent1 : parent2;
+        const secondSpouse = parent1Id < parent2Id ? parent2 : parent1;
 
-          // Second spouse connects from left handle to right side of link
-          edges.push({
-            id: `spouse-${secondSpouse.id}-${linkId}`,
-            source: secondSpouse.id,
-            sourceHandle: "spouse-left",
-            target: linkId,
-            targetHandle: "spouse-right",
-            type: "straight",
-            style: {
-              stroke: "#ef4444",
-              strokeWidth: 2,
-              strokeDasharray: "5,5",
-            },
-          });
+        // First spouse connects from right handle to left side of link
+        edges.push({
+          id: `spouse-${firstSpouse.id}-${linkId}`,
+          source: firstSpouse.id,
+          sourceHandle: "spouse-right",
+          target: linkId,
+          targetHandle: "spouse-left",
+          type: "straight",
+          style: {
+            stroke: "#ef4444",
+            strokeWidth: 2,
+            strokeDasharray: "5,5",
+          },
+        });
 
-          // Connect link node to children
-          if (member.children) {
-            member.children.forEach((childId) => {
-              const child = visibleMembers.find((m) => m.id === childId);
-              if (child && visibleMemberIds.has(child.id)) {
-                edges.push({
-                  id: `family-${linkId}-${child.id}`,
-                  source: linkId,
-                  sourceHandle: undefined,
-                  target: child.id,
-                  targetHandle: undefined,
-                  type: "smoothstep",
-                  style: {
-                    stroke: "#10b981",
-                    strokeWidth: 2,
-                  },
-                });
-              }
-            });
-          }
-        }
-      }
+        // Second spouse connects from left handle to right side of link
+        edges.push({
+          id: `spouse-${secondSpouse.id}-${linkId}`,
+          source: secondSpouse.id,
+          sourceHandle: "spouse-left",
+          target: linkId,
+          targetHandle: "spouse-right",
+          type: "straight",
+          style: {
+            stroke: "#ef4444",
+            strokeWidth: 2,
+            strokeDasharray: "5,5",
+          },
+        });
 
-      // Handle single parents (no spouse) - connect directly to children
-      if (member.children && !member.spouse) {
-        member.children.forEach((childId) => {
-          const child = visibleMembers.find((m) => m.id === childId);
-          if (child && visibleMemberIds.has(child.id)) {
+        // Connect couple link to their children
+        const children = visibleMembers.filter(
+          (child) =>
+            (child.father === parent1Id && child.mother === parent2Id) ||
+            (child.father === parent2Id && child.mother === parent1Id)
+        );
+
+        children.forEach((child) => {
+          if (visibleMemberIds.has(child.id)) {
             edges.push({
-              id: `parent-${member.id}-${child.id}`,
-              source: member.id,
+              id: `family-${linkId}-${child.id}`,
+              source: linkId,
               sourceHandle: undefined,
               target: child.id,
               targetHandle: undefined,
-              type: "straight",
-              style: { stroke: "#10b981", strokeWidth: 2 },
+              type: "smoothstep",
+              style: {
+                stroke: "#10b981",
+                strokeWidth: 2,
+              },
             });
           }
         });
       }
+    });
+
+    // Handle single parents (people with children but no couple link)
+    visibleMembers.forEach((member) => {
+      const memberChildren = getChildrenOf(member.id, visibleMembers);
+      memberChildren.forEach((child) => {
+        // Only connect directly if this child doesn't have both parents visible
+        const childParents = getParentsOf(child.id, visibleMembers);
+        if (childParents.length === 1 && visibleMemberIds.has(child.id)) {
+          edges.push({
+            id: `parent-${member.id}-${child.id}`,
+            source: member.id,
+            sourceHandle: undefined,
+            target: child.id,
+            targetHandle: undefined,
+            type: "straight",
+            style: { stroke: "#10b981", strokeWidth: 2 },
+          });
+        }
+      });
     });
 
     console.log("Generated nodes:", nodes.length, "edges:", edges.length);
