@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -195,20 +194,14 @@ export default function Home() {
       <section className="py-16 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-5xl font-bold text-slate-800 mb-6">
-            Association Châtel
+            Association Hélène Châtel
           </h1>
           <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
-            Depuis plus de 50 ans, l'Association Châtel s'engage pour le
+            Depuis plus de 50 ans, l'Association Hélène Châtel s'engage pour le
             développement social, culturel et économique de notre région.
-            Découvrez les 14 projets que nous soutenons financièrement pour
+            Découvrez les projets que nous soutenons financièrement pour
             améliorer la vie de notre communauté.
           </p>
-          <div className="bg-white rounded-lg shadow-lg p-6 inline-block">
-            <p className="text-3xl font-bold text-emerald-600">
-              {totalAmount.toLocaleString("fr-FR")}€
-            </p>
-            <p className="text-slate-600">Budget total alloué</p>
-          </div>
         </div>
       </section>
 
@@ -216,7 +209,7 @@ export default function Home() {
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">
-            Nos 14 Projets Soutenus
+            Nos Projets Soutenus
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {projects.map((project) => {
@@ -266,11 +259,11 @@ export default function Home() {
               Notre Mission
             </h2>
             <p className="text-lg text-slate-600 mb-8">
-              L'Association Châtel œuvre pour le bien-être de tous les habitants
-              de notre région. Grâce à vos dons et à notre engagement, nous
-              finançons des projets concrets qui améliorent la qualité de vie,
-              favorisent l'éducation, préservent notre patrimoine et protègent
-              notre environnement.
+              L'Association Hélène Châtel œuvre pour le bien-être de tous les
+              habitants de notre région. Grâce à vos dons et à notre engagement,
+              nous finançons des projets concrets qui améliorent la qualité de
+              vie, favorisent l'éducation, préservent notre patrimoine et
+              protègent notre environnement.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
               <div className="text-center">

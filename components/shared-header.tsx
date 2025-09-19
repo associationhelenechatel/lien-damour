@@ -17,7 +17,7 @@ export function SharedHeader() {
           <div>
             <Link href="/">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-700 to-slate-800 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity">
-                Association Châtel
+                Association Hélène Châtel
               </h1>
             </Link>
             <p className="text-slate-600">
