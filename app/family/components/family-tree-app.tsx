@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Users, Plus } from "lucide-react";
+import { Search, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PersonCard } from "@/components/person-card";
@@ -12,27 +12,35 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
-import { FamilyStats } from "@/components/family-stats";
+import { FamilyStats } from "@/app/family/components/family-stats";
 import familyData from "@/data/family-data.json";
+import type { Person } from "@/models/person.model";
+
+type GroupedByBranch = Record<string, Person[]>;
+
+const typedFamilyData = familyData as Person[];
 
 const stats = {
-  generations: Math.max(...familyData.map((p) => p.generation)),
-  couples: familyData.filter((p) => p.spouse).length,
+  generations: Math.max(...typedFamilyData.map((p) => p.generation)),
+  couples: typedFamilyData.filter((p) => p.spouse).length,
   years:
-    new Date().getFullYear() - Math.min(...familyData.map((p) => p.birthYear)),
-  locations: Array.from(new Set(familyData.map((p) => p.location))).length,
+    new Date().getFullYear() -
+    Math.min(...typedFamilyData.map((p) => p.birthYear)),
+  locations: Array.from(new Set(typedFamilyData.map((p) => p.location))).length,
 };
 
 export { FamilyTreeApp };
 export default function FamilyTreeApp() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPerson, setSelectedPerson] = useState(null);
-  const [selectedGeneration, setSelectedGeneration] = useState(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [selectedGeneration, setSelectedGeneration] = useState<number | null>(
+    null
+  );
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false);
 
   const filteredFamilyData = useMemo(() => {
-    if (!searchTerm && !selectedGeneration) return familyData;
-    return familyData.filter(
+    if (!searchTerm && !selectedGeneration) return typedFamilyData;
+    return typedFamilyData.filter(
       (person) =>
         (!searchTerm ||
           person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,9 +50,9 @@ export default function FamilyTreeApp() {
     );
   }, [searchTerm, selectedGeneration]);
 
-  const groupedByBranch = useMemo(() => {
-    const grouped = {};
-    familyData.forEach((person) => {
+  const groupedByBranch = useMemo<GroupedByBranch>(() => {
+    const grouped: GroupedByBranch = {};
+    typedFamilyData.forEach((person) => {
       const branchName = `Génération ${person.generation}`;
       if (!grouped[branchName]) grouped[branchName] = [];
       grouped[branchName].push(person);
@@ -56,7 +64,7 @@ export default function FamilyTreeApp() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <main className="container mx-auto px-4 py-8">
         {/* Family Statistics */}
-        <FamilyStats familyData={familyData} />
+        <FamilyStats familyData={typedFamilyData} />
 
         {/* Search and controls */}
         <div className="mb-8 space-y-4">
@@ -107,7 +115,7 @@ export default function FamilyTreeApp() {
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
                       <div className="grid gap-3">
-                        {members.map((person) => (
+                        {(members as Person[]).map((person) => (
                           <div
                             key={person.id}
                             className={`p-3 rounded-lg border cursor-pointer transition-all ${
@@ -151,9 +159,11 @@ export default function FamilyTreeApp() {
               {selectedPerson ? (
                 <PersonCard
                   person={selectedPerson}
-                  familyData={familyData}
-                  onPersonSelect={(personId) => {
-                    const person = familyData.find((p) => p.id === personId);
+                  familyData={typedFamilyData}
+                  onPersonSelect={(personId: string) => {
+                    const person = typedFamilyData.find(
+                      (p) => p.id === personId
+                    );
                     if (person) setSelectedPerson(person);
                   }}
                 />

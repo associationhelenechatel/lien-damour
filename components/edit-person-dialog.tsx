@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,65 +10,82 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Person {
-  id: string
-  name: string
-  birthYear: number
-  deathYear?: number
-  generation: number
-  parents: string[]
-  children: string[]
-  spouse?: string
-  occupation?: string
-  location?: string
+  id: string;
+  name: string;
+  birthYear: number;
+  deathYear?: number;
+  generation: number;
+  parents: string[];
+  children: string[];
+  spouse?: string;
+  occupation?: string;
+  location?: string;
 }
 
 interface EditPersonDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  person: Person
-  onEditPerson: (person: Person) => void
-  existingFamily: Person[]
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  person: Person;
+  onEditPerson: (person: Person) => void;
+  existingFamily: Person[];
 }
 
-export function EditPersonDialog({ open, onOpenChange, person, onEditPerson, existingFamily }: EditPersonDialogProps) {
-  const [formData, setFormData] = useState<Person>(person)
-  const [isDeceased, setIsDeceased] = useState(!!person.deathYear)
+export function EditPersonDialog({
+  open,
+  onOpenChange,
+  person,
+  onEditPerson,
+  existingFamily,
+}: EditPersonDialogProps) {
+  const [formData, setFormData] = useState<Person>(person);
+  const [isDeceased, setIsDeceased] = useState(!!person.deathYear);
 
   useEffect(() => {
-    setFormData(person)
-    setIsDeceased(!!person.deathYear)
-  }, [person])
+    setFormData(person);
+    setIsDeceased(!!person.deathYear);
+  }, [person]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     const updatedPerson = {
       ...formData,
       deathYear: isDeceased ? formData.deathYear : undefined,
-    }
+    };
 
-    onEditPerson(updatedPerson)
-    onOpenChange(false)
-  }
+    onEditPerson(updatedPerson);
+    onOpenChange(false);
+  };
 
   const availableParents = existingFamily.filter(
-    (p) => p.id !== person.id && p.generation < person.generation && !person.children.includes(p.id),
-  )
+    (p) =>
+      p.id !== person.id &&
+      p.generation < person.generation &&
+      !person.children.includes(p.id)
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Modifier {person.name}</DialogTitle>
-          <DialogDescription>Modifiez les informations de ce membre de la famille.</DialogDescription>
+          <DialogDescription>
+            Modifiez les informations de ce membre de la famille.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -78,7 +95,9 @@ export function EditPersonDialog({ open, onOpenChange, person, onEditPerson, exi
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
               />
             </div>
@@ -87,7 +106,12 @@ export function EditPersonDialog({ open, onOpenChange, person, onEditPerson, exi
               <Label htmlFor="generation">Génération</Label>
               <Select
                 value={formData.generation.toString()}
-                onValueChange={(value) => setFormData({ ...formData, generation: Number.parseInt(value) })}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    generation: Number.parseInt(value),
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -112,14 +136,23 @@ export function EditPersonDialog({ open, onOpenChange, person, onEditPerson, exi
                 min="1800"
                 max={new Date().getFullYear()}
                 value={formData.birthYear}
-                onChange={(e) => setFormData({ ...formData, birthYear: Number.parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    birthYear: Number.parseInt(e.target.value),
+                  })
+                }
                 required
               />
             </div>
 
             <div>
               <div className="flex items-center space-x-2 mb-2">
-                <Checkbox id="deceased" checked={isDeceased} onCheckedChange={setIsDeceased} />
+                <Checkbox
+                  id="deceased"
+                  checked={isDeceased}
+                  onCheckedChange={(checked) => setIsDeceased(checked === true)}
+                />
                 <Label htmlFor="deceased">Décédé(e)</Label>
               </div>
               {isDeceased && (
@@ -128,7 +161,12 @@ export function EditPersonDialog({ open, onOpenChange, person, onEditPerson, exi
                   min={formData.birthYear}
                   max={new Date().getFullYear()}
                   value={formData.deathYear || ""}
-                  onChange={(e) => setFormData({ ...formData, deathYear: Number.parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      deathYear: Number.parseInt(e.target.value),
+                    })
+                  }
                   placeholder="Année de décès"
                 />
               )}
@@ -140,7 +178,9 @@ export function EditPersonDialog({ open, onOpenChange, person, onEditPerson, exi
             <Input
               id="spouse"
               value={formData.spouse || ""}
-              onChange={(e) => setFormData({ ...formData, spouse: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, spouse: e.target.value })
+              }
               placeholder="Nom du conjoint"
             />
           </div>
@@ -150,7 +190,9 @@ export function EditPersonDialog({ open, onOpenChange, person, onEditPerson, exi
             <Input
               id="occupation"
               value={formData.occupation || ""}
-              onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, occupation: e.target.value })
+              }
               placeholder="Profession"
             />
           </div>
@@ -160,21 +202,30 @@ export function EditPersonDialog({ open, onOpenChange, person, onEditPerson, exi
             <Input
               id="location"
               value={formData.location || ""}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, location: e.target.value })
+              }
               placeholder="Ville, Pays"
             />
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Annuler
             </Button>
-            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
+            <Button
+              type="submit"
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
               Sauvegarder
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

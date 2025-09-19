@@ -3,19 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Heart, MapPin, Briefcase, Calendar, Users, Baby } from "lucide-react";
-
-interface Person {
-  id: string;
-  name: string;
-  birthYear: number;
-  deathYear?: number;
-  generation: number;
-  parents: string[];
-  children: string[];
-  spouse?: string;
-  occupation?: string;
-  location?: string;
-}
+import { Person } from "@/models/person.model";
 
 interface PersonCardProps {
   person: Person;
@@ -137,14 +125,14 @@ export function PersonCard({
             <div className="grid gap-1">
               {parents.map((parent) => (
                 <Button
-                  key={parent.id}
+                  key={parent!.id}
                   variant="ghost"
                   size="sm"
                   className="w-full justify-start text-left p-2 h-auto bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
-                  onClick={() => onPersonSelect?.(parent.id)}
+                  onClick={() => onPersonSelect?.(parent!.id)}
                 >
                   <span className="font-medium text-blue-900">
-                    {parent.name}
+                    {parent!.name}
                   </span>
                 </Button>
               ))}
@@ -161,14 +149,14 @@ export function PersonCard({
             <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
               {children.map((child) => (
                 <Button
-                  key={child.id}
+                  key={child!.id}
                   variant="ghost"
                   size="sm"
                   className="flex-shrink-0 px-3 py-1 h-auto bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors text-xs"
-                  onClick={() => onPersonSelect?.(child.id)}
+                  onClick={() => onPersonSelect?.(child!.id)}
                 >
                   <span className="font-medium text-emerald-900">
-                    {child.name}
+                    {child!.name}
                   </span>
                 </Button>
               ))}

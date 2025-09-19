@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -10,18 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Search, Home, Users, MapPin, Filter } from "lucide-react";
-import { LeafletMap } from "@/components/leaflet-map";
+import { Users, MapPin } from "lucide-react";
+import { LeafletMap } from "@/app/map/components/leaflet-map";
 import { PersonCard } from "@/components/person-card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import Link from "next/link";
+
 import { ProtectedRoute } from "@/components/protected-route";
 import familyData from "@/data/family-data.json";
 

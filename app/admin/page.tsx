@@ -20,6 +20,7 @@ import { EditPersonDialog } from "@/components/edit-person-dialog";
 import { DeletePersonDialog } from "@/components/delete-person-dialog";
 import { ProtectedRoute } from "@/components/protected-route";
 import familyDataImport from "@/data/family-data.json";
+import type { Person } from "@/models/person.model";
 
 // Import the family data (in a real app, this would come from a database)
 const familyData = familyDataImport;
@@ -30,7 +31,7 @@ export default function AdminPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [family, setFamily] = useState(familyData);
+  const [family, setFamily] = useState<Person[]>(familyData);
 
   const filteredFamily = useMemo(() => {
     if (!searchTerm) return family;
@@ -209,8 +210,6 @@ export default function AdminPage() {
           <AddPersonDialog
             open={showAddDialog}
             onOpenChange={setShowAddDialog}
-            onAddPerson={handleAddPerson}
-            existingFamily={family}
           />
 
           {selectedPersonData && (

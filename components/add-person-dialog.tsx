@@ -1,18 +1,29 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus } from "lucide-react"
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus } from "lucide-react";
 
 interface AddPersonDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
@@ -24,13 +35,13 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
     location: "",
     spouse: "",
     generation: "1",
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Ici vous pourriez ajouter la logique pour sauvegarder la nouvelle personne
-    console.log("Nouvelle personne:", formData)
-    onOpenChange(false)
+    console.log("Nouvelle personne:", formData);
+    onOpenChange(false);
     // Reset form
     setFormData({
       name: "",
@@ -40,8 +51,8 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
       location: "",
       spouse: "",
       generation: "1",
-    })
-  }
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -59,7 +70,9 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
               placeholder="Ex: Marie Dubois"
               required
             />
@@ -72,7 +85,12 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
                 id="birthYear"
                 type="number"
                 value={formData.birthYear}
-                onChange={(e) => setFormData((prev) => ({ ...prev, birthYear: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    birthYear: e.target.value,
+                  }))
+                }
                 placeholder="1950"
                 required
               />
@@ -83,7 +101,12 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
                 id="deathYear"
                 type="number"
                 value={formData.deathYear}
-                onChange={(e) => setFormData((prev) => ({ ...prev, deathYear: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    deathYear: e.target.value,
+                  }))
+                }
                 placeholder="Optionnel"
               />
             </div>
@@ -93,7 +116,9 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
             <Label htmlFor="generation">Génération</Label>
             <Select
               value={formData.generation}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, generation: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, generation: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -113,7 +138,9 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
             <Input
               id="occupation"
               value={formData.occupation}
-              onChange={(e) => setFormData((prev) => ({ ...prev, occupation: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, occupation: e.target.value }))
+              }
               placeholder="Ex: Médecin, Professeur..."
             />
           </div>
@@ -123,7 +150,9 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
             <Input
               id="location"
               value={formData.location}
-              onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, location: e.target.value }))
+              }
               placeholder="Ex: Paris, France"
             />
           </div>
@@ -133,13 +162,19 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
             <Input
               id="spouse"
               value={formData.spouse}
-              onChange={(e) => setFormData((prev) => ({ ...prev, spouse: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, spouse: e.target.value }))
+              }
               placeholder="Nom du conjoint"
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Annuler
             </Button>
             <Button type="submit">Ajouter</Button>
@@ -147,5 +182,5 @@ export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

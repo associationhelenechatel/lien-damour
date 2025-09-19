@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { FamilyTreeApp } from "@/components/family-tree-app";
+import { FamilyTreeApp } from "@/app/family/components/family-tree-app";
 
 export default function FamilyPage() {
   const { isAuthenticated } = useAuth();
