@@ -20,11 +20,6 @@ export function SharedHeader() {
                 Association Hélène Châtel
               </h1>
             </Link>
-            <p className="text-slate-600">
-              {isAuthenticated
-                ? `Bienvenue, ${user?.name}`
-                : "Découvrez nos projets solidaires"}
-            </p>
           </div>
 
           <div className="flex gap-2 items-center">
@@ -41,19 +36,6 @@ export function SharedHeader() {
                   >
                     <Users className="h-4 w-4 mr-2" />
                     Famille
-                  </Button>
-                </Link>
-                <Link href="/map">
-                  <Button
-                    variant={pathname === "/map" ? "default" : "outline"}
-                    className={
-                      pathname === "/map"
-                        ? "bg-orange-600 hover:bg-orange-700 text-white"
-                        : "border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
-                    }
-                  >
-                    <Map className="h-4 w-4 mr-2" />
-                    Carte
                   </Button>
                 </Link>
                 <Link href="/admin">

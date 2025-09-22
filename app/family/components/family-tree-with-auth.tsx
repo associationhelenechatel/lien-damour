@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { FamilyTreeClient } from "./family-tree-client";
+import { FamilyDashboard } from "./family-dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle } from "lucide-react";
 import type { FamilyTree } from "@/lib/types";
@@ -128,14 +128,7 @@ export function FamilyTreeWithAuth() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Arbre Généalogique</h1>
-        <p className="text-gray-600">
-          {familyTree.stats.totalMembers} membres de la famille
-        </p>
-      </div>
-
-      <FamilyTreeClient initialFamilyTree={familyTree} />
+      <FamilyDashboard initialFamilyTree={familyTree} />
     </div>
   );
 }
