@@ -11,9 +11,10 @@ import {
 import { Users, MapPin } from "lucide-react";
 import { LeafletMap } from "@/app/map/components/leaflet-map";
 import { PersonCard } from "@/components/person-card";
-
 import { ProtectedRoute } from "@/components/protected-route";
-import familyData from "@/data/family-data.json";
+import type { Person } from "@/models/person.model";
+
+const familyData = [] as Person[];
 
 export default function MapPage() {
   const [searchTerm, setSearchTerm] = useState("");

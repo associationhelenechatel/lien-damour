@@ -35,10 +35,10 @@ Une application web moderne présentant l'Association Châtel et ses projets sol
 - **Storage** : Netlify Blobs (pour les assets et données statiques)
 - **Build** : Optimisé pour les déploiements Netlify
 
-### Base de Données (Planifiée)
+### Base de Données
 - **Provider** : NeonDB (PostgreSQL serverless)
 - **Accès** : Next.js API Routes/Functions
-- **ORM** : À définir (Prisma recommandé)
+- **ORM** : Drizzle ORM (TypeScript-first)
 
 ### Authentification Future (Planifiée)
 - **Provider** : Auth0
@@ -123,8 +123,8 @@ yarn dev
 
 ## 🔄 Migration Planifiée
 
-### Phase 1 : Base de Données
-1. Setup NeonDB + Prisma
+### Phase 1 : Base de Données ✅
+1. Setup NeonDB + Drizzle ORM
 2. Migration des données JSON → PostgreSQL
 3. Création des API Routes Next.js
 4. Tests d'intégration
@@ -150,6 +150,57 @@ yarn start        # Serveur de production
 yarn lint         # Linting ESLint
 ```
 
+## 🗄️ Commandes Drizzle ORM
+
+### Génération et Migration
+
+```bash
+# Générer les migrations à partir du schéma
+npx drizzle-kit generate
+
+# Appliquer les migrations (push vers la base de données)
+npx drizzle-kit push
+
+# Migrer la base de données avec les fichiers de migration
+npx drizzle-kit migrate
+
+# Vérifier le statut des migrations
+npx drizzle-kit check
+```
+
+### Développement et Debugging
+
+```bash
+# Ouvrir Drizzle Studio (interface web pour explorer la DB)
+npx drizzle-kit studio
+
+# Introspection de la base de données existante
+npx drizzle-kit introspect
+
+# Supprimer toutes les tables (⚠️ ATTENTION - perte de données)
+npx drizzle-kit drop
+```
+
+### Configuration Docker (Développement Local)
+
+```bash
+# Démarrer PostgreSQL en local avec Docker
+docker-compose up -d
+
+# Arrêter les services Docker
+docker-compose down
+
+# Voir les logs des services
+docker-compose logs -f
+```
+
+### Workflow Recommandé
+
+1. **Modifier le schéma** dans `db/schema.ts`
+2. **Générer la migration** : `npx drizzle-kit generate`
+3. **Appliquer les changements** : `npx drizzle-kit push` (dev) ou `npx drizzle-kit migrate` (prod)
+4. **Vérifier avec Studio** : `npx drizzle-kit studio`
+
 ## 🔐 Identifiants de Démonstration
 
 - **Email** : `admin@chatel.fr`
@@ -163,10 +214,11 @@ yarn lint         # Linting ESLint
 - `SimpleMap` : Carte Leaflet avec marqueurs interactifs
 - `FamilyTreeApp` : Arbre généalogique avec recherche et filtres
 
-### Données
-- Format JSON temporaire dans `/data/family-data.json`
-- Structure normalisée pour migration PostgreSQL
-- Relations parent-enfant avec IDs
+### Base de Données
+- **Schema** : Défini dans `/db/schema.ts` avec Drizzle ORM
+- **Client** : Configuration NeonDB dans `/db/client.ts`
+- **Migrations** : Générées automatiquement dans `/drizzle/`
+- **Relations** : Parent-enfant avec clés étrangères PostgreSQL
 
 ### Styling
 - Tailwind CSS avec configuration personnalisée
