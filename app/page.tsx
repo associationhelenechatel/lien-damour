@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -11,6 +11,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Heart,
   Users,
@@ -28,125 +37,31 @@ import {
   BookOpen,
 } from "lucide-react";
 
-const projects = [
-  {
-    id: 1,
-    title: "Aide aux familles en difficulté",
-    description:
-      "Soutien financier et matériel aux familles traversant des périodes difficiles",
-    icon: Heart,
-    category: "Social",
-    amount: "15 000€",
-  },
-  {
-    id: 2,
-    title: "Centre d'accueil pour personnes âgées",
-    description:
-      "Amélioration des conditions de vie et des soins pour nos aînés",
-    icon: Users,
-    category: "Santé",
-    amount: "25 000€",
-  },
-  {
-    id: 3,
-    title: "Rénovation du patrimoine local",
-    description:
-      "Préservation et restauration des monuments historiques de Châtel",
-    icon: Building,
-    category: "Patrimoine",
-    amount: "30 000€",
-  },
-  {
-    id: 4,
-    title: "Bourses d'études",
-    description: "Aide financière aux étudiants méritants de la région",
-    icon: GraduationCap,
-    category: "Éducation",
-    amount: "12 000€",
-  },
-  {
-    id: 5,
-    title: "Logements sociaux",
-    description: "Construction et rénovation de logements abordables",
-    icon: HomeIcon,
-    category: "Logement",
-    amount: "50 000€",
-  },
-  {
-    id: 6,
-    title: "Banque alimentaire locale",
-    description:
-      "Distribution de denrées alimentaires aux personnes dans le besoin",
-    icon: Utensils,
-    category: "Social",
-    amount: "8 000€",
-  },
-  {
-    id: 7,
-    title: "Équipements médicaux",
-    description: "Achat d'équipements pour le centre de santé local",
-    icon: Stethoscope,
-    category: "Santé",
-    amount: "20 000€",
-  },
-  {
-    id: 8,
-    title: "Reforestation",
-    description: "Plantation d'arbres et protection de l'environnement local",
-    icon: TreePine,
-    category: "Environnement",
-    amount: "10 000€",
-  },
-  {
-    id: 9,
-    title: "Accès à l'eau potable",
-    description: "Installation de points d'eau dans les zones rurales",
-    icon: Droplets,
-    category: "Infrastructure",
-    amount: "18 000€",
-  },
-  {
-    id: 10,
-    title: "Énergie renouvelable",
-    description: "Installation de panneaux solaires sur les bâtiments publics",
-    icon: Lightbulb,
-    category: "Environnement",
-    amount: "35 000€",
-  },
-  {
-    id: 11,
-    title: "Centre culturel",
-    description: "Rénovation et équipement du centre culturel municipal",
-    icon: Palette,
-    category: "Culture",
-    amount: "22 000€",
-  },
-  {
-    id: 12,
-    title: "École de musique",
-    description: "Instruments et cours de musique pour les jeunes",
-    icon: Music,
-    category: "Culture",
-    amount: "7 000€",
-  },
-  {
-    id: 13,
-    title: "Bibliothèque numérique",
-    description:
-      "Modernisation de la bibliothèque avec des ressources numériques",
-    icon: BookOpen,
-    category: "Éducation",
-    amount: "15 000€",
-  },
-  {
-    id: 14,
-    title: "Transport adapté",
-    description: "Service de transport pour personnes à mobilité réduite",
-    icon: MapPin,
-    category: "Social",
-    amount: "28 000€",
-  },
-];
+// Import des projets depuis le fichier JSON
+import projectsData from "@/data/projects.json";
+
+// Mapping des icônes
+const iconMap = {
+  Heart,
+  Users,
+  HomeIcon,
+  BookOpen,
+  Music,
+  Stethoscope,
+  GraduationCap,
+  Building,
+  MapPin,
+  TreePine,
+  Droplets,
+  Lightbulb,
+  Palette,
+};
+
+// Projets avec icônes mappées
+const projects = projectsData.map((project) => ({
+  ...project,
+  icon: iconMap[project.icon as keyof typeof iconMap] || Heart,
+}));
 
 const categoryColors = {
   Social: "bg-blue-100 text-blue-800",
@@ -157,6 +72,10 @@ const categoryColors = {
   Environnement: "bg-emerald-100 text-emerald-800",
   Infrastructure: "bg-gray-100 text-gray-800",
   Culture: "bg-pink-100 text-pink-800",
+  Humanitaire: "bg-red-100 text-red-800",
+  Formation: "bg-yellow-100 text-yellow-800",
+  Agriculture: "bg-green-100 text-green-800",
+  Partenariat: "bg-violet-100 text-violet-800",
 };
 
 export default function Home() {
@@ -182,31 +101,28 @@ export default function Home() {
     );
   }
 
-  const totalAmount = projects.reduce((sum, project) => {
-    return (
-      sum + parseInt(project.amount.replace(/[€\s]/g, "").replace(/\./g, ""))
-    );
-  }, 0);
+  // Nombre total de projets soutenus
+  const totalProjects = projects.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Hero Section */}
-      <section className="py-16 px-4">
+      <section className="py-8 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-5xl font-bold text-slate-800 mb-6">
-            Association Hélène Châtel
+            Association Hélène Chatel
           </h1>
           <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
-            Depuis plus de 50 ans, l'Association Hélène Châtel s'engage pour le
-            développement social, culturel et économique de notre région.
-            Découvrez les projets que nous soutenons financièrement pour
-            améliorer la vie de notre communauté.
+            Depuis plus de 30 ans, l'Association Hélène Chatel finance des
+            projets à vocation sociale ou humanitaire, en France comme à
+            l'étranger. Chaque projet est proposé et suivi par un membre de la
+            famille, perpétuant l'œuvre d'Hélène Chatel née Damour.
           </p>
         </div>
       </section>
 
       {/* Projects Grid */}
-      <section className="py-16 px-4">
+      <section className="py-8 px-4">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">
             Nos Projets Soutenus
@@ -223,6 +139,7 @@ export default function Home() {
                     <div className="flex items-center justify-between mb-2">
                       <IconComponent className="h-8 w-8 text-emerald-600" />
                       <Badge
+                        variant="outline"
                         className={
                           categoryColors[
                             project.category as keyof typeof categoryColors
@@ -234,15 +151,52 @@ export default function Home() {
                     </div>
                     <CardTitle className="text-lg">{project.title}</CardTitle>
                     <CardDescription className="text-sm">
-                      {project.description}
+                      {project.summary || project.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-right">
-                      <span className="text-2xl font-bold text-emerald-600">
-                        {project.amount}
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-xs text-slate-500">
+                        {project.type}
+                      </span>
+                      <span className="text-sm text-slate-600 font-medium">
+                        {project.location}
                       </span>
                     </div>
+
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full">
+                          En savoir plus
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <IconComponent className="h-6 w-6 text-emerald-600" />
+                            {project.title}
+                          </DialogTitle>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge
+                              variant="outline"
+                              className={
+                                categoryColors[
+                                  project.category as keyof typeof categoryColors
+                                ]
+                              }
+                            >
+                              {project.category}
+                            </Badge>
+                            <span className="text-sm text-slate-500">
+                              {project.type} • {project.location}
+                            </span>
+                          </div>
+                        </DialogHeader>
+                        <DialogDescription className="text-base leading-relaxed mt-4">
+                          {project.description}
+                        </DialogDescription>
+                      </DialogContent>
+                    </Dialog>
                   </CardContent>
                 </Card>
               );
@@ -255,15 +209,17 @@ export default function Home() {
       <section className="py-16 px-4 bg-white">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-slate-800 mb-8">
-              Notre Mission
-            </h2>
+            <h2 className="text-3xl font-bold text-slate-800 mb-8">À Propos</h2>
             <p className="text-lg text-slate-600 mb-8">
-              L'Association Hélène Châtel œuvre pour le bien-être de tous les
-              habitants de notre région. Grâce à vos dons et à notre engagement,
-              nous finançons des projets concrets qui améliorent la qualité de
-              vie, favorisent l'éducation, préservent notre patrimoine et
-              protègent notre environnement.
+              L'Association Hélène Chatel est une association familiale
+              philanthropique créée en 1993 suite au décès d'Hélène Chatel née
+              Damour. Cette grande dame avait pris l'habitude de solliciter ses
+              enfants, petits-enfants et ses nombreux visiteurs pour financer
+              des projets qu'elle accompagnait dans le temps de par le monde.
+              Dirigée par un bureau représentatif des neuf branches de la
+              famille, l'association attribue chaque année plus de 20 000 euros
+              de subventions permettant de financer une vingtaine de projets par
+              an.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
               <div className="text-center">
@@ -300,6 +256,32 @@ export default function Home() {
                   futures
                 </p>
               </div>
+            </div>
+
+            {/* Contact Section */}
+            <div className="mt-16 p-8 bg-slate-50 rounded-lg">
+              <h3 className="text-2xl font-bold text-slate-800 mb-4">
+                Contact
+              </h3>
+              <p className="text-lg text-slate-600 mb-4">
+                <strong>Delphine HARMEL</strong>
+                <br />
+                Présidente
+              </p>
+              <p className="text-slate-600">
+                Pour plus d'informations : <br />
+                <a
+                  href="mailto:bureau@liendamour.fr"
+                  className="text-emerald-600 hover:text-emerald-700"
+                >
+                  bureau@liendamour.fr
+                </a>
+              </p>
+              <p className="text-sm text-slate-500 mt-4">
+                L'association est habilitée à émettre des reçus fiscaux et
+                publie annuellement un rapport d'activités permettant de
+                partager des nouvelles des différents projets financés.
+              </p>
             </div>
           </div>
         </div>

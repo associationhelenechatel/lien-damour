@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Simulation d'une authentification simple
     // Dans un vrai projet, ceci ferait appel à une API
     if (email === "admin@chatel.fr" && password === "chatel2024") {
-      const userData = { name: "Administrateur Châtel", email };
+      const userData = { name: "Administrateur Chatel", email };
       setIsAuthenticated(true);
       setUser(userData);
       localStorage.setItem("chatel-auth", JSON.stringify({ user: userData }));

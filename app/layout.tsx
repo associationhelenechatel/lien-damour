@@ -10,9 +10,9 @@ import "./globals.css";
 import "./leaflet.css";
 
 export const metadata: Metadata = {
-  title: "Association Châtel",
+  title: "Association Hélène Chatel",
   description:
-    "Découvrez les projets solidaires soutenus par l'Association Châtel et explorez l'arbre généalogique familial",
+    "Découvrez les projets solidaires soutenus par l'Association Hélène Chatel et explorez l'arbre généalogique familial",
   generator: "v0.app",
 };
 

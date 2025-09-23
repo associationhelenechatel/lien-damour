@@ -1,11 +1,11 @@
-# Association Châtel - Arbre Généalogique Familial
+# Association Hélène Chatel - Arbre Généalogique Familial
 
-Une application web moderne présentant l'Association Châtel et ses projets solidaires, avec un espace membre dédié à l'exploration de l'arbre généalogique familial.
+Une application web moderne présentant l'Association Hélène Chatel et ses projets solidaires, avec un espace membre dédié à l'exploration de l'arbre généalogique familial.
 
 ## 🎯 Fonctionnalités
 
 ### Page Publique
-- **Présentation de l'Association Châtel** : 14 projets solidaires soutenus financièrement
+- **Présentation de l'Association Hélène Chatel** : 14 projets solidaires soutenus financièrement
 - **Design moderne** : Interface responsive avec Tailwind CSS
 - **Budget transparent** : Calcul automatique du budget total alloué (295 000€)
 
@@ -74,7 +74,7 @@ yarn dev
 
 ```
 ├── app/                    # Pages Next.js (App Router)
-│   ├── page.tsx           # Page d'accueil (Association Châtel)
+│   ├── page.tsx           # Page d'accueil (Association Hélène Chatel)
 │   ├── family/            # Arbre généalogique (protégé)
 │   ├── map/               # Carte géographique (protégé)
 │   ├── admin/             # Administration (protégé)

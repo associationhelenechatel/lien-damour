@@ -17,7 +17,7 @@ export function SharedHeader() {
           <div>
             <Link href="/">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-700 to-slate-800 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity">
-                Association Hélène Châtel
+                Association Hélène Chatel
               </h1>
             </Link>
           </div>
@@ -65,7 +65,7 @@ export function SharedHeader() {
               <LoginDialog>
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
                   <LogIn className="h-4 w-4 mr-2" />
-                  Se connecter
+                  Espace Famille
                 </Button>
               </LoginDialog>
             )}
