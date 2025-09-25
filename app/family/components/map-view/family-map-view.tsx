@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, Globe, Heart } from "lucide-react";
-import { LeafletMap } from "@/app/map/components/leaflet-map";
+import { LeafletMap } from "@/app/family/components/map-view/leaflet-map";
 import type { FamilyTree, FamilyMemberWithRelations } from "@/lib/types";
 
 interface FamilyMapViewProps {

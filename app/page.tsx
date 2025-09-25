@@ -257,9 +257,15 @@ export default function Home() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Contact Section */}
-            <div className="mt-16 p-8 bg-slate-50 rounded-lg">
+      {/* Footer */}
+      <footer className="py-16 px-4 bg-white">
+        <div className="container mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="p-8 bg-slate-50 rounded-lg">
               <h3 className="text-2xl font-bold text-slate-800 mb-4">
                 Contact
               </h3>
@@ -285,7 +291,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </footer>
     </div>
   );
 }

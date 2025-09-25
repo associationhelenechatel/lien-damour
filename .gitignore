@@ -28,6 +28,11 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# database dumps
+/dumps
+*.sql
+*.sql.gz
+
 # vercel
 .vercel
 
