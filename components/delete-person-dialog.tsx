@@ -10,25 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
-
-interface Person {
-  id: string;
-  name: string;
-  birthYear: number;
-  deathYear?: number;
-  generation: number;
-  parents: string[];
-  children: string[];
-  spouse?: string;
-  occupation?: string;
-  location?: string;
-}
+import type { FamilyMemberWithRelations } from "@/lib/types";
 
 interface DeletePersonDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  person: Person;
-  onDeletePerson: (personId: string) => void;
+  person: FamilyMemberWithRelations;
+  onDeletePerson: () => void;
 }
 
 export function DeletePersonDialog({
@@ -38,7 +26,7 @@ export function DeletePersonDialog({
   onDeletePerson,
 }: DeletePersonDialogProps) {
   const handleDelete = () => {
-    onDeletePerson(person.id);
+    onDeletePerson();
     onOpenChange(false);
   };
 
@@ -48,7 +36,7 @@ export function DeletePersonDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-red-700">
             <AlertTriangle className="h-5 w-5" />
-            Supprimer {person.name}
+            Supprimer {person.displayName}
           </DialogTitle>
           <DialogDescription>
             Êtes-vous sûr de vouloir supprimer ce membre de la famille ? Cette
@@ -63,7 +51,7 @@ export function DeletePersonDialog({
             </h4>
             <ul className="text-sm text-red-700 space-y-1">
               <li>
-                <strong>Nom :</strong> {person.name}
+                <strong>Nom :</strong> {person.displayName}
               </li>
               <li>
                 <strong>Naissance :</strong> {person.birthYear}
@@ -73,14 +61,9 @@ export function DeletePersonDialog({
                   <strong>Décès :</strong> {person.deathYear}
                 </li>
               )}
-              {person.occupation && (
+              {person.address && (
                 <li>
-                  <strong>Profession :</strong> {person.occupation}
-                </li>
-              )}
-              {person.location && (
-                <li>
-                  <strong>Lieu :</strong> {person.location}
+                  <strong>Lieu :</strong> {person.address}
                 </li>
               )}
               <li>

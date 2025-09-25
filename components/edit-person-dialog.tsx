@@ -22,26 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-
-interface Person {
-  id: string;
-  name: string;
-  birthYear: number;
-  deathYear?: number;
-  generation: number;
-  parents: string[];
-  children: string[];
-  spouse?: string;
-  occupation?: string;
-  location?: string;
-}
+import type { FamilyMemberWithRelations } from "@/lib/types";
 
 interface EditPersonDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  person: Person;
-  onEditPerson: (person: Person) => void;
-  existingFamily: Person[];
+  person: FamilyMemberWithRelations;
+  onEditPerson: (person: FamilyMemberWithRelations) => void;
+  existingFamily: FamilyMemberWithRelations[];
 }
 
 export function EditPersonDialog({
@@ -51,7 +39,7 @@ export function EditPersonDialog({
   onEditPerson,
   existingFamily,
 }: EditPersonDialogProps) {
-  const [formData, setFormData] = useState<Person>(person);
+  const [formData, setFormData] = useState<FamilyMemberWithRelations>(person);
   const [isDeceased, setIsDeceased] = useState(!!person.deathYear);
 
   useEffect(() => {
@@ -64,7 +52,7 @@ export function EditPersonDialog({
 
     const updatedPerson = {
       ...formData,
-      deathYear: isDeceased ? formData.deathYear : undefined,
+      deathYear: isDeceased ? formData.deathYear : null,
     };
 
     onEditPerson(updatedPerson);
@@ -75,14 +63,14 @@ export function EditPersonDialog({
     (p) =>
       p.id !== person.id &&
       p.generation < person.generation &&
-      !person.children.includes(p.id)
+      !person.children.some((child) => child.id === p.id)
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Modifier {person.name}</DialogTitle>
+          <DialogTitle>Modifier {person.displayName}</DialogTitle>
           <DialogDescription>
             Modifiez les informations de ce membre de la famille.
           </DialogDescription>
@@ -91,14 +79,38 @@ export function EditPersonDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Nom complet</Label>
+              <Label htmlFor="firstName">Prénom</Label>
               <Input
-                id="name"
-                value={formData.name}
+                id="firstName"
+                value={formData.firstName}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, firstName: e.target.value })
                 }
                 required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="lastName">Nom de famille</Label>
+              <Input
+                id="lastName"
+                value={formData.lastName || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="maidenName">Nom de jeune fille</Label>
+              <Input
+                id="maidenName"
+                value={formData.maidenName || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, maidenName: e.target.value })
+                }
               />
             </div>
 
@@ -135,14 +147,13 @@ export function EditPersonDialog({
                 type="number"
                 min="1800"
                 max={new Date().getFullYear()}
-                value={formData.birthYear}
+                value={formData.birthYear || ""}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
                     birthYear: Number.parseInt(e.target.value),
                   })
                 }
-                required
               />
             </div>
 
@@ -158,7 +169,7 @@ export function EditPersonDialog({
               {isDeceased && (
                 <Input
                   type="number"
-                  min={formData.birthYear}
+                  min={formData.birthYear || 1800}
                   max={new Date().getFullYear()}
                   value={formData.deathYear || ""}
                   onChange={(e) =>
@@ -174,38 +185,53 @@ export function EditPersonDialog({
           </div>
 
           <div>
-            <Label htmlFor="spouse">Conjoint(e)</Label>
+            <Label htmlFor="address">Adresse</Label>
             <Input
-              id="spouse"
-              value={formData.spouse || ""}
+              id="address"
+              value={formData.address || ""}
               onChange={(e) =>
-                setFormData({ ...formData, spouse: e.target.value })
+                setFormData({ ...formData, address: e.target.value })
               }
-              placeholder="Nom du conjoint"
+              placeholder="Adresse complète"
             />
           </div>
 
-          <div>
-            <Label htmlFor="occupation">Profession</Label>
-            <Input
-              id="occupation"
-              value={formData.occupation || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, occupation: e.target.value })
-              }
-              placeholder="Profession"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="phone">Téléphone</Label>
+              <Input
+                id="phone"
+                value={formData.phone || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+                placeholder="Numéro de téléphone"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="mail">Email</Label>
+              <Input
+                id="mail"
+                type="email"
+                value={formData.mail || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, mail: e.target.value })
+                }
+                placeholder="Adresse email"
+              />
+            </div>
           </div>
 
           <div>
-            <Label htmlFor="location">Lieu de résidence</Label>
+            <Label htmlFor="code">Code/Matricule</Label>
             <Input
-              id="location"
-              value={formData.location || ""}
+              id="code"
+              value={formData.code || ""}
               onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
+                setFormData({ ...formData, code: e.target.value })
               }
-              placeholder="Ville, Pays"
+              placeholder="Code famille"
             />
           </div>
 
