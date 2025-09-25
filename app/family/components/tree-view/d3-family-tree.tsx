@@ -194,10 +194,6 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="mb-4 text-sm text-gray-600 text-center space-y-1">
-        <p>
-          🖱️ Survolez les nœuds pour plus d'infos • 🔍 Molette pour zoomer • 🖐️
-          Glissez pour naviguer
-        </p>
         <div className="flex items-center justify-center gap-4 text-xs">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-red-600 border-2 border-yellow-400"></div>
@@ -213,7 +209,7 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-hidden rounded-lg border bg-white">
+      <div className="flex-1 overflow-hidden border-t bg-white">
         <svg
           ref={svgRef}
           className="w-full h-full"
