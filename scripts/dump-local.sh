@@ -60,17 +60,10 @@ if [ $? -eq 0 ]; then
     LINES=$(wc -l < $DUMP_FILE)
     echo "📄 Nombre de lignes: $LINES"
     
-    # Créer aussi une version compressée
-    echo "🗜️  Compression du dump..."
-    gzip -c $DUMP_FILE > "${DUMP_FILE}.gz"
-    COMPRESSED_SIZE=$(du -h "${DUMP_FILE}.gz" | cut -f1)
-    echo "✅ Version compressée créée: ${DUMP_FILE}.gz ($COMPRESSED_SIZE)"
-    
     echo ""
     echo "🎉 Dump terminé avec succès !"
-    echo "📁 Fichiers créés:"
+    echo "📁 Fichier créé:"
     echo "   - $DUMP_FILE"
-    echo "   - ${DUMP_FILE}.gz"
     echo ""
     echo "💡 Pour restaurer en production:"
     echo "   psql \$NEON_URL < $DUMP_FILE"
