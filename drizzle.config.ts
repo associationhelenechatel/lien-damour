@@ -1,13 +1,14 @@
 import { defineConfig } from "drizzle-kit";
 
-const url = process.env.DATABASE_URL;
+// Use Netlify's unpooled connection for migrations (more reliable for schema changes)
+const url =
+  process.env.NETLIFY_DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
 
-if (!url)
+if (!url) {
   throw new Error(
-    `Connection string to ${
-      process.env.NODE_ENV ? "Neon" : "local"
-    } Postgres not found.`
+    "No database URL found. Please set DATABASE_URL or NETLIFY_DATABASE_URL_UNPOOLED"
   );
+}
 
 export default defineConfig({
   out: "./drizzle",

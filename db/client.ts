@@ -2,8 +2,11 @@ import { neon, neonConfig } from "@neondatabase/serverless";
 import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
 import ws from "ws";
 
-let connectionString = process.env.DATABASE_URL as string;
+// Get connection string with fallback priority
+let connectionString = (process.env.NETLIFY_DATABASE_URL ||
+  process.env.DATABASE_URL) as string;
 
+// Development configuration (local proxy)
 if (process.env.NODE_ENV === "development") {
   neonConfig.fetchEndpoint = (host) => {
     const [protocol, port] =
