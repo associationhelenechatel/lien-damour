@@ -30,8 +30,6 @@ yarn-error.log*
 
 # database dumps
 /dumps
-*.sql
-*.sql.gz
 
 # vercel
 .vercel
