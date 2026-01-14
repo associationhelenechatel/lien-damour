@@ -19,6 +19,7 @@ export const familyMember = pgTable("family_member", {
   address: text("address"),
   latitude: decimal("latitude", { precision: 10, scale: 8 }),
   longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  mapboxPlaceId: text("mapbox_place_id"),
   phone: text("phone"),
   mail: text("mail"),
   pictureId: text("picture_id"),

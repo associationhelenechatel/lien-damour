@@ -15,6 +15,13 @@
       "when": 1758484323244,
       "tag": "0001_living_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768416215300,
+      "tag": "0002_careless_hardball",
+      "breakpoints": true
     }
   ]
 }

@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log("data to update", data.birthDate);
+    console.log("birthdate", data.birthDate);
     // 6. Mettre à jour les metadata Clerk (transaction avec la DB)
     await Promise.all([
       // Metadata Clerk

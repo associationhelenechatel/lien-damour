@@ -89,7 +89,7 @@ export default function OnboardingForm({
           familyMemberId: parseInt(selectedMemberId),
           firstName,
           lastName,
-          birthDate: birthDate?.toLocaleDateString("fr-FR") || null,
+          birthDate: birthDate?.toLocaleDateString("fr-CA") || null, // fr-CA pour le format YYYY-MM-DD
           address: address || null,
           phone: phone,
           mail: user?.emailAddresses[0]?.emailAddress || null,
