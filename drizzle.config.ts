@@ -1,4 +1,9 @@
 import { defineConfig } from "drizzle-kit";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: ".env.local",
+});
 
 // Use Netlify's unpooled connection for migrations (more reliable for schema changes)
 const url =

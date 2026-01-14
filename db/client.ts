@@ -1,6 +1,7 @@
 import { neon, neonConfig } from "@neondatabase/serverless";
 import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
 import ws from "ws";
+import * as schema from "./schema";
 
 // Get connection string with fallback priority
 let connectionString = (process.env.NETLIFY_DATABASE_URL ||
@@ -23,4 +24,4 @@ neonConfig.webSocketConstructor = ws;
 
 const sql = neon(connectionString);
 
-export const db = drizzleHttp({ client: sql });
+export const db = drizzleHttp({ client: sql, schema });

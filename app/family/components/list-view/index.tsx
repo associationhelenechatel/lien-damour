@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Users } from "lucide-react";
 import type { FamilyTree } from "@/lib/types";
-import { StatsCards } from "./stats-cards";
 import { MemberCard } from "./member-card";
 import { Pagination } from "./pagination";
 
@@ -14,6 +14,12 @@ interface ListViewProps {
 }
 
 export function ListView({ familyTree }: ListViewProps) {
+  const { user } = useUser();
+
+  const currentFamilyMemberId = user?.publicMetadata?.familyMemberId as
+    | number
+    | undefined;
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -51,9 +57,6 @@ export function ListView({ familyTree }: ListViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Statistiques */}
-      <StatsCards familyTree={familyTree} />
-
       {/* Liste des membres */}
       <Card>
         <CardContent className="p-6 space-y-4">
@@ -71,7 +74,11 @@ export function ListView({ familyTree }: ListViewProps) {
           {/* Grille des membres */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {paginatedMembers.members.map((member) => (
-              <MemberCard key={member.id} member={member} />
+              <MemberCard
+                key={member.id}
+                member={member}
+                isCurrentUser={currentFamilyMemberId === member.id}
+              />
             ))}
           </div>
         </CardContent>

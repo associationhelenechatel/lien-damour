@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -79,28 +77,6 @@ const categoryColors = {
 };
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
-  const router = useRouter();
-
-  // Rediriger vers la page famille si l'utilisateur est connecté
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/family");
-    }
-  }, [isAuthenticated, router]);
-
-  // Ne pas afficher la page si l'utilisateur est connecté
-  if (isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Redirection vers l'espace famille...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Nombre total de projets soutenus
   const totalProjects = projects.length;
 
@@ -262,33 +238,29 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-16 px-4 bg-white">
+      <footer className="py-16 px-4 bg-slate-800">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="p-8 bg-slate-50 rounded-lg">
-              <h3 className="text-2xl font-bold text-slate-800 mb-4">
-                Contact
-              </h3>
-              <p className="text-lg text-slate-600 mb-4">
-                <strong>Delphine HARMEL</strong>
-                <br />
-                Présidente
-              </p>
-              <p className="text-slate-600">
-                Pour plus d'informations : <br />
-                <a
-                  href="mailto:bureau@liendamour.fr"
-                  className="text-emerald-600 hover:text-emerald-700"
-                >
-                  bureau@liendamour.fr
-                </a>
-              </p>
-              <p className="text-sm text-slate-500 mt-4">
-                L'association est habilitée à émettre des reçus fiscaux et
-                publie annuellement un rapport d'activités permettant de
-                partager des nouvelles des différents projets financés.
-              </p>
-            </div>
+            <h3 className="text-2xl font-bold text-white mb-4">Contact</h3>
+            <p className="text-lg text-slate-200 mb-4">
+              <strong>Delphine HARMEL</strong>
+              <br />
+              Présidente
+            </p>
+            <p className="text-slate-200">
+              Pour plus d'informations : <br />
+              <a
+                href="mailto:bureau@liendamour.fr"
+                className="text-emerald-400 hover:text-emerald-300"
+              >
+                bureau@liendamour.fr
+              </a>
+            </p>
+            <p className="text-sm text-slate-400 mt-4">
+              L'association est habilitée à émettre des reçus fiscaux et publie
+              annuellement un rapport d'activités permettant de partager des
+              nouvelles des différents projets financés.
+            </p>
           </div>
         </div>
       </footer>

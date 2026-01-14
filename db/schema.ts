@@ -5,6 +5,7 @@ import {
   date,
   timestamp,
   integer,
+  decimal,
 } from "drizzle-orm/pg-core";
 
 export const familyMember = pgTable("family_member", {
@@ -16,6 +17,8 @@ export const familyMember = pgTable("family_member", {
   birthDate: date("birth_date"),
   deathDate: date("death_date"),
   address: text("address"),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
   phone: text("phone"),
   mail: text("mail"),
   pictureId: text("picture_id"),

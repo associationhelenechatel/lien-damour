@@ -1,31 +1,18 @@
-/**
- * Composant qui combine authentification et arbre généalogique
- */
-
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
 import { FamilyDashboard } from "./family-dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle } from "lucide-react";
 import type { FamilyTree } from "@/lib/types";
 
 export function FamilyTreeWithAuth() {
-  const { isAuthenticated } = useAuth();
-  const router = useRouter();
   const [familyTree, setFamilyTree] = useState<FamilyTree | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Charger les données côté client
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/");
-      return;
-    }
-
-    // Charger les données côté client
     const loadFamilyTree = async () => {
       try {
         setLoading(true);
@@ -52,34 +39,15 @@ export function FamilyTreeWithAuth() {
     };
 
     loadFamilyTree();
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">
-            Accès restreint
-          </h2>
-          <p className="text-slate-600">
-            Veuillez vous connecter pour accéder à l'arbre généalogique.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-96">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center space-x-2">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span>Chargement de l'arbre généalogique...</span>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Chargement des données...</p>
+        </div>
       </div>
     );
   }
@@ -126,9 +94,5 @@ export function FamilyTreeWithAuth() {
     );
   }
 
-  return (
-    <div className="container mx-auto p-6">
-      <FamilyDashboard initialFamilyTree={familyTree} />
-    </div>
-  );
+  return <FamilyDashboard initialFamilyTree={familyTree} />;
 }

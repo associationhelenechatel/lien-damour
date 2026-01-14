@@ -4,8 +4,9 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 import { SharedHeader } from "@/components/shared-header";
-import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 import "./leaflet.css";
 
@@ -22,14 +23,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <AuthProvider>
+    <ClerkProvider>
+      <html lang="fr">
+        <body
+          className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
+        >
           <SharedHeader />
           <Suspense fallback={null}>{children}</Suspense>
-        </AuthProvider>
-        <Analytics />
-      </body>
-    </html>
+          <Toaster />
+          <Analytics />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -1,14 +1,13 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Settings, Map, Users, LogIn, LogOut, User } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
-import { LoginDialog } from "@/components/login-dialog";
+import { MapPinnedIcon, Settings, Users } from "lucide-react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 export function SharedHeader() {
   const pathname = usePathname();
-  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
@@ -23,52 +22,51 @@ export function SharedHeader() {
           </div>
 
           <div className="flex gap-2 items-center">
-            {isAuthenticated ? (
-              <>
-                <Link href="/family">
-                  <Button
-                    variant={pathname === "/family" ? "default" : "outline"}
-                    className={
-                      pathname === "/family"
-                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        : "border-emerald-300 text-emerald-700 hover:bg-emerald-50 bg-transparent"
-                    }
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Famille
-                  </Button>
-                </Link>
-                <Link href="/admin">
-                  <Button
-                    variant={pathname === "/admin" ? "default" : "outline"}
-                    className={
-                      pathname === "/admin"
-                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                        : "border-blue-300 text-blue-700 hover:bg-blue-50 bg-transparent"
-                    }
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Administration
-                  </Button>
-                </Link>
-                <div className="h-6 w-px bg-slate-300 mx-2" />
+            <SignedIn>
+              <Link href="/family">
                 <Button
-                  variant="outline"
-                  onClick={logout}
-                  className="border-red-300 text-red-700 hover:bg-red-50 bg-transparent"
+                  variant={pathname === "/family" ? "default" : "outline"}
+                  className={
+                    pathname === "/family"
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                      : "border-emerald-300 text-emerald-700 hover:text-emerald-700 hover:bg-emerald-50 bg-transparent"
+                  }
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Déconnexion
+                  <Users className="h-4 w-4 mr-2" />
+                  Famille
                 </Button>
-              </>
-            ) : (
-              <LoginDialog>
+              </Link>
+              <Link href="/admin">
+                <Button
+                  variant={pathname === "/admin" ? "default" : "outline"}
+                  className={
+                    pathname === "/admin"
+                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                      : "border-blue-300 text-blue-700 hover:text-blue-700 hover:bg-blue-50 bg-transparent"
+                  }
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Administration
+                </Button>
+              </Link>
+              <div className="h-6 w-px bg-slate-300 mx-2" />
+              <UserButton>
+                <UserButton.UserProfilePage
+                  label="Infos personnelles"
+                  labelIcon={<MapPinnedIcon className="h-4 w-4" />}
+                  url="/informations"
+                >
+                  <div>je suis custom</div>
+                </UserButton.UserProfilePage>
+              </UserButton>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                  <LogIn className="h-4 w-4 mr-2" />
                   Espace Famille
                 </Button>
-              </LoginDialog>
-            )}
+              </SignInButton>
+            </SignedOut>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import type { FamilyTree, FamilyMemberWithRelations } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface D3FamilyTreeProps {
   familyTree: FamilyTree;
@@ -23,7 +24,7 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
     d3.select(svgRef.current).selectAll("*").remove();
 
     // Dimensions énormes pour espacement extrême
-    const width = 2400;
+    const width = 2000;
     const height = 2000;
     const radius = Math.min(width, height) / 2 - 300;
 
@@ -192,33 +193,21 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
   }, [familyTree]);
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="mb-4 text-sm text-gray-600 text-center space-y-1">
-        <div className="flex items-center justify-center gap-4 text-xs">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-red-600 border-2 border-yellow-400"></div>
-            <span>Racine (Hélène Chatel)</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-green-600 border-2 border-white"></div>
-            <span>Vivant</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-gray-600 border-2 border-white"></div>
-            <span>Décédé</span>
+    <Card>
+      <CardContent>
+        <div className="w-full h-full flex flex-col">
+          <div className="flex-1 overflow-hidden">
+            <svg
+              ref={svgRef}
+              className="w-full h-full"
+              style={{ minHeight: "1000px" }}
+              viewBox="0 0 2000 2000"
+              preserveAspectRatio="xMidYMid meet"
+            />
           </div>
         </div>
-      </div>
-      <div className="flex-1 overflow-hidden border-t bg-white">
-        <svg
-          ref={svgRef}
-          className="w-full h-full"
-          style={{ minHeight: "1000px" }}
-          viewBox="0 0 2400 2000"
-          preserveAspectRatio="xMidYMid meet"
-        />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

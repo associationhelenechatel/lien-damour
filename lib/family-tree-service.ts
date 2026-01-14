@@ -4,13 +4,11 @@
 
 import { db } from "@/db/client";
 import { familyMember, familyRelation, partnership } from "@/db/schema";
-import { eq, or, sql, desc, asc } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 import type {
   FamilyMember,
   FamilyMemberWithRelations,
   FamilyTree,
-  FamilyMemberFilter,
-  SearchResult,
 } from "@/lib/types";
 
 /**
@@ -18,8 +16,6 @@ import type {
  */
 export async function getCompleteFamilyTree(): Promise<FamilyTree> {
   try {
-    console.log("🌳 Récupération de l'arbre généalogique complet...");
-
     // Récupérer toutes les données en parallèle
     const [members, relations, partnerships] = await Promise.all([
       // Tous les membres triés par code pour un ordre logique
@@ -31,10 +27,6 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
       // Tous les partenariats
       db.select().from(partnership),
     ]);
-
-    console.log(`   ✅ ${members.length} membres récupérés`);
-    console.log(`   ✅ ${relations.length} relations récupérées`);
-    console.log(`   ✅ ${partnerships.length} partenariats récupérés`);
 
     // Créer des maps pour un accès rapide
     const membersMap = new Map<number, FamilyMember>();
@@ -160,8 +152,6 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
       generations: maxGeneration + 1,
     };
 
-    console.log("📊 Statistiques de l'arbre:", stats);
-
     return {
       members: enrichedMembers,
       relations,
@@ -174,261 +164,5 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
       error
     );
     throw new Error("Impossible de récupérer l'arbre généalogique");
-  }
-}
-
-/**
- * Récupère un membre spécifique avec ses relations
- */
-export async function getFamilyMemberWithRelations(
-  memberId: number
-): Promise<FamilyMemberWithRelations | null> {
-  try {
-    // Récupérer le membre principal
-    const memberResult = await db
-      .select()
-      .from(familyMember)
-      .where(eq(familyMember.id, memberId));
-
-    if (memberResult.length === 0) {
-      return null;
-    }
-
-    const member = memberResult[0];
-
-    // Récupérer les parents
-    const parentRelations = await db
-      .select({
-        parent: familyMember,
-      })
-      .from(familyRelation)
-      .innerJoin(familyMember, eq(familyRelation.parentId, familyMember.id))
-      .where(eq(familyRelation.childId, memberId));
-
-    // Récupérer les enfants
-    const childRelations = await db
-      .select({
-        child: familyMember,
-      })
-      .from(familyRelation)
-      .innerJoin(familyMember, eq(familyRelation.childId, familyMember.id))
-      .where(eq(familyRelation.parentId, memberId));
-
-    // Récupérer le partenaire
-    const partnershipResult = await db
-      .select({
-        partner: familyMember,
-      })
-      .from(partnership)
-      .innerJoin(
-        familyMember,
-        or(
-          eq(partnership.partner1Id, familyMember.id),
-          eq(partnership.partner2Id, familyMember.id)
-        )
-      )
-      .where(
-        or(
-          eq(partnership.partner1Id, memberId),
-          eq(partnership.partner2Id, memberId)
-        )
-      );
-
-    // Filtrer pour exclure la personne elle-même du résultat partenaire
-    const partner =
-      partnershipResult.map((r) => r.partner).find((p) => p.id !== memberId) ||
-      null;
-
-    // Construire l'objet enrichi (même logique que dans getCompleteFamilyTree)
-    const firstName = member.firstName || "";
-    const lastName = member.lastName || "";
-    const maidenName = member.maidenName || "";
-
-    const fullName = `${firstName} ${lastName}`.trim() || "Nom inconnu";
-    const displayName =
-      maidenName && maidenName !== lastName
-        ? `${firstName} ${lastName} (née ${maidenName})`
-        : fullName;
-
-    const birthYear = member.birthDate
-      ? new Date(member.birthDate).getFullYear()
-      : null;
-    const deathYear = member.deathDate
-      ? new Date(member.deathDate).getFullYear()
-      : null;
-    const isAlive = !member.deathDate;
-
-    let age: number | null = null;
-    if (birthYear) {
-      const endYear = deathYear || new Date().getFullYear();
-      age = endYear - birthYear;
-    }
-
-    let generation = 0;
-    if (member.code) {
-      if (member.code === ".0" || member.code === "0") {
-        generation = 0;
-      } else if (member.code.endsWith(".0")) {
-        const baseCode = member.code.slice(0, -2);
-        generation = baseCode ? baseCode.split(".").length : 1;
-      } else {
-        generation = member.code.split(".").length;
-      }
-    }
-
-    return {
-      ...member,
-      parents: parentRelations.map((r) => r.parent),
-      children: childRelations.map((r) => r.child),
-      partner,
-      fullName,
-      displayName,
-      birthYear,
-      deathYear,
-      isAlive,
-      age,
-      generation,
-    };
-  } catch (error) {
-    console.error(
-      `❌ Erreur lors de la récupération du membre ${memberId}:`,
-      error
-    );
-    return null;
-  }
-}
-
-/**
- * Recherche des membres par nom avec scoring de pertinence
- */
-export async function searchFamilyMembers(
-  searchTerm: string,
-  limit: number = 20
-): Promise<SearchResult[]> {
-  try {
-    if (!searchTerm.trim()) {
-      return [];
-    }
-
-    const searchPattern = `%${searchTerm.toLowerCase()}%`;
-
-    const results = await db
-      .select()
-      .from(familyMember)
-      .where(
-        or(
-          sql`LOWER(${familyMember.firstName}) LIKE ${searchPattern}`,
-          sql`LOWER(${familyMember.lastName}) LIKE ${searchPattern}`,
-          sql`LOWER(${familyMember.maidenName}) LIKE ${searchPattern}`,
-          sql`LOWER(CONCAT(${familyMember.firstName}, ' ', ${familyMember.lastName})) LIKE ${searchPattern}`
-        )
-      )
-      .limit(limit);
-
-    // Enrichir les résultats avec le scoring
-    const searchResults: SearchResult[] = [];
-
-    for (const member of results) {
-      const enrichedMember = await getFamilyMemberWithRelations(member.id);
-      if (!enrichedMember) continue;
-
-      // Calculer le score de pertinence
-      let matchType: SearchResult["matchType"] = "fullName";
-      let relevanceScore = 0;
-
-      const searchLower = searchTerm.toLowerCase();
-      const firstName = (member.firstName || "").toLowerCase();
-      const lastName = (member.lastName || "").toLowerCase();
-      const maidenName = (member.maidenName || "").toLowerCase();
-      const fullName = `${firstName} ${lastName}`.trim();
-
-      if (firstName === searchLower) {
-        matchType = "firstName";
-        relevanceScore = 100;
-      } else if (lastName === searchLower) {
-        matchType = "lastName";
-        relevanceScore = 95;
-      } else if (maidenName === searchLower) {
-        matchType = "maidenName";
-        relevanceScore = 90;
-      } else if (fullName === searchLower) {
-        matchType = "fullName";
-        relevanceScore = 85;
-      } else if (firstName.startsWith(searchLower)) {
-        matchType = "firstName";
-        relevanceScore = 80;
-      } else if (lastName.startsWith(searchLower)) {
-        matchType = "lastName";
-        relevanceScore = 75;
-      } else if (maidenName.startsWith(searchLower)) {
-        matchType = "maidenName";
-        relevanceScore = 70;
-      } else {
-        relevanceScore = 50; // Match partiel
-      }
-
-      searchResults.push({
-        member: enrichedMember,
-        matchType,
-        relevanceScore,
-      });
-    }
-
-    // Trier par score de pertinence décroissant
-    return searchResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
-  } catch (error) {
-    console.error(`❌ Erreur lors de la recherche "${searchTerm}":`, error);
-    return [];
-  }
-}
-
-/**
- * Filtre les membres selon des critères
- */
-export async function getFilteredFamilyMembers(
-  filter: FamilyMemberFilter
-): Promise<FamilyMemberWithRelations[]> {
-  try {
-    const tree = await getCompleteFamilyTree();
-
-    let filteredMembers = tree.members;
-
-    // Appliquer les filtres
-    if (filter.searchTerm) {
-      const searchResults = await searchFamilyMembers(filter.searchTerm);
-      const searchMemberIds = new Set(searchResults.map((r) => r.member.id));
-      filteredMembers = filteredMembers.filter((m) =>
-        searchMemberIds.has(m.id)
-      );
-    }
-
-    if (filter.generation !== undefined) {
-      filteredMembers = filteredMembers.filter(
-        (m) => m.generation === filter.generation
-      );
-    }
-
-    if (filter.isAlive !== undefined) {
-      filteredMembers = filteredMembers.filter(
-        (m) => m.isAlive === filter.isAlive
-      );
-    }
-
-    if (filter.hasChildren !== undefined) {
-      filteredMembers = filteredMembers.filter((m) =>
-        filter.hasChildren ? m.children.length > 0 : m.children.length === 0
-      );
-    }
-
-    if (filter.hasPartner !== undefined) {
-      filteredMembers = filteredMembers.filter((m) =>
-        filter.hasPartner ? m.partner !== null : m.partner === null
-      );
-    }
-
-    return filteredMembers;
-  } catch (error) {
-    console.error("❌ Erreur lors du filtrage des membres:", error);
-    return [];
   }
 }

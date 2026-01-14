@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Search,
@@ -13,17 +14,22 @@ import {
   Users,
   Calendar,
   MapPin,
-  Briefcase,
   Loader2,
+  User,
 } from "lucide-react";
 import { AddPersonDialog } from "@/components/add-person-dialog";
 import { EditPersonDialog } from "@/components/edit-person-dialog";
 import { DeletePersonDialog } from "@/components/delete-person-dialog";
-import { ProtectedRoute } from "@/components/protected-route";
 import { getFamilyMembers, deleteFamilyMember } from "@/lib/api/family";
 import type { FamilyMemberWithRelations } from "@/lib/types";
 
 export default function AdminPage() {
+  const { user } = useUser();
+  console.log("USER", user);
+  const currentFamilyMemberId = user?.publicMetadata?.familyMemberId as
+    | number
+    | undefined;
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPerson, setSelectedPerson] = useState<number | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -112,73 +118,94 @@ export default function AdminPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
-        <div className="container mx-auto px-4 py-8">
-          {/* Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-emerald-500 h-4 w-4" />
-              <Input
-                placeholder="Rechercher par nom, profession ou lieu..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-emerald-200 focus:border-emerald-500"
-              />
-            </div>
-            <Button
-              onClick={() => setShowAddDialog(true)}
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter un membre
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Controls */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-emerald-500 h-4 w-4" />
+            <Input
+              placeholder="Rechercher par nom, profession ou lieu..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-emerald-200 focus:border-emerald-500"
+            />
           </div>
+          <Button
+            onClick={() => setShowAddDialog(true)}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter un membre
+          </Button>
+        </div>
 
-          {/* Loading State */}
-          {loading && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-              <span className="ml-2 text-emerald-600">
-                Chargement des données familiales...
-              </span>
-            </div>
-          )}
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+            <span className="ml-2 text-emerald-600">
+              Chargement des données...
+            </span>
+          </div>
+        )}
 
-          {/* Error State */}
-          {error && (
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6 text-center">
-                <p className="text-red-600">{error}</p>
-                <Button
-                  onClick={() => window.location.reload()}
-                  variant="outline"
-                  className="mt-4"
-                >
-                  Réessayer
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+        {/* Error State */}
+        {error && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-6 text-center">
+              <p className="text-red-600">{error}</p>
+              <Button
+                onClick={() => window.location.reload()}
+                variant="outline"
+                className="mt-4"
+              >
+                Réessayer
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Family List */}
-          {!loading && !error && (
-            <div className="grid gap-4">
-              {filteredFamily.map((person) => (
+        {/* Family List */}
+        {!loading && !error && (
+          <div className="grid gap-4">
+            {filteredFamily.map((person) => {
+              const isCurrentUser = currentFamilyMemberId === person.id;
+              return (
                 <Card
                   key={person.id}
-                  className="border-emerald-200 hover:shadow-md transition-shadow"
+                  className={`${
+                    isCurrentUser
+                      ? "border-blue-500 bg-blue-50 shadow-lg ring-2 ring-blue-300"
+                      : "border-emerald-200 hover:shadow-md"
+                  } transition-shadow`}
                 >
                   <CardContent className="p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-emerald-900">
+                          <h3
+                            className={`text-lg font-semibold ${
+                              isCurrentUser
+                                ? "text-blue-900"
+                                : "text-emerald-900"
+                            }`}
+                          >
                             {person.displayName}
                           </h3>
+                          {isCurrentUser && (
+                            <Badge className="bg-blue-600 text-white">
+                              <User className="h-3 w-3 mr-1" />
+                              Vous
+                            </Badge>
+                          )}
                           <Badge
                             variant="outline"
-                            className="border-emerald-300 text-emerald-700"
+                            className={
+                              isCurrentUser
+                                ? "border-blue-300 text-blue-700"
+                                : "border-emerald-300 text-emerald-700"
+                            }
                           >
                             Génération {person.generation}
                           </Badge>
@@ -264,46 +291,43 @@ export default function AdminPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
+        )}
 
-          {filteredFamily.length === 0 && (
-            <Card className="border-emerald-200">
-              <CardContent className="p-8 text-center">
-                <p className="text-emerald-700">
-                  Aucun membre trouvé pour cette recherche.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+        {filteredFamily.length === 0 && (
+          <Card className="border-emerald-200">
+            <CardContent className="p-8 text-center">
+              <p className="text-emerald-700">
+                Aucun membre trouvé pour cette recherche.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Dialogs */}
-          <AddPersonDialog
-            open={showAddDialog}
-            onOpenChange={setShowAddDialog}
+        {/* Dialogs */}
+        <AddPersonDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
+
+        {selectedPersonData && (
+          <EditPersonDialog
+            open={showEditDialog}
+            onOpenChange={setShowEditDialog}
+            person={selectedPersonData}
+            onEditPerson={handleEditPerson}
+            existingFamily={family}
           />
+        )}
 
-          {selectedPersonData && (
-            <EditPersonDialog
-              open={showEditDialog}
-              onOpenChange={setShowEditDialog}
-              person={selectedPersonData}
-              onEditPerson={handleEditPerson}
-              existingFamily={family}
-            />
-          )}
-
-          {selectedPersonData && (
-            <DeletePersonDialog
-              open={showDeleteDialog}
-              onOpenChange={setShowDeleteDialog}
-              person={selectedPersonData}
-              onDeletePerson={handleDeletePerson}
-            />
-          )}
-        </div>
+        {selectedPersonData && (
+          <DeletePersonDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            person={selectedPersonData}
+            onDeletePerson={handleDeletePerson}
+          />
+        )}
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

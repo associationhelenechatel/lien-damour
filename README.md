@@ -1,25 +1,30 @@
-# Association Hélène Chatel - Arbre Généalogique Familial
+# Lien d'Amour - Annuaire Familial Partagé
 
-Une application web moderne présentant l'Association Hélène Chatel et ses projets solidaires, avec un espace membre dédié à l'exploration de l'arbre généalogique familial.
+**Lien d'Amour** est une application web moderne permettant à toute la famille de partager et consulter un annuaire familial complet. Chaque membre de la famille peut créer un compte pour accéder à l'arbre généalogique, visualiser les membres sur une carte géographique, et gérer les informations familiales.
 
-## 🎯 Fonctionnalités
+## 🎯 Concept et Enjeux
 
-### Page Publique
-- **Présentation de l'Association Hélène Chatel** : 14 projets solidaires soutenus financièrement
-- **Design moderne** : Interface responsive avec Tailwind CSS
-- **Budget transparent** : Calcul automatique du budget total alloué (295 000€)
+### Vision du Projet
+Lien d'Amour est un **annuaire partagé pour toute la famille** où :
+- Chaque membre de la famille peut créer un compte (sur invitation uniquement)
+- Les membres sont déjà référencés dans la base de données
+- Les admins peuvent envoyer des invitations par email
+- Le système lie un email à un membre de la famille existant
 
-### Espace Membre (Authentifié)
-- **Arbre généalogique interactif** : Visualisation des liens familiaux
-- **Carte géographique** : Localisation des membres de la famille
-- **Administration** : Gestion des données familiales (CRUD)
-- **Navigation protégée** : Accès sécurisé aux fonctionnalités
+### Problématique Principale
+**Système d'invitation sécurisé** : Comment permettre aux admins d'inviter des membres de la famille à créer un compte, tout en s'assurant que :
+1. Seuls les admins peuvent créer des invitations
+2. On ne peut créer un compte que via un lien d'invitation valide
+3. Le lien relie un email à un membre de la famille déjà référencé
+4. Les invitations sont sécurisées et expirent après un certain temps
 
 ## 🏗️ Architecture Technique
 
-### Frontend
-- **Framework** : Next.js 14 (App Router)
+### Stack Technologique
+- **Framework** : Next.js 15 (App Router)
 - **React** : Version 19
+- **Base de données** : PostgreSQL (NeonDB serverless)
+- **ORM** : Drizzle ORM
 - **Styling** : Tailwind CSS + shadcn/ui
 - **Cartes** : Leaflet (implémentation native)
 - **Icons** : Lucide React
@@ -30,116 +35,154 @@ Une application web moderne présentant l'Association Hélène Chatel et ses pro
 - **Identifiants de démo** : `admin@chatel.fr` / `chatel2024`
 - **Redirection automatique** : Utilisateurs connectés → `/family`
 
-### Hébergement & Déploiement
-- **Plateforme** : Netlify
-- **Storage** : Netlify Blobs (pour les assets et données statiques)
-- **Build** : Optimisé pour les déploiements Netlify
+#### Tables Principales
 
-### Base de Données
-- **Provider** : NeonDB (PostgreSQL serverless)
-- **Accès** : Next.js API Routes/Functions
-- **ORM** : Drizzle ORM (TypeScript-first)
+**`family_member`** : Les membres de la famille (déjà existants)
+- `id`, `firstName`, `lastName`, `mail`, `address`, etc.
+- Ces membres sont créés par les admins avant l'invitation
 
-### Authentification Future (Planifiée)
-- **Provider** : Auth0
-- **Méthode** : Magic Links (connexion par email)
-- **Sécurité** : JWT tokens + refresh tokens
-- **UX** : Connexion sans mot de passe
+**`users`** (à créer) : Les comptes utilisateurs
+- `id`, `email`, `passwordHash`, `familyMemberId` (FK vers family_member)
+- `role` : 'admin' | 'member'
+- `createdAt`, `updatedAt`
+
+**`invitations`** (à créer) : Les invitations envoyées
+- `id`, `token` (unique, sécurisé)
+- `familyMemberId` (FK vers family_member)
+- `email` (email de destination)
+- `createdBy` (FK vers users - l'admin qui a créé l'invitation)
+- `expiresAt` (date d'expiration)
+- `usedAt` (null si non utilisée, timestamp si utilisée)
+- `createdAt`
+
+## 🔐 Système d'Invitation
+
+### Principe de Fonctionnement
+
+1. **Création d'une invitation (Admin)**
+   - Un admin sélectionne un membre de la famille (`family_member`)
+   - L'admin entre l'email de destination
+   - Le système génère un token unique et sécurisé
+   - Un lien d'invitation est créé : `/invite/[token]`
+   - L'invitation est envoyée par email (ou copiée manuellement)
+
+2. **Utilisation de l'invitation (Membre)**
+   - Le membre clique sur le lien d'invitation
+   - Le système vérifie que le token est valide et non expiré
+   - Le membre est redirigé vers une page de création de compte
+   - Le membre crée son mot de passe
+   - Un compte `user` est créé, lié au `family_member` correspondant
+   - L'invitation est marquée comme utilisée (`usedAt`)
+
+3. **Sécurité**
+   - Tokens cryptographiquement sécurisés (crypto.randomBytes)
+   - Expiration automatique (ex: 7 jours)
+   - Une invitation ne peut être utilisée qu'une seule fois
+   - Vérification que l'email correspond au membre de la famille
+
+### Flux Technique Détaillé
+
+```
+┌─────────────┐
+│   Admin     │
+└──────┬──────┘
+       │
+       │ 1. Sélectionne family_member + email
+       ▼
+┌─────────────────────────────────┐
+│ POST /api/invitations           │
+│ - Génère token unique           │
+│ - Crée invitation en DB          │
+│ - Retourne lien d'invitation    │
+└──────┬──────────────────────────┘
+       │
+       │ 2. Envoie lien par email
+       ▼
+┌─────────────┐
+│   Membre    │
+└──────┬──────┘
+       │
+       │ 3. Clique sur /invite/[token]
+       ▼
+┌─────────────────────────────────┐
+│ GET /invite/[token]             │
+│ - Vérifie token valide          │
+│ - Vérifie non expiré            │
+│ - Vérifie non utilisé            │
+│ - Affiche formulaire création   │
+└──────┬──────────────────────────┘
+       │
+       │ 4. Soumet formulaire (email + password)
+       ▼
+┌─────────────────────────────────┐
+│ POST /api/invitations/accept    │
+│ - Vérifie token à nouveau       │
+│ - Hash le mot de passe          │
+│ - Crée user lié à family_member │
+│ - Marque invitation comme utilisée│
+└─────────────────────────────────┘
+```
+
+## 📁 Structure du Projet
+
+```
+├── app/
+│   ├── page.tsx              # Page d'accueil publique
+│   ├── family/               # Arbre généalogique (protégé)
+│   ├── map/                  # Carte géographique (protégé)
+│   ├── admin/                # Administration (admin uniquement)
+│   │   └── invitations/      # Gestion des invitations
+│   ├── invite/               # Page d'invitation publique
+│   │   └── [token]/          # Page de création de compte via invitation
+│   └── api/
+│       ├── auth/             # Authentification
+│       ├── invitations/      # CRUD invitations
+│       └── family-tree/      # Arbre généalogique
+├── components/
+│   ├── ui/                   # Composants shadcn/ui
+│   ├── login-dialog.tsx      # Dialogue de connexion
+│   └── protected-route.tsx  # HOC de protection
+├── db/
+│   ├── schema.ts             # Schéma Drizzle ORM
+│   └── client.ts             # Client DB
+├── lib/
+│   └── utils.ts              # Utilitaires
+├── docs/                     # Documentation technique
+│   └── INVITATION_SYSTEM.md  # Documentation système d'invitation
+└── README.md                 # Ce fichier
+```
 
 ## 🚀 Démarrage Rapide
 
 ### Prérequis
 - Node.js 18+
-- Yarn (recommandé)
+- Yarn
+- PostgreSQL (local avec Docker ou NeonDB)
 
 ### Installation
-```bash
-# Cloner le projet
-git clone <repository-url>
-cd lien-damour
 
+```bash
 # Installer les dépendances
 yarn install
+
+# Configurer les variables d'environnement
+cp .env.example .env
+# Éditer .env avec vos credentials DB
+
+# Appliquer les migrations
+yarn db:push
 
 # Lancer le serveur de développement
 yarn dev
 ```
 
-### Accès à l'application
-- **URL locale** : http://localhost:3000
-- **Page publique** : Accessible à tous
-- **Connexion** : Utiliser les identifiants pré-remplis
+### Variables d'Environnement
 
-## 📁 Structure du Projet
-
+```env
+DATABASE_URL=postgresql://user:pass@host/db
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+JWT_SECRET=your-secret-key
 ```
-├── app/                    # Pages Next.js (App Router)
-│   ├── page.tsx           # Page d'accueil (Association Hélène Chatel)
-│   ├── family/            # Arbre généalogique (protégé)
-│   ├── map/               # Carte géographique (protégé)
-│   ├── admin/             # Administration (protégé)
-│   ├── layout.tsx         # Layout principal
-│   ├── globals.css        # Styles globaux
-│   └── leaflet.css        # Styles Leaflet
-├── components/            # Composants React réutilisables
-│   ├── ui/                # Composants shadcn/ui
-│   ├── family-tree.tsx    # Arbre généalogique
-│   ├── simple-map.tsx     # Carte Leaflet
-│   ├── login-dialog.tsx   # Dialogue de connexion
-│   ├── shared-header.tsx  # Header adaptatif
-│   └── protected-route.tsx # HOC de protection
-├── lib/                   # Utilitaires et contextes
-│   ├── auth-context.tsx   # Contexte d'authentification
-│   └── utils.ts           # Utilitaires généraux
-├── data/                  # Données statiques
-│   └── family-data.json   # Données familiales (temporaire)
-└── public/                # Assets statiques
-```
-
-## 🔧 Choix Techniques Détaillés
-
-### Pourquoi Leaflet natif ?
-- **Compatibilité** : React 19 + react-leaflet avait des conflits
-- **Performance** : Import dynamique évite les problèmes SSR
-- **Contrôle** : Implémentation sur mesure plus flexible
-
-### Pourquoi Netlify ?
-- **Simplicité** : Déploiement automatique depuis Git
-- **Performance** : CDN global intégré
-- **Blobs** : Storage simple pour assets et données
-- **Functions** : Serverless pour les API futures
-
-### Pourquoi NeonDB ?
-- **Serverless** : Scaling automatique
-- **PostgreSQL** : Base relationnelle robuste
-- **Intégration** : Compatible Next.js API Routes
-- **Coût** : Plan gratuit généreux
-
-### Pourquoi Auth0 + Magic Links ?
-- **UX** : Connexion sans mot de passe
-- **Sécurité** : Gestion professionnelle des tokens
-- **Scalabilité** : Support multi-tenant
-- **Maintenance** : Moins de code d'auth à maintenir
-
-## 🔄 Migration Planifiée
-
-### Phase 1 : Base de Données ✅
-1. Setup NeonDB + Drizzle ORM
-2. Migration des données JSON → PostgreSQL
-3. Création des API Routes Next.js
-4. Tests d'intégration
-
-### Phase 2 : Authentification
-1. Configuration Auth0
-2. Remplacement du contexte local
-3. Implémentation Magic Links
-4. Tests de sécurité
-
-### Phase 3 : Optimisations
-1. Cache avec Netlify Blobs
-2. Optimisation des requêtes
-3. Monitoring et analytics
-4. Tests de performance
 
 ## 📝 Scripts Disponibles
 
@@ -148,83 +191,58 @@ yarn dev          # Serveur de développement
 yarn build        # Build de production
 yarn start        # Serveur de production
 yarn lint         # Linting ESLint
+yarn db:generate  # Générer migrations
+yarn db:push      # Appliquer migrations (dev)
+yarn db:migrate   # Appliquer migrations (prod)
+yarn db:studio    # Ouvrir Drizzle Studio
 ```
 
-## 🗄️ Commandes Drizzle ORM
+## 🔄 Workflow de Développement
 
-### Génération et Migration
+### Modifier le Schéma
 
-```bash
-# Générer les migrations à partir du schéma
-npx drizzle-kit generate
+1. Modifier `db/schema.ts`
+2. Générer la migration : `yarn db:generate`
+3. Appliquer : `yarn db:push` (dev) ou `yarn db:migrate` (prod)
+4. Vérifier : `yarn db:studio`
 
-# Appliquer les migrations (push vers la base de données)
-npx drizzle-kit push
+## 📚 Documentation Complémentaire
 
-# Migrer la base de données avec les fichiers de migration
-npx drizzle-kit migrate
+- **Système d'invitation détaillé** : Voir `docs/INVITATION_SYSTEM.md`
+- **API Routes** : Documentation dans chaque route `/app/api/`
+- **Composants** : JSDoc dans les fichiers de composants
 
-# Vérifier le statut des migrations
-npx drizzle-kit check
-```
+Toute la documentation technique est disponible dans le dossier `docs/`.
 
-### Développement et Debugging
+## 🔐 Sécurité
 
-```bash
-# Ouvrir Drizzle Studio (interface web pour explorer la DB)
-npx drizzle-kit studio
+- **Mots de passe** : Hash avec bcrypt
+- **Tokens d'invitation** : Cryptographiquement sécurisés
+- **Sessions** : JWT tokens avec expiration
+- **Validation** : Zod pour la validation des données
+- **CSRF** : Protection Next.js intégrée
 
-# Introspection de la base de données existante
-npx drizzle-kit introspect
+## 🎯 Roadmap
 
-# Supprimer toutes les tables (⚠️ ATTENTION - perte de données)
-npx drizzle-kit drop
-```
+### Phase 1 : Système d'Invitation ✅ (En cours)
+- [x] Schéma de base de données
+- [ ] API d'invitation
+- [ ] Interface admin pour créer invitations
+- [ ] Page publique d'acceptation d'invitation
+- [ ] Envoi d'emails (optionnel)
 
-### Configuration Docker (Développement Local)
+### Phase 2 : Authentification Complète
+- [ ] Migration depuis localStorage vers DB
+- [ ] Sessions JWT
+- [ ] Refresh tokens
+- [ ] Gestion des rôles (admin/member)
 
-```bash
-# Démarrer PostgreSQL en local avec Docker
-docker-compose up -d
-
-# Arrêter les services Docker
-docker-compose down
-
-# Voir les logs des services
-docker-compose logs -f
-```
-
-### Workflow Recommandé
-
-1. **Modifier le schéma** dans `db/schema.ts`
-2. **Générer la migration** : `npx drizzle-kit generate`
-3. **Appliquer les changements** : `npx drizzle-kit push` (dev) ou `npx drizzle-kit migrate` (prod)
-4. **Vérifier avec Studio** : `npx drizzle-kit studio`
-
-## 🔐 Identifiants de Démonstration
-
-- **Email** : `admin@chatel.fr`
-- **Mot de passe** : `chatel2024`
-
-## 📚 Documentation Technique
-
-### Composants Clés
-- `AuthProvider` : Contexte d'authentification global
-- `ProtectedRoute` : HOC pour protéger les routes
-- `SimpleMap` : Carte Leaflet avec marqueurs interactifs
-- `FamilyTreeApp` : Arbre généalogique avec recherche et filtres
-
-### Base de Données
-- **Schema** : Défini dans `/db/schema.ts` avec Drizzle ORM
-- **Client** : Configuration NeonDB dans `/db/client.ts`
-- **Migrations** : Générées automatiquement dans `/drizzle/`
-- **Relations** : Parent-enfant avec clés étrangères PostgreSQL
-
-### Styling
-- Tailwind CSS avec configuration personnalisée
-- Composants shadcn/ui pour la cohérence
-- Thème vert émeraude pour l'identité visuelle
+### Phase 3 : Fonctionnalités Avancées
+- [ ] Notifications
+- [ ] Historique des modifications
+- [ ] Export de données
+- [ ] Recherche avancée
 
 ---
 
-**Développé avec ❤️ pour préserver l'histoire familiale**
+**Développé avec ❤️ pour préserver les liens familiaux**

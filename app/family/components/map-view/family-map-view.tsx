@@ -4,37 +4,20 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, Globe, Heart } from "lucide-react";
-import { LeafletMap } from "@/app/family/components/map-view/leaflet-map";
+import SimpleGeocodedMap from "@/app/family/components/map-view/simple-geocoded-map";
 import type { FamilyTree, FamilyMemberWithRelations } from "@/lib/types";
 
 interface FamilyMapViewProps {
   familyTree: FamilyTree;
 }
 
-// Adapter les données pour le composant LeafletMap
+// Adapter les données pour le composant Map - seulement ceux avec coordonnées géocodées
 function adaptFamilyDataForMap(members: FamilyMemberWithRelations[]) {
-  return members
-    .filter((member) => member.address) // Seulement ceux avec une adresse
-    .map((member) => ({
-      id: member.id.toString(),
-      name: member.displayName,
-      birthYear: member.birthDate
-        ? new Date(member.birthDate).getFullYear()
-        : 0,
-      deathYear: member.deathDate
-        ? new Date(member.deathDate).getFullYear()
-        : undefined,
-      generation: member.generation,
-      parents: member.parents.map((p) => p.id.toString()),
-      children: member.children.map((c) => c.id.toString()),
-      spouse: member.partner?.id.toString(),
-      occupation: undefined, // Pas d'occupation dans notre schéma actuel
-      location: member.address || undefined,
-    }));
+  return members.filter((member) => member.latitude && member.longitude);
 }
 
 export function FamilyMapView({ familyTree }: FamilyMapViewProps) {
-  const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
+  const [selectedPerson, setSelectedPerson] = useState<number | null>(null);
 
   // Adapter les données pour la carte
   const mapData = useMemo(
@@ -42,12 +25,12 @@ export function FamilyMapView({ familyTree }: FamilyMapViewProps) {
     [familyTree.members]
   );
 
-  // Statistiques des localisations
+  // Statistiques des localisations géocodées
   const locationStats = useMemo(() => {
     const stats: { [key: string]: number } = {};
     mapData.forEach((person) => {
-      if (person.location) {
-        stats[person.location] = (stats[person.location] || 0) + 1;
+      if (person.address) {
+        stats[person.address] = (stats[person.address] || 0) + 1;
       }
     });
     return Object.entries(stats)
@@ -56,75 +39,38 @@ export function FamilyMapView({ familyTree }: FamilyMapViewProps) {
   }, [mapData]);
 
   const selectedPersonData = selectedPerson
-    ? familyTree.members.find((p) => p.id.toString() === selectedPerson)
+    ? familyTree.members.find((p) => p.id === selectedPerson)
     : null;
 
   return (
     <div className="space-y-6">
-      {/* Statistiques */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card>
-          <CardContent className="p-3 flex items-center justify-center gap-2">
-            <MapPin className="h-5 w-5 text-blue-600 flex-shrink-0" />
-            <div className="text-lg font-bold">{mapData.length}</div>
-            <div className="text-md text-gray-600">Avec adresse</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 flex items-center justify-center gap-2">
-            <Globe className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <div className="text-lg font-bold">{locationStats.length}</div>
-            <div className="text-md text-gray-600">Lieux différents</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 flex items-center justify-center gap-2">
-            <Users className="h-5 w-5 text-orange-600 flex-shrink-0" />
-            <div className="text-lg font-bold">
-              {Math.round(
-                (mapData.length / familyTree.stats.totalMembers) * 100
-              )}
-              %
-            </div>
-            <div className="text-md text-gray-600">Géolocalisés</div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Contenu principal */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Carte */}
         <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                Répartition Géographique de la Famille
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[600px]">
-                {mapData.length > 0 ? (
-                  <LeafletMap
-                    familyData={mapData}
-                    selectedPerson={selectedPerson}
-                    onPersonSelect={setSelectedPerson}
-                  />
-                ) : (
-                  <div className="h-full bg-gray-50 rounded-lg flex items-center justify-center">
-                    <div className="text-center text-gray-500">
-                      <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucun membre avec adresse trouvé</p>
-                      <p className="text-sm mt-2">
-                        Les adresses doivent être renseignées dans la base de
-                        données
-                      </p>
-                    </div>
-                  </div>
-                )}
+          <div className="h-[600px]">
+            {mapData.length > 0 ? (
+              <SimpleGeocodedMap
+                familyData={mapData}
+                selectedPerson={selectedPerson}
+                onPersonSelect={setSelectedPerson}
+              />
+            ) : (
+              <div className="h-full bg-gray-50 rounded-lg flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucun membre géocodé trouvé</p>
+                  <p className="text-sm mt-2">
+                    Les adresses doivent être géocodées (latitude/longitude)
+                    pour apparaître sur la carte
+                  </p>
+                  <p className="text-xs mt-1 text-gray-400">
+                    Utilisez les scripts de géocodage pour traiter les adresses
+                  </p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         </div>
 
         {/* Sidebar */}

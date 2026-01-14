@@ -32,6 +32,10 @@ export type FamilyMemberWithRelations = FamilyMember & {
   isAlive: boolean;
   age: number | null;
   generation: number;
+
+  // Coordonnées géographiques (optionnelles)
+  latitude?: string | null;
+  longitude?: string | null;
 };
 
 // Type pour l'arbre généalogique complet
@@ -56,11 +60,4 @@ export type FamilyMemberFilter = {
   isAlive?: boolean;
   hasChildren?: boolean;
   hasPartner?: boolean;
-};
-
-// Type pour les résultats de recherche
-export type SearchResult = {
-  member: FamilyMemberWithRelations;
-  matchType: "firstName" | "lastName" | "maidenName" | "fullName";
-  relevanceScore: number;
 };
