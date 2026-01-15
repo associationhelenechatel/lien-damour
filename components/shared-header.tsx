@@ -58,6 +58,7 @@ export function SharedHeader() {
                 >
                   <div>je suis custom</div>
                 </UserButton.UserProfilePage>
+                <UserButton.UserProfilePage label="security" />
               </UserButton>
             </SignedIn>
             <SignedOut>
