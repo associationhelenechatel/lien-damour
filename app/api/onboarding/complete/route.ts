@@ -13,6 +13,9 @@ const completeOnboardingSchema = z.object({
   address: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
   mail: z.string().nullable(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  mapboxPlaceId: z.string().optional(),
 });
 
 /**
@@ -105,6 +108,9 @@ export async function POST(request: Request) {
           address: data.address || member.address,
           phone: data.phone || member.phone,
           mail: data.mail || member.mail,
+          latitude: data.latitude !== undefined ? data.latitude.toString() : member.latitude,
+          longitude: data.longitude !== undefined ? data.longitude.toString() : member.longitude,
+          mapboxPlaceId: data.mapboxPlaceId || member.mapboxPlaceId,
           updatedAt: new Date(),
         })
         .where(eq(familyMember.id, data.familyMemberId)),

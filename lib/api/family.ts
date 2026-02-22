@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { eq, and, or, ilike, desc, asc } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -83,8 +84,6 @@ function enrichFamilyMember(
     age = endYear - birthYear;
   }
 
-  const generation = calculateGeneration(member.id, relations);
-
   return {
     ...member,
     parents,
@@ -96,7 +95,6 @@ function enrichFamilyMember(
     deathYear,
     isAlive,
     age,
-    generation,
   };
 }
 
@@ -122,7 +120,6 @@ export async function getFamilyTree(): Promise<FamilyTree> {
       totalPartnerships: partnerships.length,
       livingMembers: members.filter((m) => !m.deathDate).length,
       deceasedMembers: members.filter((m) => m.deathDate).length,
-      generations: Math.max(...enrichedMembers.map((m) => m.generation)),
     };
 
     return {
@@ -144,49 +141,83 @@ export async function getFamilyMembers(
   const familyTree = await getFamilyTree();
   let filteredMembers = familyTree.members;
 
-  // Apply filters
-  if (filters.searchTerm) {
-    const searchTerm = filters.searchTerm.toLowerCase();
-    filteredMembers = filteredMembers.filter(
-      (member) =>
-        member.firstName.toLowerCase().includes(searchTerm) ||
-        member.lastName?.toLowerCase().includes(searchTerm) ||
-        member.maidenName?.toLowerCase().includes(searchTerm) ||
-        member.fullName.toLowerCase().includes(searchTerm) ||
-        member.code?.toLowerCase().includes(searchTerm)
-    );
-  }
+  // FILTERS NOT USED FOR NOW
 
-  if (filters.generation !== undefined) {
-    filteredMembers = filteredMembers.filter(
-      (member) => member.generation === filters.generation
-    );
-  }
+  // if (filters.searchTerm) {
+  //   const searchTerm = filters.searchTerm.toLowerCase();
+  //   filteredMembers = filteredMembers.filter(
+  //     (member) =>
+  //       member.firstName.toLowerCase().includes(searchTerm) ||
+  //       member.lastName?.toLowerCase().includes(searchTerm) ||
+  //       member.maidenName?.toLowerCase().includes(searchTerm) ||
+  //       member.fullName.toLowerCase().includes(searchTerm) ||
+  //       member.code?.toLowerCase().includes(searchTerm)
+  //   );
+  // }
 
-  if (filters.isAlive !== undefined) {
-    filteredMembers = filteredMembers.filter(
-      (member) => member.isAlive === filters.isAlive
-    );
-  }
+  // if (filters.isAlive !== undefined) {
+  //   filteredMembers = filteredMembers.filter(
+  //     (member) => member.isAlive === filters.isAlive
+  //   );
+  // }
 
-  if (filters.hasChildren !== undefined) {
-    filteredMembers = filteredMembers.filter((member) =>
-      filters.hasChildren
-        ? member.children.length > 0
-        : member.children.length === 0
-    );
-  }
+  // if (filters.hasChildren !== undefined) {
+  //   filteredMembers = filteredMembers.filter((member) =>
+  //     filters.hasChildren
+  //       ? member.children.length > 0
+  //       : member.children.length === 0
+  //   );
+  // }
 
-  if (filters.hasPartner !== undefined) {
-    filteredMembers = filteredMembers.filter((member) =>
-      filters.hasPartner ? member.partner !== null : member.partner === null
-    );
-  }
+  // if (filters.hasPartner !== undefined) {
+  //   filteredMembers = filteredMembers.filter((member) =>
+  //     filters.hasPartner ? member.partner !== null : member.partner === null
+  //   );
+  // }
 
   return filteredMembers;
 }
 
-// Get a single family member by ID
+// Get a single family member by ID (direct DB call, no relations)
+export async function getFamilyMemberById(
+  id: number
+): Promise<FamilyMember | null> {
+  try {
+    const [member] = await db
+      .select()
+      .from(familyMember)
+      .where(eq(familyMember.id, id))
+      .limit(1);
+    return member ?? null;
+  } catch (error) {
+    console.error("Error fetching family member by id:", error);
+    return null;
+  }
+}
+
+// Get the family member linked to the current Clerk user (publicMetadata.familyMemberId)
+export async function getCurrentUserFamilyMember(): Promise<FamilyMember | null> {
+  const { sessionClaims } = await auth();
+  const familyMemberId = sessionClaims?.metadata?.familyMemberId as
+    | number
+    | undefined;
+  if (familyMemberId == null) return null;
+  return getFamilyMemberById(familyMemberId);
+}
+
+// Update the family member linked to the current user (only that member)
+export async function updateCurrentUserFamilyMember(
+  data: Partial<NewFamilyMember>
+): Promise<FamilyMember | null> {
+  const { sessionClaims } = await auth();
+  const familyMemberId = sessionClaims?.metadata?.familyMemberId as
+    | number
+    | undefined;
+  if (familyMemberId == null) return null;
+  return updateFamilyMember(familyMemberId, data);
+}
+
+// Get a single family member by ID with relations (uses full tree)
 export async function getFamilyMember(
   id: number
 ): Promise<FamilyMemberWithRelations | null> {

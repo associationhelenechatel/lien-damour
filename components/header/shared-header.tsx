@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MapPinnedIcon, Settings, Users } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { PersonalInfosTab } from "./personal-infos-tab";
 
 export function SharedHeader() {
   const pathname = usePathname();
@@ -56,7 +57,7 @@ export function SharedHeader() {
                   labelIcon={<MapPinnedIcon className="h-4 w-4" />}
                   url="/informations"
                 >
-                  <div>je suis custom</div>
+                  <PersonalInfosTab />
                 </UserButton.UserProfilePage>
                 <UserButton.UserProfilePage label="security" />
               </UserButton>

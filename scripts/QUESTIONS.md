@@ -1,3 +1,0 @@
-- Gestion des droits
-  - Qui peut editer les projets de l'asso ?
-  - Qui peut ajouter des personnes a l'annuaire ?

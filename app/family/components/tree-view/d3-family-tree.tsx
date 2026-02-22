@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import type { FamilyTree, FamilyMemberWithRelations } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface D3FamilyTreeProps {
   familyTree: FamilyTree;
@@ -193,21 +192,14 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
   }, [familyTree]);
 
   return (
-    <Card>
-      <CardContent>
-        <div className="w-full h-full flex flex-col">
-          <div className="flex-1 overflow-hidden">
-            <svg
-              ref={svgRef}
-              className="w-full h-full"
-              style={{ minHeight: "1000px" }}
-              viewBox="0 0 2000 2000"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="w-full h-full overflow-hidden">
+      <svg
+        ref={svgRef}
+        className="w-full h-full"
+        viewBox="0 0 2000 2000"
+        preserveAspectRatio="xMidYMid meet"
+      />
+    </div>
   );
 }
 

@@ -20,10 +20,12 @@ export function FamilyDashboard({ initialFamilyTree }: FamilyDashboardProps) {
   const [viewMode, setViewMode] = useState<"list" | "tree" | "map">("list");
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="space-y-8">
-        {/* Navigation entre vues */}
-        <div className="flex justify-center">
+      <div className="relative w-full h-full">
+        {/* Navigation entre vues - superposée au-dessus du contenu */}
+        <div 
+          id="nav" 
+          className="fixed top-22 left-1/2 -translate-x-1/2 z-[9999] flex justify-center pointer-events-auto"
+        >
           <ToggleGroup
             variant="outline"
             type="single"
@@ -31,6 +33,7 @@ export function FamilyDashboard({ initialFamilyTree }: FamilyDashboardProps) {
             onValueChange={(value) =>
               value && setViewMode(value as "list" | "tree" | "map")
             }
+            className="bg-white/95 backdrop-blur-sm shadow-lg rounded-md"
           >
             <ToggleGroupItem value="list">
               <User className="h-4 w-4" />
@@ -47,15 +50,15 @@ export function FamilyDashboard({ initialFamilyTree }: FamilyDashboardProps) {
           </ToggleGroup>
         </div>
 
-        {/* Affichage principal */}
-        {viewMode === "list" ? (
-          <ListView familyTree={initialFamilyTree} />
-        ) : viewMode === "tree" ? (
-          <TreeView familyTree={initialFamilyTree} />
-        ) : (
-          <MapView familyTree={initialFamilyTree} />
-        )}
+        <div className="w-full h-full">
+          {viewMode === "list" ? (
+            <ListView familyTree={initialFamilyTree} />
+          ) : viewMode === "tree" ? (
+            <TreeView familyTree={initialFamilyTree} />
+          ) : (
+            <MapView familyTree={initialFamilyTree} />
+          )}
+        </div>
       </div>
-    </div>
   );
 }

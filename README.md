@@ -180,7 +180,6 @@ yarn dev
 
 ```env
 DATABASE_URL=postgresql://user:pass@host/db
-NEXT_PUBLIC_APP_URL=http://localhost:3000
 JWT_SECRET=your-secret-key
 ```
 

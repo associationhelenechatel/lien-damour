@@ -94,5 +94,9 @@ export function FamilyTreeWithAuth() {
     );
   }
 
-  return <FamilyDashboard initialFamilyTree={familyTree} />;
+  return (
+    <div className="w-full h-[calc(100vh-69px)]">
+      <FamilyDashboard initialFamilyTree={familyTree} />
+    </div>
+  );
 }

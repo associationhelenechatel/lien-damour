@@ -104,20 +104,7 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
           age = endYear - birthYear;
         }
 
-        // Calculer la génération basée sur le code
-        let generation = 0;
-        if (member.code) {
-          if (member.code === ".0" || member.code === "0") {
-            generation = 0; // Génération racine
-          } else if (member.code.endsWith(".0")) {
-            // Conjoint : même génération que son partenaire
-            const baseCode = member.code.slice(0, -2);
-            generation = baseCode ? baseCode.split(".").length : 1;
-          } else {
-            // Enfant : génération = nombre de points
-            generation = member.code.split(".").length;
-          }
-        }
+    
 
         return {
           ...member,
@@ -130,7 +117,6 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
           deathYear,
           isAlive,
           age,
-          generation,
         };
       }
     );
@@ -138,18 +124,13 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
     // Calculer les statistiques
     const livingMembers = enrichedMembers.filter((m) => m.isAlive).length;
     const deceasedMembers = enrichedMembers.length - livingMembers;
-    const maxGeneration = Math.max(
-      ...enrichedMembers.map((m) => m.generation),
-      0
-    );
-
+    
     const stats = {
       totalMembers: members.length,
       totalRelations: relations.length,
       totalPartnerships: partnerships.length,
       livingMembers,
       deceasedMembers,
-      generations: maxGeneration + 1,
     };
 
     return {

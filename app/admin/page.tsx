@@ -25,7 +25,7 @@ import type { FamilyMemberWithRelations } from "@/lib/types";
 
 export default function AdminPage() {
   const { user } = useUser();
-  console.log("USER", user);
+  
   const currentFamilyMemberId = user?.publicMetadata?.familyMemberId as
     | number
     | undefined;
@@ -199,16 +199,6 @@ export default function AdminPage() {
                               Vous
                             </Badge>
                           )}
-                          <Badge
-                            variant="outline"
-                            className={
-                              isCurrentUser
-                                ? "border-blue-300 text-blue-700"
-                                : "border-emerald-300 text-emerald-700"
-                            }
-                          >
-                            Génération {person.generation}
-                          </Badge>
                           {person.code && (
                             <Badge
                               variant="secondary"

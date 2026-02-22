@@ -62,10 +62,6 @@ export default function SimpleGeocodedMap({
           (person) => person.latitude && person.longitude
         );
 
-        console.log(
-          `Affichage de ${geocodedMembers.length} membres avec coordonnées sur ${familyData.length} membres au total`
-        );
-
         // Add markers for geocoded family members only
         geocodedMembers.forEach((person) => {
           const lat = parseFloat(person.latitude!);
@@ -153,7 +149,7 @@ export default function SimpleGeocodedMap({
   }, []);
 
   return (
-    <div className="w-full h-full min-h-[400px] rounded-lg overflow-hidden relative">
+    <div className="w-full h-full overflow-hidden relative">
       <div ref={mapRef} className="w-full h-full" />
     </div>
   );

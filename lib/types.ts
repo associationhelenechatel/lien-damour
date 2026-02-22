@@ -31,7 +31,6 @@ export type FamilyMemberWithRelations = FamilyMember & {
   deathYear: number | null;
   isAlive: boolean;
   age: number | null;
-  generation: number;
 
   // Coordonnées géographiques (optionnelles)
   latitude?: string | null;
@@ -49,7 +48,6 @@ export type FamilyTree = {
     totalPartnerships: number;
     livingMembers: number;
     deceasedMembers: number;
-    generations: number;
   };
 };
 

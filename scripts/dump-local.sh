@@ -64,9 +64,6 @@ if [ $? -eq 0 ]; then
     echo "🎉 Dump terminé avec succès !"
     echo "📁 Fichier créé:"
     echo "   - $DUMP_FILE"
-    echo ""
-    echo "💡 Pour restaurer en production:"
-    echo "   psql \$NEON_URL < $DUMP_FILE"
     
 else
     echo "❌ Erreur lors de la création du dump"

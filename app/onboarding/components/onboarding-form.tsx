@@ -24,18 +24,21 @@ import { Loader2, User, Calendar, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
 import type { FamilyMemberWithRelations } from "@/lib/types";
 import { DatePicker } from "@/components/ui/date-picker";
+import dynamic from "next/dynamic";
 
-interface FamilyMember {
-  id: number;
-  firstName: string;
-  lastName: string | null;
-  maidenName: string | null;
-  birthDate: string | null;
-  address: string | null;
-  phone: string | null;
-  mail: string | null;
-  code: string | null;
-}
+// Import dynamique du SearchBox pour éviter les erreurs SSR
+const SearchBox = dynamic(
+  () => import('@mapbox/search-js-react').then((mod) => mod.SearchBox),
+  { 
+    ssr: false,
+    loading: () => (
+      <Input
+        placeholder="Chargement de la recherche d'adresse..."
+        disabled
+      />
+    )
+  }
+);
 
 export default function OnboardingForm({
   familyMembers,
@@ -54,6 +57,8 @@ export default function OnboardingForm({
   const [birthDate, setBirthDate] = useState<Date | undefined>(undefined);
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
+  const [addressCoordinates, setAddressCoordinates] = useState<{ lat: number; lng: number } | undefined>(undefined);
+  const [mapboxPlaceId, setMapboxPlaceId] = useState<string | undefined>(undefined);
 
   // Mettre à jour les infos du membre sélectionné
   useEffect(() => {
@@ -68,6 +73,9 @@ export default function OnboardingForm({
         setBirthDate(member.birthDate ? new Date(member.birthDate) : undefined);
         setAddress(member.address || "");
         setPhone(member.phone || "");
+        // Note: Les coordonnées et placeId ne sont pas pré-remplis car ils nécessitent un re-géocodage
+        setAddressCoordinates(undefined);
+        setMapboxPlaceId(undefined);
       }
     }
   }, [selectedMemberId, familyMembers]);
@@ -93,6 +101,9 @@ export default function OnboardingForm({
           address: address || null,
           phone: phone,
           mail: user?.emailAddresses[0]?.emailAddress || null,
+          latitude: addressCoordinates?.lat,
+          longitude: addressCoordinates?.lng,
+          mapboxPlaceId: mapboxPlaceId,
         }),
       });
 
@@ -118,17 +129,6 @@ export default function OnboardingForm({
       setSubmitting(false);
     }
   };
-
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mx-auto mb-4" />
-          <p className="text-slate-600">Chargement...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
@@ -229,12 +229,31 @@ export default function OnboardingForm({
                       <MapPin className="h-4 w-4" />
                       Adresse
                     </Label>
-                    <Input
-                      id="address"
-                      type="text"
+                    <SearchBox
+                      accessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN as string}
+                      options={{
+                        language: 'fr',
+                        country: 'FR'
+                      }}
                       value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="Votre adresse complète"
+                      onRetrieve={(result) => {
+                        if (result && result.features && result.features.length > 0) {
+                          const feature = result.features[0];
+                          if (feature) {
+                            // Récupérer l'adresse depuis les propriétés
+                            const props = feature.properties as any;
+                            const address = props?.full_address || props?.name || feature.properties?.name || '';
+                            const [lng, lat] = feature.geometry.coordinates as [number, number];
+                            const placeId = props?.mapbox_id || feature.id?.toString() || undefined;
+                            
+                            setAddress(address);
+                            setAddressCoordinates({ lat, lng });
+                            if (placeId) {
+                              setMapboxPlaceId(placeId);
+                            }
+                          }
+                        }
+                      }}
                     />
                   </div>
 

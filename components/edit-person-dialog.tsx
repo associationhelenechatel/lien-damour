@@ -14,13 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { FamilyMemberWithRelations } from "@/lib/types";
 
@@ -62,7 +55,6 @@ export function EditPersonDialog({
   const availableParents = existingFamily.filter(
     (p) =>
       p.id !== person.id &&
-      p.generation < person.generation &&
       !person.children.some((child) => child.id === p.id)
   );
 
@@ -112,30 +104,6 @@ export function EditPersonDialog({
                   setFormData({ ...formData, maidenName: e.target.value })
                 }
               />
-            </div>
-
-            <div>
-              <Label htmlFor="generation">Génération</Label>
-              <Select
-                value={formData.generation.toString()}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    generation: Number.parseInt(value),
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6].map((gen) => (
-                    <SelectItem key={gen} value={gen.toString()}>
-                      Génération {gen}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
 

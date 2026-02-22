@@ -1,7 +1,6 @@
-import { pgTable, integer, text } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/neon-http";
 import dotenv from "dotenv";
-import { seed, reset } from "drizzle-seed";
+import { reset } from "drizzle-seed";
 import { neon, neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 import {
@@ -48,10 +47,6 @@ neonConfig.webSocketConstructor = ws;
 const sqlClient = neon(connectionString);
 const db = drizzle(sqlClient as any);
 
-const users = pgTable("users", {
-  id: integer().primaryKey(),
-  name: text().notNull(),
-});
 async function main() {
   console.log("🗑️  Nettoyage de la base de données existante...");
   // Supprimer les données existantes (dans l'ordre inverse des dépendances)
