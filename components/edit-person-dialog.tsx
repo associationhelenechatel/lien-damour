@@ -22,7 +22,6 @@ interface EditPersonDialogProps {
   onOpenChange: (open: boolean) => void;
   person: FamilyMemberWithRelations;
   onEditPerson: (person: FamilyMemberWithRelations) => void;
-  existingFamily: FamilyMemberWithRelations[];
 }
 
 export function EditPersonDialog({
@@ -30,7 +29,6 @@ export function EditPersonDialog({
   onOpenChange,
   person,
   onEditPerson,
-  existingFamily,
 }: EditPersonDialogProps) {
   const [formData, setFormData] = useState<FamilyMemberWithRelations>(person);
   const [isDeceased, setIsDeceased] = useState(!!person.deathYear);
@@ -52,12 +50,6 @@ export function EditPersonDialog({
     onOpenChange(false);
   };
 
-  const availableParents = existingFamily.filter(
-    (p) =>
-      p.id !== person.id &&
-      !person.children.some((child) => child.id === p.id)
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -69,31 +61,6 @@ export function EditPersonDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName">Prénom</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) =>
-                  setFormData({ ...formData, firstName: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="lastName">Nom de famille</Label>
-              <Input
-                id="lastName"
-                value={formData.lastName || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, lastName: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="maidenName">Nom de jeune fille</Label>

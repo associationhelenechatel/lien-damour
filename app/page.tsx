@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -18,48 +19,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Heart,
-  Users,
-  MapPin,
-  GraduationCap,
-  Home as HomeIcon,
-  Utensils,
-  Stethoscope,
-  TreePine,
-  Droplets,
-  Lightbulb,
-  Building,
-  Palette,
-  Music,
-  BookOpen,
-} from "lucide-react";
+import { Heart, Loader2, GraduationCap, TreePine } from "lucide-react";
+import { getProjects } from "@/lib/api/project";
+import type { Project } from "@/lib/types";
 
-// Import des projets depuis le fichier JSON
-import projectsData from "@/data/projects.json";
-
-// Mapping des icônes
-const iconMap = {
-  Heart,
-  Users,
-  HomeIcon,
-  BookOpen,
-  Music,
-  Stethoscope,
-  GraduationCap,
-  Building,
-  MapPin,
-  TreePine,
-  Droplets,
-  Lightbulb,
-  Palette,
-};
-
-// Projets avec icônes mappées
-const projects = projectsData.map((project) => ({
-  ...project,
-  icon: iconMap[project.icon as keyof typeof iconMap] || Heart,
-}));
+const DEFAULT_PROJECT_IMAGE =
+  "https://picsum.photos/seed/project/160/120";
 
 const categoryColors = {
   Social: "bg-blue-100 text-blue-800",
@@ -77,8 +42,14 @@ const categoryColors = {
 };
 
 export default function Home() {
-  // Nombre total de projets soutenus
-  const totalProjects = projects.length;
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getProjects()
+      .then(setProjects)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -103,43 +74,56 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">
             Nos Projets Soutenus
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {projects.map((project) => {
-              const IconComponent = project.icon;
-              return (
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {projects.map((project) => (
                 <Card
                   key={project.id}
-                  className="hover:shadow-lg transition-shadow duration-300"
+                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <IconComponent className="h-8 w-8 text-emerald-600" />
-                      <Badge
-                        variant="outline"
-                        className={
-                          categoryColors[
-                            project.category as keyof typeof categoryColors
-                          ]
-                        }
-                      >
-                        {project.category}
-                      </Badge>
+                  <CardContent className="p-4 flex flex-col gap-3">
+                    {/* 1. Logo + nom */}
+                    <div className="flex gap-3">
+                      <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-slate-100">
+                        <Image
+                          src={project.logo || DEFAULT_PROJECT_IMAGE}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          unoptimized
+                          sizes="56px"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0 flex items-center">
+                        <CardTitle className="text-base leading-tight">
+                          {project.name}
+                        </CardTitle>
+                      </div>
                     </div>
-                    <CardTitle className="text-lg">{project.title}</CardTitle>
-                    <CardDescription className="text-sm">
-                      {project.summary || project.description}
+                    {/* 2. Description pleine largeur */}
+                    <CardDescription className="text-sm line-clamp-4 w-full">
+                      {project.shortDescription || project.description}
                     </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-xs text-slate-500">
-                        {project.type}
-                      </span>
-                      <span className="text-sm text-slate-600 font-medium">
-                        {project.location}
-                      </span>
-                    </div>
-
+                    {/* 3. Catégorie uniquement */}
+                    {project.tag && (
+                      <div className="w-fit">
+                        <Badge
+                          variant="outline"
+                          className={
+                            categoryColors[
+                              project.tag as keyof typeof categoryColors
+                            ]
+                          }
+                        >
+                          {project.tag}
+                        </Badge>
+                      </div>
+                    )}
+                    {/* 4. Bouton */}
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="sm" className="w-full">
@@ -149,35 +133,41 @@ export default function Home() {
                       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle className="flex items-center gap-2">
-                            <IconComponent className="h-6 w-6 text-emerald-600" />
-                            {project.title}
+                            <Heart className="h-6 w-6 text-emerald-600" />
+                            {project.name}
                           </DialogTitle>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge
-                              variant="outline"
-                              className={
-                                categoryColors[
-                                  project.category as keyof typeof categoryColors
-                                ]
-                              }
-                            >
-                              {project.category}
-                            </Badge>
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <div>
+                              {project.tag && (
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    categoryColors[
+                                      project.tag as keyof typeof categoryColors
+                                    ]
+                                  }
+                                >
+                                  {project.tag}
+                                </Badge>
+                              )}
+                            </div>
                             <span className="text-sm text-slate-500">
-                              {project.type} • {project.location}
+                              {[project.type, project.location]
+                                .filter(Boolean)
+                                .join(" • ")}
                             </span>
                           </div>
                         </DialogHeader>
                         <DialogDescription className="text-base leading-relaxed mt-4">
-                          {project.description}
+                          {project.description || project.shortDescription || ""}
                         </DialogDescription>
                       </DialogContent>
                     </Dialog>
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

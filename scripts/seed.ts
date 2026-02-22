@@ -8,6 +8,7 @@ import {
   familyRelations,
   partnerships,
 } from "../data/mock-family-data.js";
+import { seedProjects } from "../data/projects.js";
 import * as schema from "../db/schema.js";
 
 dotenv.config({
@@ -82,6 +83,11 @@ async function main() {
       startDate: part.startDate,
       endDate: part.endDate,
     });
+  }
+
+  console.log("📁 Insertion des projets...");
+  for (const project of seedProjects) {
+    await db.insert(schema.project).values(project);
   }
 
   console.log("✅ Seed terminé !");

@@ -50,3 +50,16 @@ export const partnership = pgTable("partnership", {
   startDate: date("start_date"),
   endDate: date("end_date"),
 });
+
+export const project = pgTable("project", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  shortDescription: text("short_description"),
+  location: text("location"),
+  type: text("type"), // association, project, partnership
+  tag: text("tag"), // education, social, humanitarian, etc.
+  logo: text("logo"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

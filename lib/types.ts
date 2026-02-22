@@ -3,17 +3,19 @@
  */
 
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { familyMember, familyRelation, partnership } from "@/db/schema";
+import { familyMember, familyRelation, partnership, project } from "@/db/schema";
 
 // Types de base générés automatiquement par Drizzle
 export type FamilyMember = InferSelectModel<typeof familyMember>;
 export type FamilyRelation = InferSelectModel<typeof familyRelation>;
 export type Partnership = InferSelectModel<typeof partnership>;
+export type Project = InferSelectModel<typeof project>;
 
 // Types pour l'insertion (création de nouvelles entrées)
 export type NewFamilyMember = InferInsertModel<typeof familyMember>;
 export type NewFamilyRelation = InferInsertModel<typeof familyRelation>;
 export type NewPartnership = InferInsertModel<typeof partnership>;
+export type NewProject = InferInsertModel<typeof project>;
 
 // Types enrichis pour l'arbre généalogique complet
 export type FamilyMemberWithRelations = FamilyMember & {

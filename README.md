@@ -223,13 +223,15 @@ Toute la documentation technique est disponible dans le dossier `docs/`.
 
 ## 🎯 Roadmap
 
-[] Données des membres dans un tableau avec des filtres
 [x] Update son profil
+[] Données des membres dans un tableau avec des filtres
 [] Données en DB avec adresses correctes
-[] Update le profil des autres (admin)
-[] Gérer les projets de la homepage (admin)
+[] Update le profil des autres via l'admin panel
+[x] Gérer les projets de la homepage
 [] Gestion du code famille
 [] Déploiement clerk en prod
+[] Upload de fichiers
+[] Utiliser les logos de l'association
 
 ---
 

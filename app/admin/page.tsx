@@ -118,8 +118,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
-      <div className="container mx-auto px-4 py-8">
+    <>
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
@@ -305,7 +304,6 @@ export default function AdminPage() {
             onOpenChange={setShowEditDialog}
             person={selectedPersonData}
             onEditPerson={handleEditPerson}
-            existingFamily={family}
           />
         )}
 
@@ -317,7 +315,6 @@ export default function AdminPage() {
             onDeletePerson={handleDeletePerson}
           />
         )}
-      </div>
-    </div>
+    </>
   );
 }
