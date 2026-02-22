@@ -223,24 +223,13 @@ Toute la documentation technique est disponible dans le dossier `docs/`.
 
 ## 🎯 Roadmap
 
-### Phase 1 : Système d'Invitation ✅ (En cours)
-- [x] Schéma de base de données
-- [ ] API d'invitation
-- [ ] Interface admin pour créer invitations
-- [ ] Page publique d'acceptation d'invitation
-- [ ] Envoi d'emails (optionnel)
-
-### Phase 2 : Authentification Complète
-- [ ] Migration depuis localStorage vers DB
-- [ ] Sessions JWT
-- [ ] Refresh tokens
-- [ ] Gestion des rôles (admin/member)
-
-### Phase 3 : Fonctionnalités Avancées
-- [ ] Notifications
-- [ ] Historique des modifications
-- [ ] Export de données
-- [ ] Recherche avancée
+[] Données des membres dans un tableau avec des filtres
+[x] Update son profil
+[] Données en DB avec adresses correctes
+[] Update le profil des autres (admin)
+[] Gérer les projets de la homepage (admin)
+[] Gestion du code famille
+[] Déploiement clerk en prod
 
 ---
 
