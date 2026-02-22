@@ -16,7 +16,7 @@ DB_PASSWORD="postgres"
 
 # Nom du fichier de dump avec timestamp
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-DUMP_FILE="dumps/family_tree_${TIMESTAMP}.sql"
+DUMP_FILE="dumps/local_${TIMESTAMP}.sql"
 
 # Créer le dossier dumps s'il n'existe pas
 mkdir -p dumps

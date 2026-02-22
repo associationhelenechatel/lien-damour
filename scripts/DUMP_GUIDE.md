@@ -70,11 +70,13 @@ export DATABASE_URL="postgresql://username:password@host:5432/database"
 
 ## 📊 Ce que font les scripts
 
-### `dump-local.sh`
-- Se connecte à votre base Docker locale (port 5433)
-- Crée un dump SQL complet avec `--clean --if-exists`
-- Génère aussi une version compressée (.gz)
-- Affiche la taille et les statistiques
+### `dump-production.sh`
+- Se connecte à la base Neon de production (via `NETLIFY_DATABASE_URL` ou `PRODUCTION_DATABASE_URL`)
+- **N'utilise pas** `DATABASE_URL` (souvent la base locale Docker) pour éviter de dumper la mauvaise base
+- Refuse de lancer si l’URL contient localhost / 127.0.0.1
+- Charge `.env.local` si présent (où vous pouvez définir `NETLIFY_DATABASE_URL`)
+- Crée un dump dans `dumps/production_YYYYMMDD_HHMMSS.sql`
+- Usage : `export NETLIFY_DATABASE_URL='postgresql://...' && yarn db:dump:prod`
 
 ### `restore-production.sh`
 - Vérifie la connexion à Neon

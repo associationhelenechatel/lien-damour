@@ -14,6 +14,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:dump": "./scripts/dump-local.sh",
+    "db:dump:prod": "./scripts/dump-production.sh",
     "db:seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
