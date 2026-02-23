@@ -51,8 +51,8 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center py-4">
+    <div className="flex flex-col min-h-0 flex-1">
+      <div className="flex items-center py-4 flex-shrink-0">
         <Input
           placeholder="Rechercher par nom..."
           value={(table.getColumn("fullName")?.getFilterValue() as string) ?? ""}
@@ -62,7 +62,7 @@ export function DataTable<TData, TValue>({
           className="max-w-xs"
         />
       </div>
-      <div className="flex-1 overflow-auto rounded-md border mb-4">
+      <div className="flex-1 min-h-0 overflow-auto rounded-md border mb-4">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -122,7 +122,9 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <div className="flex-shrink-0">
+        <DataTablePagination table={table} />
+      </div>
     </div>
   );
 }
