@@ -63,7 +63,7 @@ export function DataTable<TData, TValue>({
         />
       </div>
       <div className="flex-1 min-h-0 overflow-auto rounded-md border mb-4">
-        <Table>
+        <Table className="min-w-full !w-max">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -88,7 +88,22 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell
+                        key={cell.id}
+                        className={
+                          cell.column.id === "actions"
+                            ? "sticky right-0 z-10 bg-background"
+                            : undefined
+                        }
+                        style={
+                          cell.column.id === "actions"
+                            ? {
+                                boxShadow:
+                                  "inset 4px 0 6px -3px rgba(0,0,0,0.06)",
+                              }
+                            : undefined
+                        }
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

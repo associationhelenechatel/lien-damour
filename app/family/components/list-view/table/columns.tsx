@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MapPin, MoreHorizontal } from "lucide-react";
+import { CopyIcon, MapPin, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +40,7 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
   },
   {
     accessorKey: "birthDate",
-    header: "Date de naissance",
+    header: "Né(e) le",
     cell: ({ row }) => {
       const date = row.getValue("birthDate") as string | null;
       if (!date) return <div className="text-muted-foreground whitespace-nowrap">-</div>;
@@ -79,10 +79,11 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
+              disabled={!member.mail}
               onClick={() => navigator.clipboard.writeText(String(member.mail))}
             >
+              <CopyIcon className="h-4 w-4 mr-2" />
               Copier le mail
             </DropdownMenuItem>
             <DropdownMenuSeparator />
