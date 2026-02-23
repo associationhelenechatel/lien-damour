@@ -10,7 +10,7 @@ export default async function FamilyPage() {
 
     return (
       <div className="w-full h-[calc(100vh-69px)]">
-        <FamilyDashboard initialFamilyTree={familyTree} />
+        <FamilyDashboard familyTree={familyTree} />
       </div>
     );
   } catch (err) {

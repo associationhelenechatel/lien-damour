@@ -9,10 +9,10 @@ import { TreeView } from "./tree-view";
 import { MapView } from "./map-view";
 
 interface FamilyDashboardProps {
-  initialFamilyTree: FamilyTree;
+  familyTree: FamilyTree;
 }
 
-export function FamilyDashboard({ initialFamilyTree }: FamilyDashboardProps) {
+export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
   const [viewMode, setViewMode] = useState<"list" | "tree" | "map">("list");
 
   return (
@@ -48,11 +48,11 @@ export function FamilyDashboard({ initialFamilyTree }: FamilyDashboardProps) {
 
         <div className="w-full h-full">
           {viewMode === "list" ? (
-            <ListView familyTree={initialFamilyTree} />
+            <ListView familyTree={familyTree} />
           ) : viewMode === "tree" ? (
-            <TreeView familyTree={initialFamilyTree} />
+            <TreeView familyTree={familyTree} />
           ) : (
-            <MapView familyTree={initialFamilyTree} />
+            <MapView familyTree={familyTree} />
           )}
         </div>
       </div>
