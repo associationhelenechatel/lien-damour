@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { MapPin, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { FamilyMemberWithRelations } from "@/lib/types";
+import { useListViewContext } from "../list-view-context";
 
 export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
   {
@@ -56,6 +57,12 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
     id: "actions",
     cell: ({ row }) => {
       const member = row.original;
+      const { onViewOnMap } = useListViewContext() ?? {};
+      const hasCoordinates =
+        member.latitude != null &&
+        member.longitude != null &&
+        String(member.latitude).trim() !== "" &&
+        String(member.longitude).trim() !== "";
 
       return (
         <DropdownMenu>
@@ -73,7 +80,13 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
               Copier l'ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Voir sur la carte</DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!hasCoordinates}
+              onClick={() => onViewOnMap?.(member.id)}
+            >
+              <MapPin className="h-4 w-4 mr-2" />
+              Voir sur la carte
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

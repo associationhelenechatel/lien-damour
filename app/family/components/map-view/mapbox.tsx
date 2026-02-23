@@ -2,7 +2,9 @@
 
 import { FamilyMemberWithRelations } from "@/lib/types";
 import * as React from "react";
+import { useRef, useEffect, useState } from "react";
 import Map, { Marker } from "react-map-gl/mapbox";
+import type { MapRef } from "react-map-gl/mapbox";
 import {
   Popover,
   PopoverContent,
@@ -11,22 +13,44 @@ import {
 import { CircleUser } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const DEFAULT_BOUNDS: [[number, number], [number, number]] = [
+  [-5.4649, 51.813],
+  [10.0246, 41.2458],
+];
+
 export function Mapbox({
   mapData,
+  centerOn = null,
+  onMapCentered,
 }: {
   mapData: FamilyMemberWithRelations[];
+  centerOn?: { latitude: number; longitude: number } | null;
+  onMapCentered?: () => void;
 }) {
+  const mapRef = useRef<MapRef>(null);
+  const [mapReady, setMapReady] = useState(false);
+
+  useEffect(() => {
+    if (!centerOn || !mapRef.current || !mapReady) return;
+    const map = mapRef.current.getMap();
+    map.flyTo({
+      center: [centerOn.longitude, centerOn.latitude],
+      zoom: 14,
+      duration: 1500,
+    });
+    onMapCentered?.();
+  }, [centerOn, onMapCentered, mapReady]);
+
   return (
     <Map
+      ref={mapRef}
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
       initialViewState={{
-        bounds: [
-          [-5.4649, 51.8130],
-          [10.0246, 41.2458],
-        ],
+        bounds: DEFAULT_BOUNDS,
       }}
       style={{ width: "100%", height: "100%" }}
       mapStyle="mapbox://styles/mapbox/streets-v11"
+      onLoad={() => setMapReady(true)}
     >
       {mapData.map((member) => (
         <Marker
