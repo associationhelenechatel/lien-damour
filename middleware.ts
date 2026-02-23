@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
 const isOnboardingApiRoute = createRouteMatcher([
-  "/api/family-members",
   "/api/onboarding(.*)",
 ]);
 const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
