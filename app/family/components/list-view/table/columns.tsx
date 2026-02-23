@@ -21,36 +21,42 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
     header: "Nom",
     cell: ({ row }) => {
       const member = row.original;
-      return <div className="font-medium">{member.fullName}</div>;
+      return (
+        <div className="font-medium whitespace-nowrap">{member.fullName}</div>
+      );
     },
-    size: 200
   },
   {
     accessorKey: "mail",
     header: "Email",
-    size: 200,
   },
   {
     accessorKey: "phone",
     header: "Téléphone",
-    size: 120,
+    cell: ({ row }) => {
+      const value = row.getValue("phone") as string | null;
+      return <div className="whitespace-nowrap">{value ?? "-"}</div>;
+    },
   },
   {
     accessorKey: "birthDate",
     header: "Date de naissance",
     cell: ({ row }) => {
       const date = row.getValue("birthDate") as string | null;
-      if (!date) return <div className="text-muted-foreground">-</div>;
-      return new Date(date).toLocaleDateString("fr-FR");
+      if (!date) return <div className="text-muted-foreground whitespace-nowrap">-</div>;
+      return (
+        <div className="whitespace-nowrap">
+          {new Date(date).toLocaleDateString("fr-FR")}
+        </div>
+      );
     },
-    size: 120,
   },
   {
     accessorKey: "address",
     header: "Adresse",
     cell: ({ row }) => {
       const address = row.getValue("address") as string | null;
-      return <div className="max-w-[400px] truncate">{address || "-"}</div>;
+      return <div>{address || "-"}</div>;
     },
   },
   {
@@ -91,6 +97,5 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
         </DropdownMenu>
       );
     },
-    size: 20,
   },
 ];

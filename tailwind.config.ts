@@ -1,19 +1,10 @@
 import type { Config } from "tailwindcss";
 
-const config = {
+const config: Config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  safelist: [
-    "w-[20px]",
-    "w-[100px]",
-    "w-[120px]",
-    "w-[150px]",
-    "w-[200px]",
-    "w-[250px]",
-    "w-[300px]",
   ],
   theme: {
     extend: {
@@ -68,4 +59,5 @@ const config = {
   },
   plugins: [require("tailwindcss-animate")],
 };
+
 export default config;
