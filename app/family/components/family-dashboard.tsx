@@ -1,7 +1,3 @@
-/**
- * Tableau de bord principal de la famille avec navigation entre vues
- */
-
 "use client";
 
 import { useState } from "react";
