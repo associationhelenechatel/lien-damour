@@ -20,8 +20,9 @@ import {
 import { AddPersonDialog } from "@/components/add-person-dialog";
 import { EditPersonDialog } from "@/components/edit-person-dialog";
 import { DeletePersonDialog } from "@/components/delete-person-dialog";
-import { getFamilyMembers, deleteFamilyMember } from "@/lib/api/family";
+import { deleteFamilyMember } from "@/lib/api/family";
 import type { FamilyMemberWithRelations } from "@/lib/types";
+import { getCompleteFamilyTree } from "@/lib/family-tree-service";
 
 export default function AdminPage() {
   const { user } = useUser();
@@ -45,7 +46,8 @@ export default function AdminPage() {
       try {
         setLoading(true);
         setError(null);
-        const members = await getFamilyMembers();
+        const familyTree = await getCompleteFamilyTree();
+        const members = familyTree.members;
         setFamily(members);
       } catch (err) {
         setError("Failed to load family data");
@@ -79,7 +81,8 @@ export default function AdminPage() {
     try {
       // The createFamilyMember function will be called from the dialog
       // We just need to refresh the data
-      const members = await getFamilyMembers();
+      const familyTree = await getCompleteFamilyTree();
+      const members = familyTree.members;
       setFamily(members);
       setShowAddDialog(false);
     } catch (err) {
@@ -92,7 +95,8 @@ export default function AdminPage() {
     try {
       // The updateFamilyMember function will be called from the dialog
       // We just need to refresh the data
-      const members = await getFamilyMembers();
+      const familyTree = await getCompleteFamilyTree();
+      const members = familyTree.members;
       setFamily(members);
       setShowEditDialog(false);
       setSelectedPerson(null);
@@ -106,7 +110,8 @@ export default function AdminPage() {
     if (selectedPerson) {
       try {
         await deleteFamilyMember(selectedPerson);
-        const members = await getFamilyMembers();
+        const familyTree = await getCompleteFamilyTree();
+        const members = familyTree.members;
         setFamily(members);
         setShowDeleteDialog(false);
         setSelectedPerson(null);
