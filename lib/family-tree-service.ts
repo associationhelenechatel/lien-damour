@@ -104,8 +104,6 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
           age = endYear - birthYear;
         }
 
-    
-
         return {
           ...member,
           parents,
@@ -121,23 +119,10 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
       }
     );
 
-    // Calculer les statistiques
-    const livingMembers = enrichedMembers.filter((m) => m.isAlive).length;
-    const deceasedMembers = enrichedMembers.length - livingMembers;
-    
-    const stats = {
-      totalMembers: members.length,
-      totalRelations: relations.length,
-      totalPartnerships: partnerships.length,
-      livingMembers,
-      deceasedMembers,
-    };
-
     return {
       members: enrichedMembers,
       relations,
       partnerships,
-      stats,
     };
   } catch (error) {
     console.error(

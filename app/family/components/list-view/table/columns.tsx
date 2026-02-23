@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,21 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { FamilyMemberWithRelations } from "@/lib/types";
 
-// Type for family member data in the table
-export type FamilyMemberTableData = {
-  id: number;
-  firstName: string;
-  lastName: string | null;
-  maidenName: string | null;
-  fullName: string; // Calculated field for filtering and sorting
-  mail: string | null;
-  phone: string | null;
-  birthDate: string | null;
-  address: string | null;
-};
-
-export const columns: ColumnDef<FamilyMemberTableData>[] = [
+export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
   {
     accessorKey: "fullName",
     header: "Nom",

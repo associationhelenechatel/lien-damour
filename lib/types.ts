@@ -44,13 +44,6 @@ export type FamilyTree = {
   members: FamilyMemberWithRelations[];
   relations: FamilyRelation[];
   partnerships: Partnership[];
-  stats: {
-    totalMembers: number;
-    totalRelations: number;
-    totalPartnerships: number;
-    livingMembers: number;
-    deceasedMembers: number;
-  };
 };
 
 // Types pour les requêtes et filtres

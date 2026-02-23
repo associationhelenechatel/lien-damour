@@ -21,17 +21,20 @@
 ## 🚀 Démarrage Rapide
 
 ### Prérequis
-- Node.js 18+
+- Node.js 20+ (ou nvm)
 - Yarn
 - Docker
 
 ### Installation
 
 ```bash
+# (Si nvm installé)
+nvm use
+
 # Installer les dépendances
 yarn install
 
-# Démarrer docker pour la DB postregres
+# Démarrer docker pour la base de données PostGres local
 docker compose up -d
 
 # Configurer les variables d'environnement
