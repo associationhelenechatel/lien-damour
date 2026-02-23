@@ -71,7 +71,7 @@ yarn db:studio    # Ouvrir Drizzle Studio
 
 ## 🎯 Roadmap
 
-[x] Update son profil
+- [x] Update son profil
 [] Données des membres dans un tableau avec des filtres
 [x] Données en DB avec adresses correctes
 [] Update le profil des autres via l'admin panel
