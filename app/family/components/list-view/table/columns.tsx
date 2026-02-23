@@ -75,9 +75,9 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(String(member.id))}
+              onClick={() => navigator.clipboard.writeText(String(member.mail))}
             >
-              Copier l'ID
+              Copier le mail
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

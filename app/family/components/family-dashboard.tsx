@@ -39,7 +39,7 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
           type="single"
           value={viewMode}
           onValueChange={(value) =>
-            value && setViewMode(value as "list" | "tree" | "map")
+            value && setViewMode(value as "list" | "map" | "tree")
           }
           className="bg-white/95 backdrop-blur-sm shadow-lg rounded-md"
         >
@@ -47,13 +47,13 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
             <User className="h-4 w-4" />
             Liste
           </ToggleGroupItem>
-          <ToggleGroupItem value="tree">
-            <TreePine className="h-4 w-4" />
-            Arbre
-          </ToggleGroupItem>
           <ToggleGroupItem value="map">
             <MapPin className="h-4 w-4" />
             Carte
+          </ToggleGroupItem>
+          <ToggleGroupItem value="tree">
+            <TreePine className="h-4 w-4" />
+            Arbre
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
@@ -64,14 +64,15 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
             familyTree={familyTree}
             onViewOnMap={handleViewOnMap}
           />
-        ) : viewMode === "tree" ? (
-          <TreeView familyTree={familyTree} />
-        ) : (
+        ) : viewMode === "map" ? (
           <MapView
             familyTree={familyTree}
             centerOnMemberId={mapCenterOnMemberId}
             onMapCentered={handleMapCentered}
           />
+          
+        ) : (
+          <TreeView familyTree={familyTree} />
         )}
       </div>
     </div>
