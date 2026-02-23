@@ -73,8 +73,7 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
               Copier l'ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Voir les détails</DropdownMenuItem>
-            <DropdownMenuItem>Modifier</DropdownMenuItem>
+            <DropdownMenuItem>Voir sur la carte</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

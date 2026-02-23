@@ -34,6 +34,11 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
+    initialState: {
+      pagination: {
+        pageSize: 20,
+      }
+    },
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),

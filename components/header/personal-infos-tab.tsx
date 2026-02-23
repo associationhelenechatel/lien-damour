@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Loader2, MapPin, Phone, Calendar } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 

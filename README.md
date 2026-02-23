@@ -62,9 +62,10 @@ yarn dev
 - [x] Données en DB avec adresses correctes
 - [x] Gérer les projets de la homepage via l'admin
 - [x] Update son profil
-- [ ] Update les membres via l'admin panel
 - [ ] Données des membres dans un tableau avec des filtres
+- [ ] Update les membres via l'admin panel
 - [ ] Gestion du code famille
+- [ ] Gestion des admins
 - [ ] Déploiement clerk en prod
 - [ ] Upload de fichiers
 - [ ] Utiliser les logos de l'association
