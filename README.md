@@ -2,7 +2,7 @@
 
 **Lien d'Amour** est une application web moderne permettant à toute la famille de partager et consulter un annuaire familial complet. Chaque membre de la famille peut créer un compte pour accéder à l'arbre généalogique, visualiser les membres sur une carte géographique, et gérer les informations familiales.
 
-## 🏗️ Architecture Technique
+## 🏗️ Architecture
 
 ### Services et plateformes
 - **Netlify** — hébergement et CI/CD
@@ -11,13 +11,12 @@
 - **Cloudflare R2** — stockage de fichiers (file hosting)
 - **Mapbox** - Cartographie et adresses
 
-### Stack Technologique
+### Stack Technique
 - **Framework** : Next.js 15 (App Router)
 - **React** : Version 19
 - **Base de données** : PostgreSQL (NeonDB serverless)
 - **ORM** : Drizzle
 - **Styling** : Tailwind CSS + shadcn/ui
-- **Cartes** : Leaflet (implémentation native)
 
 ## 🚀 Démarrage Rapide
 
@@ -49,38 +48,20 @@ yarn db:seed
 yarn dev
 ```
 
-## 📝 Scripts Disponibles
-
-```bash
-yarn dev          # Serveur de développement
-yarn build        # Build de production
-yarn start        # Serveur de production
-yarn lint         # Linting ESLint
-yarn db:generate  # Générer migrations
-yarn db:push      # Appliquer migrations (dev)
-yarn db:migrate   # Appliquer migrations (prod)
-yarn db:studio    # Ouvrir Drizzle Studio
-```
-
-### Modifier le Schéma
+### Créer une migration
 
 1. Modifier `db/schema.ts`
 2. Générer la migration : `yarn db:generate`
 3. Appliquer : `yarn db:push` (dev) ou `yarn db:migrate` (prod)
-4. Vérifier : `yarn db:studio`
 
 ## 🎯 Roadmap
 
+- [x] Données en DB avec adresses correctes
+- [x] Gérer les projets de la homepage via l'admin
 - [x] Update son profil
-[] Données des membres dans un tableau avec des filtres
-[x] Données en DB avec adresses correctes
-[] Update le profil des autres via l'admin panel
-[x] Gérer les projets de la homepage
-[] Gestion du code famille
-[] Déploiement clerk en prod
-[] Upload de fichiers
-[] Utiliser les logos de l'association
-
----
-
-**Développé avec ❤️ pour préserver les liens familiaux**
+- [] Update les membres via l'admin panel
+- [] Données des membres dans un tableau avec des filtres
+- [] Gestion du code famille
+- [] Déploiement clerk en prod
+- [] Upload de fichiers
+- [] Utiliser les logos de l'association
