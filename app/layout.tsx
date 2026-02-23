@@ -8,7 +8,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import { SharedHeader } from "@/components/header/shared-header";
 import "./globals.css";
-import "./leaflet.css";
 
 export const metadata: Metadata = {
   title: "Association Hélène Chatel",
