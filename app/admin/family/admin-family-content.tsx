@@ -51,7 +51,7 @@ export function AdminFamilyContent({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4 mt-4">
+      <DataTable columns={columns} data={familyTree.members}>
         <Button
           onClick={() => setShowNewEventDialog(true)}
           className="bg-emerald-600 hover:bg-emerald-700"
@@ -59,8 +59,7 @@ export function AdminFamilyContent({
           <Plus className="h-4 w-4 mr-2" />
           Nouvel événement
         </Button>
-      </div>
-      <DataTable columns={columns} data={familyTree.members} />
+      </DataTable>
 
       <NewEventDialog
         open={showNewEventDialog}

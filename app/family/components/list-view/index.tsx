@@ -28,7 +28,7 @@ export function ListView({
     >
       <div className="w-full h-full flex flex-col overflow-hidden">
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-          <div className="container mx-auto py-4 flex-1 min-h-0 flex flex-col">
+          <div className="container mx-auto py-4 mt-12 flex-1 min-h-0 flex flex-col">
             <DataTable columns={columns} data={familyTree.members} />
           </div>
         </div>
