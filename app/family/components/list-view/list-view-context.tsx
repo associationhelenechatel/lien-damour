@@ -2,8 +2,12 @@
 
 import { createContext, useContext } from "react";
 
+import type { FamilyMemberWithRelations } from "@/lib/types";
+
 export type ListViewContextValue = {
+  variant: "family" | "admin";
   onViewOnMap: (memberId: number) => void;
+  onEdit?: (member: FamilyMemberWithRelations) => void;
 };
 
 const ListViewContext = createContext<ListViewContextValue | null>(null);

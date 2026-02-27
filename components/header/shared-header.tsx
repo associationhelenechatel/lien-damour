@@ -26,9 +26,9 @@ export function SharedHeader() {
             <SignedIn>
               <Link href="/family">
                 <Button
-                  variant={pathname === "/family" ? "default" : "outline"}
+                  variant={pathname?.startsWith("/family") ? "default" : "outline"}
                   className={
-                    pathname === "/family"
+                    pathname?.startsWith("/family")
                       ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                       : "border-emerald-300 text-emerald-700 hover:text-emerald-700 hover:bg-emerald-50 bg-transparent"
                   }
@@ -39,9 +39,9 @@ export function SharedHeader() {
               </Link>
               <Link href="/admin">
                 <Button
-                  variant={pathname === "/admin" ? "default" : "outline"}
+                  variant={pathname?.startsWith("/admin") ? "default" : "outline"}
                   className={
-                    pathname === "/admin"
+                    pathname?.startsWith("/admin")
                       ? "bg-blue-600 hover:bg-blue-700 text-white"
                       : "border-blue-300 text-blue-700 hover:text-blue-700 hover:bg-blue-50 bg-transparent"
                   }

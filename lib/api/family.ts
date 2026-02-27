@@ -113,33 +113,6 @@ export async function updateFamilyMember(
   }
 }
 
-// Delete a family member
-export async function deleteFamilyMember(id: number): Promise<void> {
-  try {
-    // First, delete related records
-    await db
-      .delete(familyRelation)
-      .where(
-        or(eq(familyRelation.parentId, id), eq(familyRelation.childId, id))
-      );
-
-    await db
-      .delete(partnership)
-      .where(
-        or(eq(partnership.partner1Id, id), eq(partnership.partner2Id, id))
-      );
-
-    // Then delete the member
-    await db.delete(familyMember).where(eq(familyMember.id, id));
-
-    revalidatePath("/admin");
-    revalidatePath("/family");
-  } catch (error) {
-    console.error("Error deleting family member:", error);
-    throw new Error("Failed to delete family member");
-  }
-}
-
 // Add a family relation (parent-child)
 export async function addFamilyRelation(
   parentId: number,

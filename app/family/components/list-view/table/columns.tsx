@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { CopyIcon, MapPin, MoreHorizontal } from "lucide-react";
+import { CopyIcon, MapPin, MoreHorizontal, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -62,7 +62,16 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
     id: "actions",
     cell: ({ row }) => {
       const member = row.original;
-      const { onViewOnMap } = useListViewContext() ?? {};
+      const context = useListViewContext();
+      if (context?.variant === "admin") {
+        return (
+          <Button variant="ghost" size="sm" className="h-8" onClick={() => context.onEdit?.(member)}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Modifier
+          </Button>
+        );
+      }
+      const { onViewOnMap } = context ?? {};
       const hasCoordinates =
         member.latitude != null &&
         member.longitude != null &&
