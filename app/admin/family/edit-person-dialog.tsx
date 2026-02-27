@@ -15,7 +15,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { FamilyMemberWithRelations } from "@/lib/types";
+import dynamic from "next/dynamic";
+
+const SearchBox = dynamic(
+  () => import("@mapbox/search-js-react").then((mod) => mod.SearchBox),
+  {
+    ssr: false,
+    loading: () => (
+      <Input placeholder="Chargement de la recherche d'adresse..." disabled />
+    ),
+  }
+);
+
+function toDateOrUndefined(value: string | null | undefined): Date | undefined {
+  if (!value) return undefined;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
 
 interface EditPersonDialogProps {
   open: boolean;
@@ -31,19 +49,39 @@ export function EditPersonDialog({
   onEditPerson,
 }: EditPersonDialogProps) {
   const [formData, setFormData] = useState<FamilyMemberWithRelations>(person);
-  const [isDeceased, setIsDeceased] = useState(!!person.deathYear);
+  const [isDeceased, setIsDeceased] = useState(!!person.deathDate);
+  const [addressCoordinates, setAddressCoordinates] = useState<
+    { lat: number; lng: number } | undefined
+  >(
+    person.latitude != null && person.longitude != null
+      ? { lat: Number(person.latitude), lng: Number(person.longitude) }
+      : undefined
+  );
+  const [mapboxPlaceId, setMapboxPlaceId] = useState<string | undefined>(
+    person.mapboxPlaceId ?? undefined
+  );
 
   useEffect(() => {
     setFormData(person);
-    setIsDeceased(!!person.deathYear);
+    setIsDeceased(!!person.deathDate);
+    setAddressCoordinates(
+      person.latitude != null && person.longitude != null
+        ? { lat: Number(person.latitude), lng: Number(person.longitude) }
+        : undefined
+    );
+    setMapboxPlaceId(person.mapboxPlaceId ?? undefined);
   }, [person]);
+
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const birthDateValue = toDateOrUndefined(formData.birthDate);
+  const deathDateValue = toDateOrUndefined(formData.deathDate);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const updatedPerson = {
+    const updatedPerson: FamilyMemberWithRelations = {
       ...formData,
-      deathYear: isDeceased ? formData.deathYear : null,
+      deathDate: isDeceased ? formData.deathDate : null,
     };
 
     onEditPerson(updatedPerson);
@@ -101,19 +139,18 @@ export function EditPersonDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="birthYear">Année de naissance</Label>
-              <Input
-                id="birthYear"
-                type="number"
-                min="1800"
-                max={new Date().getFullYear()}
-                value={formData.birthYear || ""}
-                onChange={(e) =>
+              <Label>Date de naissance</Label>
+              <DatePicker
+                value={birthDateValue}
+                onChange={(date) =>
                   setFormData({
                     ...formData,
-                    birthYear: Number.parseInt(e.target.value),
+                    birthDate: date
+                      ? date.toLocaleDateString("fr-CA")
+                      : null,
                   })
                 }
+                contentClassName="z-[10000]"
               />
             </div>
 
@@ -127,18 +164,17 @@ export function EditPersonDialog({
                 <Label htmlFor="deceased">Décédé(e)</Label>
               </div>
               {isDeceased && (
-                <Input
-                  type="number"
-                  min={formData.birthYear || 1800}
-                  max={new Date().getFullYear()}
-                  value={formData.deathYear || ""}
-                  onChange={(e) =>
+                <DatePicker
+                  value={deathDateValue}
+                  onChange={(date) =>
                     setFormData({
                       ...formData,
-                      deathYear: Number.parseInt(e.target.value),
+                      deathDate: date
+                        ? date.toLocaleDateString("fr-CA")
+                        : null,
                     })
                   }
-                  placeholder="Année de décès"
+                  contentClassName="z-[10000]"
                 />
               )}
             </div>
@@ -146,14 +182,57 @@ export function EditPersonDialog({
 
           <div>
             <Label htmlFor="address">Adresse</Label>
-            <Input
-              id="address"
-              value={formData.address || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, address: e.target.value })
-              }
-              placeholder="Adresse complète"
-            />
+            {mapboxToken ? (
+              <>
+                <SearchBox
+                  accessToken={mapboxToken}
+                  options={{ language: "fr", country: "FR" }}
+                  value={formData.address || ""}
+                  onRetrieve={(result) => {
+                    if (
+                      result?.features &&
+                      result.features.length > 0
+                    ) {
+                      const feature = result.features[0];
+                      if (feature) {
+                        const props = feature.properties as unknown as Record<
+                          string,
+                          unknown
+                        >;
+                        const fullAddress =
+                          (props?.full_address as string) ||
+                          (props?.name as string) ||
+                          "";
+                        const [lng, lat] = feature.geometry
+                          .coordinates as [number, number];
+                        const placeId =
+                          (props?.mapbox_id as string) ??
+                          feature.id?.toString() ??
+                          undefined;
+                        setFormData({
+                          ...formData,
+                          address: fullAddress,
+                          latitude: String(lat),
+                          longitude: String(lng),
+                          mapboxPlaceId: placeId ?? null,
+                        });
+                        setAddressCoordinates({ lat, lng });
+                        setMapboxPlaceId(placeId);
+                      }
+                    }
+                  }}
+                />
+              </>
+            ) : (
+              <Input
+                id="address"
+                value={formData.address || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+                placeholder="Adresse complète"
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
