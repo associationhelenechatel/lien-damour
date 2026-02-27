@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUser, useSession } from "@clerk/nextjs";
+import { useSession } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -45,7 +45,6 @@ export default function OnboardingForm({
 }: {
   familyMembers: FamilyMemberWithRelations[];
 }) {
-  const { user, isLoaded } = useUser();
   const { session } = useSession();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -67,9 +66,9 @@ export default function OnboardingForm({
         (m) => m.id === parseInt(selectedMemberId)
       );
       if (member) {
-        // Pré-remplir avec les données existantes
-        setFirstName(user?.firstName || member.firstName || "");
-        setLastName(user?.lastName || member.lastName || "");
+        // Pré-remplir avec les données du membre en DB (source de vérité)
+        setFirstName(member.firstName || "");
+        setLastName(member.lastName || "");
         setBirthDate(member.birthDate ? new Date(member.birthDate) : undefined);
         setAddress(member.address || "");
         setPhone(member.phone || "");
@@ -100,7 +99,6 @@ export default function OnboardingForm({
           birthDate: birthDate?.toLocaleDateString("fr-CA") || null, // fr-CA pour le format YYYY-MM-DD
           address: address || null,
           phone: phone,
-          mail: user?.emailAddresses[0]?.emailAddress || null,
           latitude: addressCoordinates?.lat,
           longitude: addressCoordinates?.lng,
           mapboxPlaceId: mapboxPlaceId,

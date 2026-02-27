@@ -37,6 +37,8 @@ function toDateOrUndefined(value: string | null | undefined): Date | undefined {
 function initFormState(m: FamilyMember | null) {
   if (!m) {
     return {
+      firstName: "",
+      lastName: "",
       birthDate: undefined as Date | undefined,
       address: "",
       phone: "",
@@ -45,6 +47,8 @@ function initFormState(m: FamilyMember | null) {
     };
   }
   return {
+    firstName: m.firstName ?? "",
+    lastName: m.lastName ?? "",
     birthDate: toDateOrUndefined(m.birthDate),
     address: m.address ?? "",
     phone: m.phone ?? "",
@@ -64,6 +68,8 @@ export function PersonalInfosTab() {
   const [saving, setSaving] = useState(false);
 
   const formState = initFormState(cachedMember);
+  const [firstName, setFirstName] = useState(() => formState.firstName);
+  const [lastName, setLastName] = useState(() => formState.lastName);
   const [birthDate, setBirthDate] = useState<Date | undefined>(
     () => formState.birthDate
   );
@@ -77,6 +83,8 @@ export function PersonalInfosTab() {
   );
 
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<{
+    firstName: string;
+    lastName: string;
     birthDate: string;
     address: string;
     phone: string;
@@ -90,6 +98,8 @@ export function PersonalInfosTab() {
         setLastSavedSnapshot(null);
         if (m) {
           const next = initFormState(m);
+          setFirstName(next.firstName);
+          setLastName(next.lastName);
           setBirthDate(next.birthDate);
           setAddress(next.address);
           setPhone(next.phone);
@@ -104,6 +114,8 @@ export function PersonalInfosTab() {
     if (!member) return null;
     const bd = toDateOrUndefined(member.birthDate);
     return {
+      firstName: (member.firstName ?? "").trim(),
+      lastName: (member.lastName ?? "").trim(),
       birthDate: bd?.toISOString() ?? "",
       address: (member.address ?? "").trim(),
       phone: (member.phone ?? "").trim(),
@@ -112,26 +124,31 @@ export function PersonalInfosTab() {
 
   const currentSnapshot = useMemo(
     () => ({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       birthDate: birthDate?.toISOString() ?? "",
       address: address.trim(),
       phone: phone.trim(),
     }),
-    [birthDate, address, phone]
+    [firstName, lastName, birthDate, address, phone]
   );
 
   const baseSnapshot = lastSavedSnapshot ?? initialSnapshot;
   const hasChanged =
     baseSnapshot != null &&
-    (currentSnapshot.birthDate !== baseSnapshot.birthDate ||
+    (currentSnapshot.firstName !== baseSnapshot.firstName ||
+      currentSnapshot.lastName !== baseSnapshot.lastName ||
+      currentSnapshot.birthDate !== baseSnapshot.birthDate ||
       currentSnapshot.address !== baseSnapshot.address ||
       currentSnapshot.phone !== baseSnapshot.phone);
 
+  const firstNameValid = firstName.trim() !== "";
   const birthDateValid = birthDate != null;
   const addressValid =
     address.trim() !== "" && (addressCoordinates != null || mapboxPlaceId != null);
   const phoneValid = phone.trim() !== "";
 
-  const allValid = birthDateValid && addressValid && phoneValid;
+  const allValid = firstNameValid && birthDateValid && addressValid && phoneValid;
   const saveEnabled = hasChanged && allValid && !saving;
 
   const handleSave = async () => {
@@ -139,6 +156,8 @@ export function PersonalInfosTab() {
     setSaving(true);
     try {
       await updateCurrentUserFamilyMember({
+        firstName: firstName.trim(),
+        lastName: lastName.trim() || null,
         birthDate: birthDate?.toLocaleDateString("fr-CA") ?? null,
         address: address.trim() || null,
         phone: phone.trim() || null,
@@ -157,6 +176,8 @@ export function PersonalInfosTab() {
       if (member) {
         cachedMember = {
           ...member,
+          firstName: firstName.trim(),
+          lastName: lastName.trim() || null,
           birthDate: birthDate?.toLocaleDateString("fr-CA") ?? null,
           address: address.trim() || null,
           phone: phone.trim() || null,
@@ -194,6 +215,30 @@ export function PersonalInfosTab() {
 
       <section className="border-t border-slate-200 pt-4 mt-4">
         <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="personal-firstname" className="flex items-center gap-2 text-xs font-medium text-black">
+              Prénom
+            </Label>
+            <Input
+              id="personal-firstname"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Prénom"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="personal-lastname" className="flex items-center gap-2 text-xs font-medium text-black">
+              Nom
+            </Label>
+            <Input
+              id="personal-lastname"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Nom"
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="personal-birthdate" className="flex items-center gap-2 text-xs font-medium text-black">
               Date de naissance

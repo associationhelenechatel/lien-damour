@@ -20,7 +20,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: null,
     mail: null,
     pictureId: null,
-    code: "H001",  
+    code: "0",  
   },
   {
     id: 2,
@@ -37,7 +37,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: "+33 1 23 45 67 89",
     mail: "jean.chatel@example.com",
     pictureId: null,
-    code: "J001",
+    code: "1",
   },
   {
     id: 3,
@@ -54,7 +54,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: "+33 1 23 45 67 89",
     mail: "marie.chatel@example.com",
     pictureId: null,
-    code: "M001",
+    code: "1.0",
   },
   {
     id: 4,
@@ -71,7 +71,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: "+33 1 98 76 54 32",
     mail: "pierre.chatel@example.com",
     pictureId: null,
-    code: "P001",
+    code: "1.1",
   },
   {
     id: 5,
@@ -88,7 +88,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: "+33 1 98 76 54 32",
     mail: "sophie.martin@example.com",
     pictureId: null,
-    code: "S001",
+    code: "1.1.0",
   },
   {
     id: 6,
@@ -105,7 +105,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: "+33 6 12 34 56 78",
     mail: "lucas.chatel@example.com",
     pictureId: null,
-    code: "L001",
+    code: "1.1.1",
   },
   {
     id: 7,
@@ -122,7 +122,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: "+33 6 98 76 54 32",
     mail: "emma.chatel@example.com",
     pictureId: null,
-    code: "E001",
+    code: "1.1.2",
   },
   {
     id: 8,
@@ -139,7 +139,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: "+33 1 55 44 33 22",
     mail: "claire.chatel@example.com",
     pictureId: null,
-    code: "C001",
+    code: "1.2",
   },
   {
     id: 9,
@@ -156,7 +156,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: null,
     mail: "thomas.chatel@example.com",
     pictureId: null,
-    code: "T001",
+    code: "1.2.1",
   },
   {
     id: 10,
@@ -173,7 +173,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: null,
     mail: null,
     pictureId: null,
-    code: "P002",
+    code: "2",
   },
   {
     id: 11,
@@ -190,7 +190,7 @@ export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
     phone: "+33 1 55 44 33 22",
     mail: "marc.bernard@example.com",
     pictureId: null,
-    code: "M002",
+    code: "1.2.0",
   },
 ];
 

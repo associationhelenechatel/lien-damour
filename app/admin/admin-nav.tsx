@@ -14,7 +14,7 @@ export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 border-b border-slate-200 bg-white/80 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+    <nav className="flex gap-1 border-b border-slate-200 bg-white/80 px-4 sm:mx-0 sm:px-0">
       {tabs.map(({ href, label, icon: Icon }) => {
         const isActive =
           href === "/admin"

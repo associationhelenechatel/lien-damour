@@ -12,7 +12,6 @@ const completeOnboardingSchema = z.object({
   birthDate: z.string().nullable().optional(),
   address: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
-  mail: z.string().nullable(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   mapboxPlaceId: z.string().optional(),
@@ -22,14 +21,14 @@ const completeOnboardingSchema = z.object({
  * API pour compléter l'onboarding
  *
  * POST /api/onboarding/complete
- * Body: { familyMemberId, birthDate?, address?, phone?, mail? }
+ * Body: { familyMemberId, firstName, lastName, birthDate?, address?, phone? }
  *
  * 1. Vérifie que l'utilisateur est authentifié
  * 2. Vérifie que l'utilisateur n'a pas déjà un familyMemberId
  * 3. Vérifie que le membre existe
  * 4. Vérifie qu'aucun autre utilisateur n'a ce familyMemberId
- * 5. Met à jour les metadata Clerk
- * 6. Met à jour les infos du family_member dans la DB
+ * 5. Met à jour les metadata Clerk (familyMemberId uniquement ; les noms restent en DB)
+ * 6. Met à jour les infos du family_member dans la DB (source de vérité pour firstName/lastName)
  */
 export async function POST(request: Request) {
   try {
@@ -85,20 +84,14 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log("birthdate", data.birthDate);
-    // 6. Mettre à jour les metadata Clerk (transaction avec la DB)
+    // 6. Mettre à jour les metadata Clerk (familyMemberId uniquement) et la DB (noms et infos)
     await Promise.all([
-      // Metadata Clerk
-      client.users.updateUser(userId, {
-        firstName: data.firstName,
-        lastName: data.lastName,
-      }),
       client.users.updateUserMetadata(userId, {
         publicMetadata: {
           familyMemberId: data.familyMemberId,
         },
       }),
-      // Infos du membre dans la DB
+      // Infos du membre dans la DB (firstName/lastName = source de vérité, pas Clerk)
       db
         .update(familyMember)
         .set({
@@ -107,7 +100,6 @@ export async function POST(request: Request) {
           birthDate: data.birthDate || member.birthDate,
           address: data.address || member.address,
           phone: data.phone || member.phone,
-          mail: data.mail || member.mail,
           latitude: data.latitude !== undefined ? data.latitude.toString() : member.latitude,
           longitude: data.longitude !== undefined ? data.longitude.toString() : member.longitude,
           mapboxPlaceId: data.mapboxPlaceId || member.mapboxPlaceId,

@@ -26,6 +26,14 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
     },
   },
   {
+    accessorKey: "code",
+    header: "Matricule",
+    cell: ({ row }) => {
+      const value = row.getValue("code") as string | null;
+      return <div className="whitespace-nowrap font-mono text-sm">{value ?? "-"}</div>;
+    },
+  },
+  {
     accessorKey: "mail",
     header: "Email",
   },

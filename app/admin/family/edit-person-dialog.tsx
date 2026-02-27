@@ -63,7 +63,32 @@ export function EditPersonDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="maidenName">Nom de jeune fille</Label>
+              <Label htmlFor="firstName">Prénom</Label>
+              <Input
+                id="firstName"
+                value={formData.firstName ?? ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
+                placeholder="Prénom"
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName">Nom</Label>
+              <Input
+                id="lastName"
+                value={formData.lastName ?? ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
+                placeholder="Nom"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="maidenName">Nom de naissance</Label>
               <Input
                 id="maidenName"
                 value={formData.maidenName || ""}
@@ -156,18 +181,6 @@ export function EditPersonDialog({
                 placeholder="Adresse email"
               />
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="code">Code/Matricule</Label>
-            <Input
-              id="code"
-              value={formData.code || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, code: e.target.value })
-              }
-              placeholder="Code famille"
-            />
           </div>
 
           <DialogFooter>

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { AddPersonDialog } from "@/app/admin/family/add-person-dialog";
+import { Plus } from "lucide-react";
 import { EditPersonDialog } from "@/app/admin/family/edit-person-dialog";
+import { NewEventDialog, type NewEventChoice } from "@/app/admin/family/new-event-dialog";
 import type { FamilyMemberWithRelations, FamilyTree } from "@/lib/types";
 import { DataTable } from "@/app/family/components/list-view/table/data-table";
 import { getAdminColumns } from "@/app/admin/family/admin-table-columns";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface AdminFamilyContentProps {
   familyTree: FamilyTree;
@@ -15,6 +18,7 @@ export function AdminFamilyContent({
   familyTree,
 }: AdminFamilyContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showNewEventDialog, setShowNewEventDialog] = useState(false);
   const [selectedPerson, setSelectedPerson] =
     useState<FamilyMemberWithRelations | null>(null);
 
@@ -29,11 +33,40 @@ export function AdminFamilyContent({
     setSelectedPerson(null);
   };
 
+  const handleNewEventChoice = (choice: NewEventChoice) => {
+    switch (choice) {
+      case "birth":
+        toast.info("Formulaire naissance à venir.");
+        break;
+      case "marriage":
+        toast.info("Formulaire mariage/union à venir.");
+        break;
+      case "death":
+        toast.info("Formulaire décès à venir.");
+        break;
+    }
+  };
+
   const columns = getAdminColumns(handleEdit);
 
   return (
     <>
+      <div className="flex items-center justify-between gap-4 mt-4">
+        <Button
+          onClick={() => setShowNewEventDialog(true)}
+          className="bg-emerald-600 hover:bg-emerald-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Nouvel événement
+        </Button>
+      </div>
       <DataTable columns={columns} data={familyTree.members} />
+
+      <NewEventDialog
+        open={showNewEventDialog}
+        onOpenChange={setShowNewEventDialog}
+        onChoice={handleNewEventChoice}
+      />
 
       {selectedPerson && (
         <EditPersonDialog
