@@ -12,10 +12,10 @@ export function SharedHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
-      <div className="container mx-16 px-4 py-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
+    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+      <div className="w-full px-4 sm:px-6 py-2">
+        <div className="flex flex-col sm:flex-row mx-8 sm:items-center sm:justify-between gap-4">
+          <div className="flex-shrink-0">
             <Link href="/">
               <Image
                 src="/assets/logo.png"
@@ -26,7 +26,7 @@ export function SharedHeader() {
             </Link>
           </div>
 
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center flex-shrink-0 sm:ml-auto">
             <SignedIn>
               <Link href="/family">
                 <Button
