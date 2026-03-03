@@ -64,8 +64,9 @@ yarn dev
 - [x] Update son profil
 - [x] Données des membres dans un tableau avec des filtres
 - [x] Update les membres via l'admin panel
+- [ ] Refaire la navbar
 - [ ] Gestion du code famille
 - [ ] Gestion des admins
 - [ ] Déploiement clerk en prod
 - [ ] Upload de fichiers
-- [ ] Utiliser les logos de l'association
+- [x] Utiliser les logos de l'association
