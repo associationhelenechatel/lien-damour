@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,13 +13,16 @@ export function SharedHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-16 px-4 py-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <Link href="/">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-700 to-slate-800 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity">
-                Association Hélène Chatel
-              </h1>
+              <Image
+                src="/assets/logo.png"
+                height={36}
+                width={150}
+                alt="Association Hélène Chatel"
+              />
             </Link>
           </div>
 

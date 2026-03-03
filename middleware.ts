@@ -10,7 +10,16 @@ const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { isAuthenticated, sessionClaims, redirectToSignIn } = await auth();
 
-  // For users visiting /onboarding, don't try to redirect
+  // Users who already completed onboarding must not see /onboarding → redirect home
+  if (
+    isAuthenticated &&
+    isOnboardingRoute(req) &&
+    sessionClaims?.metadata?.familyMemberId
+  ) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  // Authenticated users on /onboarding (without familyMemberId) can proceed
   if (isAuthenticated && isOnboardingRoute(req)) {
     return NextResponse.next();
   }
