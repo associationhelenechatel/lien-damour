@@ -50,26 +50,10 @@ export function EditPersonDialog({
 }: EditPersonDialogProps) {
   const [formData, setFormData] = useState<FamilyMemberWithRelations>(person);
   const [isDeceased, setIsDeceased] = useState(!!person.deathDate);
-  const [addressCoordinates, setAddressCoordinates] = useState<
-    { lat: number; lng: number } | undefined
-  >(
-    person.latitude != null && person.longitude != null
-      ? { lat: Number(person.latitude), lng: Number(person.longitude) }
-      : undefined
-  );
-  const [mapboxPlaceId, setMapboxPlaceId] = useState<string | undefined>(
-    person.mapboxPlaceId ?? undefined
-  );
 
   useEffect(() => {
     setFormData(person);
     setIsDeceased(!!person.deathDate);
-    setAddressCoordinates(
-      person.latitude != null && person.longitude != null
-        ? { lat: Number(person.latitude), lng: Number(person.longitude) }
-        : undefined
-    );
-    setMapboxPlaceId(person.mapboxPlaceId ?? undefined);
   }, [person]);
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -216,8 +200,6 @@ export function EditPersonDialog({
                           longitude: String(lng),
                           mapboxPlaceId: placeId ?? null,
                         });
-                        setAddressCoordinates({ lat, lng });
-                        setMapboxPlaceId(placeId);
                       }
                     }
                   }}

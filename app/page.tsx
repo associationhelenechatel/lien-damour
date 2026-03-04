@@ -55,13 +55,13 @@ export default function Home() {
       <section className="py-8 px-4 bg-white/95">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">
-            L'Association Hélène Chatel
+            L&apos;Association Hélène Chatel
           </h2>
           <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
-            Depuis plus de 30 ans, l'Association Hélène Chatel finance des
+            Depuis plus de 30 ans, l&apos;Association Hélène Chatel finance des
             projets à vocation sociale ou humanitaire, en France comme à
-            l'étranger. Chaque projet est proposé et suivi par un membre de la
-            famille, perpétuant l'œuvre d'Hélène Chatel née Damour.
+            l&apos;étranger. Chaque projet est proposé et suivi par un membre de la
+            famille, perpétuant l&apos;œuvre d&apos;Hélène Chatel née Damour.
           </p>
         </div>
         <div className="container mx-auto text-center">
@@ -185,13 +185,13 @@ export default function Home() {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-slate-800 mb-8">À Propos</h2>
             <p className="text-lg text-slate-600 mb-8">
-              L'Association Hélène Chatel est une association familiale
-              philanthropique créée en 1993 suite au décès d'Hélène Chatel née
-              Damour. Cette grande dame avait pris l'habitude de solliciter ses
+              L&apos;Association Hélène Chatel est une association familiale
+              philanthropique créée en 1993 suite au décès d&apos;Hélène Chatel née
+              Damour. Cette grande dame avait pris l&apos;habitude de solliciter ses
               enfants, petits-enfants et ses nombreux visiteurs pour financer
-              des projets qu'elle accompagnait dans le temps de par le monde.
+              des projets qu&apos;elle accompagnait dans le temps de par le monde.
               Dirigée par un bureau représentatif des neuf branches de la
-              famille, l'association attribue chaque année plus de 20 000 euros
+              famille, l&apos;association attribue chaque année plus de 20 000 euros
               de subventions permettant de financer une vingtaine de projets par
               an.
             </p>
@@ -215,7 +215,7 @@ export default function Home() {
                   Éducation
                 </h3>
                 <p className="text-slate-600">
-                  Nous investissons dans l'avenir de nos jeunes
+                  Nous investissons dans l&apos;avenir de nos jeunes
                 </p>
               </div>
               <div className="text-center">
@@ -245,7 +245,7 @@ export default function Home() {
               Présidente
             </p>
             <p className="text-slate-200">
-              Pour plus d'informations : <br />
+              Pour plus d&apos;informations : <br />
               <a
                 href="mailto:bureau@liendamour.fr"
                 className="text-emerald-400 hover:text-emerald-300"
@@ -254,8 +254,8 @@ export default function Home() {
               </a>
             </p>
             <p className="text-sm text-slate-400 mt-4">
-              L'association est habilitée à émettre des reçus fiscaux et publie
-              annuellement un rapport d'activités permettant de partager des
+              L&apos;association est habilitée à émettre des reçus fiscaux et publie
+              annuellement un rapport d&apos;activités permettant de partager des
               nouvelles des différents projets financés.
             </p>
           </div>

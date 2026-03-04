@@ -137,7 +137,7 @@ export default function OnboardingForm({
               Bienvenue !
             </CardTitle>
             <CardDescription className="text-lg mt-2">
-              Complétez votre profil pour accéder à l'annuaire familial
+              Complétez votre profil pour accéder à l&apos;annuaire familial
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -239,7 +239,7 @@ export default function OnboardingForm({
                           const feature = result.features[0];
                           if (feature) {
                             // Récupérer l'adresse depuis les propriétés
-                            const props = feature.properties as any;
+                            const props = feature.properties;
                             const address = props?.full_address || props?.name || feature.properties?.name || '';
                             const [lng, lat] = feature.geometry.coordinates as [number, number];
                             const placeId = props?.mapbox_id || feature.id?.toString() || undefined;
@@ -284,7 +284,7 @@ export default function OnboardingForm({
                 ) : (
                   <>
                     <User className="h-4 w-4 mr-2" />
-                    Terminer l'onboarding
+                    Terminer l&apos;onboarding
                   </>
                 )}
               </Button>

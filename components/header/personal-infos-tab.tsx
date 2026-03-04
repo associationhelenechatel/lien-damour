@@ -120,7 +120,7 @@ export function PersonalInfosTab() {
       address: (member.address ?? "").trim(),
       phone: (member.phone ?? "").trim(),
     };
-  }, [member?.id]);
+  }, [member]);
 
   const currentSnapshot = useMemo(
     () => ({

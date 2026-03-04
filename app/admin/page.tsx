@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { getCompleteFamilyTree } from "@/lib/family-tree-service";
 import { AdminFamilyContent } from "@/app/admin/family/admin-family-content";
 

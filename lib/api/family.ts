@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { familyMember, familyRelation, partnership } from "@/db/schema";
 import { getCompleteFamilyTree } from "@/lib/family-tree-service";

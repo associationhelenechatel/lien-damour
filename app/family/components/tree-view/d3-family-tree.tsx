@@ -66,7 +66,7 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
       .attr(
         "d",
         d3
-          .linkRadial<any, TreeNode>()
+          .linkRadial<unknown, TreeNode>()
           .angle((d) => d.x!)
           .radius((d) => d.y!)
       )
@@ -160,7 +160,7 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
         const name = d.data.displayName;
         return name.length > 15 ? name.substring(0, 12) + "..." : name;
       })
-      .style("font-size", (d) => {
+      .style("font-size", () => {
         return `${10}px`;
       })
       .style("font-family", "Arial, sans-serif")
@@ -229,7 +229,7 @@ function createHierarchyData(
 
     return {
       ...person,
-      children: children as any,
+      children: children,
     };
   }
 
