@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,12 +52,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Hero Section */}
-      <section className="py-8 px-4">
+      <section className="py-8 px-4 bg-white/95">
         <div className="container mx-auto text-center">
-          <h1 className="text-5xl font-bold text-slate-800 mb-6">
-            Association Hélène Chatel
-          </h1>
+          <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">
+            L'Association Hélène Chatel
+          </h2>
           <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
             Depuis plus de 30 ans, l'Association Hélène Chatel finance des
             projets à vocation sociale ou humanitaire, en France comme à
@@ -66,9 +64,20 @@ export default function Home() {
             famille, perpétuant l'œuvre d'Hélène Chatel née Damour.
           </p>
         </div>
+        <div className="container mx-auto text-center">
+          <a
+            href="https://www.helloasso.com/associations/association-helene-chatel/formulaires/5"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-base px-8 py-6">
+              <Heart className="h-5 w-5 mr-2" />
+              Faire un don
+            </Button>
+          </a>
+        </div>
       </section>
 
-      {/* Projects Grid */}
       <section className="py-8 px-4">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">
@@ -171,7 +180,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Section */}
       <section className="py-16 px-4 bg-white">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
@@ -227,7 +235,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-16 px-4 bg-slate-800">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">

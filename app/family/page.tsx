@@ -9,7 +9,7 @@ export default async function FamilyPage() {
     const familyTree = await getCompleteFamilyTree();
 
     return (
-      <div className="w-full h-[calc(100vh-69px)]">
+      <div className="w-full h-[calc(100vh-3.5rem-1px)]">
         <FamilyDashboard familyTree={familyTree} />
       </div>
     );

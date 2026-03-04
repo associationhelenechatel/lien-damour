@@ -1,5 +1,6 @@
 import type React from "react";
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
@@ -16,6 +17,11 @@ export const metadata: Metadata = {
   generator: "v0.app",
 };
 
+const ceraProFont = localFont({
+  src: "./fonts/CeraPro.woff2",
+  variable: "--font-cera-pro",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,7 +31,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="fr">
         <body
-          className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
+          className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${ceraProFont.variable}`}
         >
           <SharedHeader />
           <Suspense fallback={null}>{children}</Suspense>
