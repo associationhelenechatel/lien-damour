@@ -5,6 +5,8 @@ import { familyMember } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+// TODO: déplacer dans /api/family-member/update
+
 const completeOnboardingSchema = z.object({
   familyMemberId: z.number().int().positive(),
   firstName: z.string(),
