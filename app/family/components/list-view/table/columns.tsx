@@ -14,6 +14,52 @@ import {
 import type { FamilyMemberWithRelations } from "@/lib/types";
 import { useListViewContext } from "../list-view-context";
 
+function ActionsCell({ member }: { member: FamilyMemberWithRelations }) {
+  const context = useListViewContext();
+  if (context?.variant === "admin") {
+    return (
+      <Button variant="ghost" size="sm" className="h-8" onClick={() => context.onEdit?.(member)}>
+        <Pencil className="h-4 w-4 mr-2" />
+        Modifier
+      </Button>
+    );
+  }
+  const { onViewOnMap } = context ?? {};
+  const hasCoordinates =
+    member.latitude != null &&
+    member.longitude != null &&
+    String(member.latitude).trim() !== "" &&
+    String(member.longitude).trim() !== "";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Ouvrir le menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem
+          disabled={!member.mail}
+          onClick={() => navigator.clipboard.writeText(String(member.mail))}
+        >
+          <CopyIcon className="h-4 w-4 mr-2" />
+          Copier le mail
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!hasCoordinates}
+          onClick={() => onViewOnMap?.(member.id)}
+        >
+          <MapPin className="h-4 w-4 mr-2" />
+          Voir sur la carte
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
   {
     accessorKey: "fullName",
@@ -68,51 +114,6 @@ export const columns: ColumnDef<FamilyMemberWithRelations>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const member = row.original;
-      const context = useListViewContext();
-      if (context?.variant === "admin") {
-        return (
-          <Button variant="ghost" size="sm" className="h-8" onClick={() => context.onEdit?.(member)}>
-            <Pencil className="h-4 w-4 mr-2" />
-            Modifier
-          </Button>
-        );
-      }
-      const { onViewOnMap } = context ?? {};
-      const hasCoordinates =
-        member.latitude != null &&
-        member.longitude != null &&
-        String(member.latitude).trim() !== "" &&
-        String(member.longitude).trim() !== "";
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Ouvrir le menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              disabled={!member.mail}
-              onClick={() => navigator.clipboard.writeText(String(member.mail))}
-            >
-              <CopyIcon className="h-4 w-4 mr-2" />
-              Copier le mail
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              disabled={!hasCoordinates}
-              onClick={() => onViewOnMap?.(member.id)}
-            >
-              <MapPin className="h-4 w-4 mr-2" />
-              Voir sur la carte
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <ActionsCell member={row.original} />,
   },
 ];
