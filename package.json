@@ -63,11 +63,11 @@
     "input-otp": "^1.4.2",
     "lucide-react": "^0.563.0",
     "mapbox-gl": "^3.18.1",
-    "next": "15",
+    "next": "16.1.6",
     "next-themes": "^0.4.6",
-    "react": "^19",
+    "react": "19.2.4",
     "react-day-picker": "^9.13.0",
-    "react-dom": "^19",
+    "react-dom": "19.2.4",
     "react-hook-form": "^7.60.0",
     "react-map-gl": "^8.1.0",
     "react-resizable-panels": "^2.1.7",
@@ -84,14 +84,14 @@
     "@types/d3": "^7.4.3",
     "@types/mapbox-gl": "^3.5.0",
     "@types/node": "^24.5.2",
-    "@types/react": "19",
-    "@types/react-dom": "19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
     "@types/ws": "^8.18.1",
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.4",
     "drizzle-seed": "^0.3.1",
     "eslint": "^9.35.0",
-    "eslint-config-next": "^15.5.3",
+    "eslint-config-next": "16.1.6",
     "postcss": "^8.5",
     "postgres": "^3.4.7",
     "tailwindcss": "^4.1.9",
@@ -99,5 +99,9 @@
     "tw-animate-css": "^1.3.8",
     "typescript": "^5"
   },
-  "packageManager": "yarn@1.22.19+sha512.ff4579ab459bb25aa7c0ff75b62acebe576f6084b36aa842971cf250a5d8c6cd3bc9420b22ce63c7f93a0857bc6ef29291db39c3e7a23aab5adfd5a4dd6c5d71"
+  "packageManager": "yarn@1.22.19+sha512.ff4579ab459bb25aa7c0ff75b62acebe576f6084b36aa842971cf250a5d8c6cd3bc9420b22ce63c7f93a0857bc6ef29291db39c3e7a23aab5adfd5a4dd6c5d71",
+  "resolutions": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
+  }
 }
