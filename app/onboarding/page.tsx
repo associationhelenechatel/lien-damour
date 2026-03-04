@@ -2,6 +2,8 @@ import { getAllUsers } from "@/lib/api/clerk";
 import OnboardingForm from "./components/onboarding-form";
 import { getCompleteFamilyTree } from "@/lib/family-tree-service";
 
+export const dynamic = "force-dynamic";
+
 export default async function OnboardingPage() {
   const familyTree = await getCompleteFamilyTree();
   const users = await getAllUsers();
