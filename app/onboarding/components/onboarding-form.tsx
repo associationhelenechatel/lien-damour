@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, User, Calendar, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
 import type { FamilyMemberWithRelations } from "@/lib/types";
+import { completeOnboarding } from "@/lib/api/onboarding";
 import { DatePicker } from "@/components/ui/date-picker";
 import dynamic from "next/dynamic";
 
@@ -89,28 +90,23 @@ export default function OnboardingForm({
 
     setSubmitting(true);
     try {
-      const response = await fetch("/api/onboarding/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          familyMemberId: parseInt(selectedMemberId),
-          firstName,
-          lastName,
-          birthDate: birthDate?.toLocaleDateString("fr-CA") || null, // fr-CA pour le format YYYY-MM-DD
-          address: address || null,
-          phone: phone,
-          latitude: addressCoordinates?.lat,
-          longitude: addressCoordinates?.lng,
-          mapboxPlaceId: mapboxPlaceId,
-        }),
+      const result = await completeOnboarding({
+        familyMemberId: parseInt(selectedMemberId),
+        firstName,
+        lastName,
+        birthDate: birthDate?.toLocaleDateString("fr-CA") || null,
+        address: address || null,
+        phone: phone,
+        latitude: addressCoordinates?.lat,
+        longitude: addressCoordinates?.lng,
+        mapboxPlaceId: mapboxPlaceId,
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erreur lors de l'onboarding");
+      if (!result.success) {
+        throw new Error(result.error);
       }
 
-      toast.success("Onboarding complété avec succès !");
+      toast.success(result.message);
 
       // Forcer Clerk à regénérer le JWT avec les nouvelles publicMetadata
       // Cela met à jour les sessionClaims dans le middleware
