@@ -25,21 +25,7 @@ import { toast } from "sonner";
 import type { FamilyMemberWithRelations } from "@/lib/types";
 import { completeOnboarding } from "@/lib/api/onboarding";
 import { DatePicker } from "@/components/ui/date-picker";
-import dynamic from "next/dynamic";
-
-// Import dynamique du SearchBox pour éviter les erreurs SSR
-const SearchBox = dynamic(
-  () => import('@mapbox/search-js-react').then((mod) => mod.SearchBox),
-  { 
-    ssr: false,
-    loading: () => (
-      <Input
-        placeholder="Chargement de la recherche d'adresse..."
-        disabled
-      />
-    )
-  }
-);
+import { AddressSearchBox } from "@/components/address-search-box";
 
 export default function OnboardingForm({
   familyMembers,
@@ -223,11 +209,11 @@ export default function OnboardingForm({
                       <MapPin className="h-4 w-4" />
                       Adresse
                     </Label>
-                    <SearchBox
+                    <AddressSearchBox
                       accessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN as string}
                       options={{
-                        language: 'fr',
-                        country: 'FR'
+                        language: "fr",
+                        country: "FR",
                       }}
                       value={address}
                       onRetrieve={(result) => {

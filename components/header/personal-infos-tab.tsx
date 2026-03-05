@@ -12,21 +12,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import dynamic from "next/dynamic";
-
-const SearchBox = dynamic(
-  () =>
-    import("@mapbox/search-js-react").then((mod) => mod.SearchBox),
-  {
-    ssr: false,
-    loading: () => (
-      <Input
-        placeholder="Chargement de la recherche d'adresse..."
-        disabled
-      />
-    ),
-  }
-);
+import { AddressSearchBox } from "@/components/address-search-box";
 
 function toDateOrUndefined(value: string | null | undefined): Date | undefined {
   if (!value) return undefined;
@@ -255,7 +241,7 @@ export function PersonalInfosTab() {
               Adresse
             </Label>
             {mapboxToken ? (
-              <SearchBox
+              <AddressSearchBox
                 accessToken={mapboxToken}
                 options={{ language: "fr", country: "FR" }}
                 value={address}

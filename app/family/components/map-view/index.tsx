@@ -8,6 +8,8 @@ interface MapViewProps {
   familyTree: FamilyTree;
   centerOnMemberId?: number | null;
   onMapCentered?: () => void;
+  onPopoverOpen?: (memberId: number) => void;
+  onPopoverClose?: () => void;
 }
 
 function filterMembersWithoutCoordinates(members: FamilyMemberWithRelations[]) {
@@ -24,6 +26,8 @@ export function MapView({
   familyTree,
   centerOnMemberId = null,
   onMapCentered,
+  onPopoverOpen,
+  onPopoverClose,
 }: MapViewProps) {
   const mapData = useMemo(
     () => filterMembersWithoutCoordinates(familyTree.members),
@@ -45,6 +49,9 @@ export function MapView({
       mapData={mapData}
       centerOn={centerOn}
       onMapCentered={onMapCentered}
+      openPopoverForMemberId={centerOnMemberId}
+      onPopoverOpen={onPopoverOpen}
+      onPopoverClose={onPopoverClose}
     />
   );
 }

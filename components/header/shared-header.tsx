@@ -85,7 +85,7 @@ export function SharedHeader() {
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
-                <span className="font-normal text-slate-500 hover:text-black cursor-pointer">
+                <span className="font-cera text-slate-500 hover:text-black cursor-pointer">
                   Se connecter
                 </span>
               </SignInButton>

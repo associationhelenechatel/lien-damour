@@ -24,6 +24,14 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
   }, []);
 
   const handleMapCentered = useCallback(() => {
+    // Ne pas effacer mapCenterOnMemberId ici : on le garde pour laisser le popover ouvert.
+  }, []);
+
+  const handlePopoverOpen = useCallback((memberId: number) => {
+    setMapCenterOnMemberId(memberId);
+  }, []);
+
+  const handlePopoverClose = useCallback(() => {
     setMapCenterOnMemberId(null);
   }, []);
 
@@ -69,6 +77,8 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
             familyTree={familyTree}
             centerOnMemberId={mapCenterOnMemberId}
             onMapCentered={handleMapCentered}
+            onPopoverOpen={handlePopoverOpen}
+            onPopoverClose={handlePopoverClose}
           />
           
         ) : (

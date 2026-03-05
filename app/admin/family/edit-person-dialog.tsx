@@ -17,17 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import type { FamilyMemberWithRelations } from "@/lib/types";
-import dynamic from "next/dynamic";
-
-const SearchBox = dynamic(
-  () => import("@mapbox/search-js-react").then((mod) => mod.SearchBox),
-  {
-    ssr: false,
-    loading: () => (
-      <Input placeholder="Chargement de la recherche d'adresse..." disabled />
-    ),
-  }
-);
+import { AddressSearchBox } from "@/components/address-search-box";
 
 function toDateOrUndefined(value: string | null | undefined): Date | undefined {
   if (!value) return undefined;
@@ -168,7 +158,7 @@ export function EditPersonDialog({
             <Label htmlFor="address">Adresse</Label>
             {mapboxToken ? (
               <>
-                <SearchBox
+                <AddressSearchBox
                   accessToken={mapboxToken}
                   options={{ language: "fr", country: "FR" }}
                   value={formData.address || ""}

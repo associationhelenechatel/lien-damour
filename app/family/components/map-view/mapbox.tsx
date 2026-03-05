@@ -22,10 +22,17 @@ export function Mapbox({
   mapData,
   centerOn = null,
   onMapCentered,
+  openPopoverForMemberId = null,
+  onPopoverOpen,
+  onPopoverClose,
 }: {
   mapData: FamilyMemberWithRelations[];
   centerOn?: { latitude: number; longitude: number } | null;
   onMapCentered?: () => void;
+  /** Quand fourni, le popover de ce membre est ouvert (ex. après "Voir sur la carte"). */
+  openPopoverForMemberId?: number | null;
+  onPopoverOpen?: (memberId: number) => void;
+  onPopoverClose?: () => void;
 }) {
   const mapRef = useRef<MapRef>(null);
   const [mapReady, setMapReady] = useState(false);
@@ -59,7 +66,13 @@ export function Mapbox({
           latitude={parseFloat(member.latitude!)}
           anchor="bottom"
         >
-          <Popover>
+          <Popover
+            open={openPopoverForMemberId === member.id}
+            onOpenChange={(open) => {
+              if (open) onPopoverOpen?.(member.id);
+              else onPopoverClose?.();
+            }}
+          >
             <PopoverTrigger asChild>
               <button
                 type="button"
