@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { EditPersonDialog } from "@/app/admin/family/edit-person-dialog";
 import { NewEventDialog, type NewEventChoice } from "@/app/admin/family/new-event-dialog";
+import { NewMarriageDialog } from "@/app/admin/family/new-marriage-dialog";
+import { NewBirthDialog } from "@/app/admin/family/new-birth-dialog";
+import { NewDeathDialog } from "@/app/admin/family/new-death-dialog";
 import type { FamilyMemberWithRelations, FamilyTree } from "@/lib/types";
 import { DataTable } from "@/app/family/components/list-view/table/data-table";
 import { getAdminColumns } from "@/app/admin/family/admin-table-columns";
@@ -19,6 +22,9 @@ export function AdminFamilyContent({
 }: AdminFamilyContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showNewEventDialog, setShowNewEventDialog] = useState(false);
+  const [showMarriageDialog, setShowMarriageDialog] = useState(false);
+  const [showBirthDialog, setShowBirthDialog] = useState(false);
+  const [showDeathDialog, setShowDeathDialog] = useState(false);
   const [selectedPerson, setSelectedPerson] =
     useState<FamilyMemberWithRelations | null>(null);
 
@@ -36,13 +42,13 @@ export function AdminFamilyContent({
   const handleNewEventChoice = (choice: NewEventChoice) => {
     switch (choice) {
       case "birth":
-        toast.info("Formulaire naissance à venir.");
+        setShowBirthDialog(true);
         break;
       case "marriage":
-        toast.info("Formulaire mariage/union à venir.");
+        setShowMarriageDialog(true);
         break;
       case "death":
-        toast.info("Formulaire décès à venir.");
+        setShowDeathDialog(true);
         break;
     }
   };
@@ -65,6 +71,24 @@ export function AdminFamilyContent({
         open={showNewEventDialog}
         onOpenChange={setShowNewEventDialog}
         onChoice={handleNewEventChoice}
+      />
+
+      <NewMarriageDialog
+        open={showMarriageDialog}
+        onOpenChange={setShowMarriageDialog}
+        familyTree={familyTree}
+      />
+
+      <NewBirthDialog
+        open={showBirthDialog}
+        onOpenChange={setShowBirthDialog}
+        familyTree={familyTree}
+      />
+
+      <NewDeathDialog
+        open={showDeathDialog}
+        onOpenChange={setShowDeathDialog}
+        familyTree={familyTree}
       />
 
       {selectedPerson && (

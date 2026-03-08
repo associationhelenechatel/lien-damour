@@ -66,8 +66,8 @@ yarn dev
 - [x] Update les membres via l'admin panel
 - [x] Refaire la navbar
 - [x] Utiliser les logos de l'association
-- [ ] Gestion du code famille
+- [x] Événement naissance / mariage
 - [ ] Gestion des admins
-- [ ] Événement naissance / mariage
 - [ ] Déploiement clerk en prod
+- [ ] Pouvoir inviter des membres
 - [ ] Upload de fichiers

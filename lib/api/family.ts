@@ -12,6 +12,31 @@ import type {
   NewFamilyMember,
 } from "@/lib/types";
 
+// ----------------------------
+// Génération du matricule (code) – voir docs/MATRICULE.md
+// ----------------------------
+
+/** Conjoint de la personne de code X → code = X.0 */
+export async function getCodeForNewSpouse(partnerId: number): Promise<string> {
+  const partner = await getFamilyMemberById(partnerId);
+  if (!partner?.code || String(partner.code).trim() === "")
+    throw new Error("Membre partenaire introuvable ou sans matricule");
+  return `${partner.code}.0`;
+}
+
+/** Enfant d'une personne de code X : 1er enfant → X.1, 2e → X.2, etc. */
+export async function getCodeForNewChild(parentId: number): Promise<string> {
+  const parent = await getFamilyMemberById(parentId);
+  if (!parent?.code || String(parent.code).trim() === "")
+    throw new Error("Parent introuvable ou sans matricule");
+  const children = await db
+    .select()
+    .from(familyRelation)
+    .where(eq(familyRelation.parentId, parentId));
+  const nextIndex = children.length + 1;
+  return `${parent.code}.${nextIndex}`;
+}
+
 // Get a single family member by ID (direct DB call, no relations)
 export async function getFamilyMemberById(
   id: number

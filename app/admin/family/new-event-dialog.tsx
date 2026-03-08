@@ -17,23 +17,20 @@ interface NewEventDialogProps {
   onChoice?: (choice: NewEventChoice) => void;
 }
 
-const choices: { value: NewEventChoice; label: string; description: string; icon: React.ReactNode }[] = [
+const choices: { value: NewEventChoice; label: string; icon: React.ReactNode }[] = [
   {
     value: "birth",
     label: "Annoncer une naissance",
-    description: "Créer un nouveau membre et le rattacher à un ou deux parents existants.",
     icon: <Baby className="h-6 w-6" />,
   },
   {
     value: "marriage",
     label: "Annoncer un mariage / une union",
-    description: "Ajouter un conjoint et le lier à un membre existant de l'arbre.",
     icon: <Heart className="h-6 w-6" />,
   },
   {
     value: "death",
     label: "Annoncer un décès",
-    description: "Mettre à jour la date de décès d'un membre existant.",
     icon: <Flower2 className="h-6 w-6" />,
   },
 ];
@@ -55,7 +52,7 @@ export function NewEventDialog({
           <DialogTitle>Nouvel événement</DialogTitle>
         </DialogHeader>
         <div className="grid gap-2 py-2">
-          {choices.map(({ value, label, description, icon }) => (
+          {choices.map(({ value, label, icon }) => (
             <Button
               key={value}
               variant="outline"
@@ -65,9 +62,6 @@ export function NewEventDialog({
               <span className="flex items-center gap-2 font-medium">
                 <span className="text-emerald-600">{icon}</span>
                 {label}
-              </span>
-              <span className="text-xs font-normal text-wrap">
-                {description}
               </span>
             </Button>
           ))}
