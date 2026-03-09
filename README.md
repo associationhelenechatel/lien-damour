@@ -53,7 +53,7 @@ yarn dev
 
 ### Créer une migration
 
-1. Modifier `db/schema.ts`
+1. Modifier `drizzle/schema.ts`
 2. Générer la migration : `yarn db:generate`
 3. Appliquer : `yarn db:push` (dev) ou `yarn db:migrate` (prod)
 

@@ -3,7 +3,7 @@
  */
 
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { familyMember, familyRelation, partnership, project } from "@/db/schema";
+import { familyMember, familyRelation, partnership, project } from "@/drizzle/schema";
 
 // Types de base générés automatiquement par Drizzle
 export type FamilyMember = InferSelectModel<typeof familyMember>;

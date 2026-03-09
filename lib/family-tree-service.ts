@@ -2,8 +2,8 @@
  * Service pour récupérer l'arbre généalogique complet avec jointures
  */
 
-import { db } from "@/db/client";
-import { familyMember, familyRelation, partnership } from "@/db/schema";
+import { db } from "@/drizzle/client";
+import { familyMember, familyRelation, partnership } from "@/drizzle/schema";
 import { asc } from "drizzle-orm";
 import type {
   FamilyMember,

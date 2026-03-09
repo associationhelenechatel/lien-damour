@@ -1,4 +1,4 @@
-import * as schema from "../db/schema.js";
+import * as schema from "@/drizzle/schema";
 
 // ----------------
 // DONNÉES GÉNÉRÉES

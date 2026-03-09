@@ -3,8 +3,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
-import { db } from "@/db/client";
-import { familyMember, familyRelation, partnership } from "@/db/schema";
+import { db } from "@/drizzle/client";
+import { familyMember, familyRelation, partnership } from "@/drizzle/schema";
 import { getCompleteFamilyTree } from "@/lib/family-tree-service";
 import type {
   FamilyMember,

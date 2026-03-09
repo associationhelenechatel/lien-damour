@@ -9,7 +9,7 @@ import {
   partnerships,
 } from "../data/mock-family-data.js";
 import { seedProjects } from "../data/projects.js";
-import * as schema from "../db/schema.js";
+import * as schema from "@/drizzle/schema";
 
 dotenv.config({
   path: ".env.local",

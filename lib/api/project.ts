@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { eq, asc } from "drizzle-orm";
-import { db } from "@/db/client";
-import { project } from "@/db/schema";
+import { db } from "@/drizzle/client";
+import { project } from "@/drizzle/schema";
 import type { Project, NewProject } from "@/lib/types";
 
 export async function getProjects(): Promise<Project[]> {

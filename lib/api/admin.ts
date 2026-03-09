@@ -2,8 +2,8 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { db } from "@/db/client";
-import { admin } from "@/db/schema";
+import { db } from "@/drizzle/client";
+import { admin } from "@/drizzle/schema";
 import { getAllUsers } from "@/lib/api/clerk";
 
 /** Données sérialisables d’un user pour l’UI (évite de passer les objets Clerk au client). */

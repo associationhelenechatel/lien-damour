@@ -2,8 +2,8 @@
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { db } from "@/db/client";
-import { familyMember } from "@/db/schema";
+import { db } from "@/drizzle/client";
+import { familyMember } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
