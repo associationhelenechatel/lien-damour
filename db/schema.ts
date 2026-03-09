@@ -63,3 +63,9 @@ export const project = pgTable("project", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const admin = pgTable("admin", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

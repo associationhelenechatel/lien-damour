@@ -1,5 +1,9 @@
 import type { NewProject } from "@/lib/types";
 
+// ----------------
+// DONNÉES GÉNÉRÉES
+// ----------------
+
 export const seedProjects: NewProject[] = [
   {
     name: "Las Granjas",

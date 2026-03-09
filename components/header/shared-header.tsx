@@ -14,8 +14,9 @@ const NAV_LINKS = [
   { href: "/admin", label: "Administration" },
 ] as const;
 
-export function SharedHeader() {
+export function SharedHeader({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const links = isAdmin ? NAV_LINKS : NAV_LINKS.filter((l) => l.href !== "/admin");
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 border-b border-slate-300">
@@ -34,7 +35,7 @@ export function SharedHeader() {
 
           <nav className="ml-12 flex gap-8 items-stretch flex-shrink-0 min-h-0 font-cera">
             <SignedIn>
-              {NAV_LINKS.map(({ href, label }) => {
+              {links.map(({ href, label }) => {
                 const isActive =
                   pathname === href || (href !== "/" && (pathname?.startsWith(href + "/") ?? false));
                 return (

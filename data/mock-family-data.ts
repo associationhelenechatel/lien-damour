@@ -1,8 +1,8 @@
 import * as schema from "../db/schema.js";
 
-// ----------------------------
-// DONNÉES MOCK – Chaque membre a une adresse unique
-// ----------------------------
+// ----------------
+// DONNÉES GÉNÉRÉES
+// ----------------
 
 export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
   {

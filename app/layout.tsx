@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import { SharedHeader } from "@/components/header/shared-header";
+import { isCurrentUserAdmin } from "@/lib/api/admin";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,18 +23,19 @@ const ceraProFont = localFont({
   variable: "--font-cera-pro",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isAdmin = await isCurrentUserAdmin();
   return (
     <ClerkProvider>
       <html lang="fr">
         <body
           className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${ceraProFont.variable}`}
         >
-          <SharedHeader />
+          <SharedHeader isAdmin={isAdmin} />
           <Suspense fallback={null}>{children}</Suspense>
           <Toaster />
           <Analytics />

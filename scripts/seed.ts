@@ -90,6 +90,14 @@ async function main() {
     await db.insert(schema.project).values(project);
   }
 
+  const seedAdminUserId = process.env.SEED_ADMIN_CLERK_USER_ID;
+  if (seedAdminUserId) {
+    console.log("🔐 Insertion du compte admin...");
+    await db.insert(schema.admin).values({ userId: seedAdminUserId });
+  } else {
+    console.log("ℹ️  SEED_ADMIN_CLERK_USER_ID non défini : aucun admin seedé.");
+  }
+
   console.log("✅ Seed terminé !");
 }
 main();

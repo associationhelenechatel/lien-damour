@@ -67,7 +67,7 @@ yarn dev
 - [x] Refaire la navbar
 - [x] Utiliser les logos de l'association
 - [x] Événement naissance / mariage
-- [ ] Gestion des admins
+- [x] Gestion des admins
+- [x] Pouvoir inviter des membres
 - [ ] Déploiement clerk en prod
-- [ ] Pouvoir inviter des membres
 - [ ] Upload de fichiers

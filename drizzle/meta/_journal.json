@@ -29,6 +29,13 @@
       "when": 1771768357821,
       "tag": "0003_condemned_leech",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773049406502,
+      "tag": "0004_old_starbolt",
+      "breakpoints": true
     }
   ]
 }

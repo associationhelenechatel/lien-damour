@@ -3,18 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Users, FolderKanban } from "lucide-react";
+import { Users, FolderKanban, Mail, Shield } from "lucide-react";
 
 const tabs = [
   { href: "/admin", label: "Membres", icon: Users },
   { href: "/admin/projects", label: "Projets", icon: FolderKanban },
+  { href: "/admin/invitations", label: "Invitations", icon: Mail },
+  { href: "/admin/administrators", label: "Administrateurs", icon: Shield },
 ];
 
 export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 border-b border-slate-200 bg-white/80 px-4 sm:mx-0 sm:px-0">
+    <nav className="flex gap-1 px-0">
       {tabs.map(({ href, label, icon: Icon }) => {
         const isActive =
           href === "/admin"
