@@ -1,5 +1,7 @@
 # Lien d'Amour - Annuaire Familial Partagé
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/e5cdfe7f-e73b-4962-aa5e-a95ac78a6298/deploy-status)](https://app.netlify.com/projects/associationhelenechatel/deploys)
+
 **Lien d'Amour** est une application web moderne permettant à toute la famille de partager et consulter un annuaire familial complet. Chaque membre de la famille peut créer un compte pour accéder à l'arbre généalogique, visualiser les membres sur une carte géographique, et gérer les informations familiales.
 
 ## 🏗️ Architecture
