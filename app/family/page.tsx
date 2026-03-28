@@ -6,11 +6,26 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default async function FamilyPage() {
+type FamilyPageProps = {
+  searchParams: Promise<{ map?: string }>;
+};
+
+export default async function FamilyPage({ searchParams }: FamilyPageProps) {
   try {
     const familyTree = await getCompleteFamilyTree();
+    const sp = await searchParams;
+    const mapParam = sp.map;
+    const parsedMapId =
+      mapParam != null && mapParam !== "" ? parseInt(mapParam, 10) : NaN;
+    const initialMapMemberId =
+      Number.isFinite(parsedMapId) && parsedMapId > 0 ? parsedMapId : null;
 
-    return <FamilyDashboard familyTree={familyTree} />;
+    return (
+      <FamilyDashboard
+        familyTree={familyTree}
+        initialMapMemberId={initialMapMemberId}
+      />
+    );
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Erreur inconnue";

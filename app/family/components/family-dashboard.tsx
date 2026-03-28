@@ -1,22 +1,36 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { MapPin, TreePine, User } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { FamilyTree } from "@/lib/types";
-import { ListView } from "./list-view";
-import { ListView2 } from "./list-view-2";
+import { ListView2 } from "./list-view";
 import { TreeView } from "./tree-view";
 import { MapView } from "./map-view";
 
 interface FamilyDashboardProps {
   familyTree: FamilyTree;
+  /** Ouvre la vue carte centrée sur ce membre (ex. query `?map=42` depuis la fiche profil). */
+  initialMapMemberId?: number | null;
 }
 
-export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
-  const [viewMode, setViewMode] = useState<"list" | "list-2" | "tree" | "map">("list");
+export function FamilyDashboard({
+  familyTree,
+  initialMapMemberId = null,
+}: FamilyDashboardProps) {
+  const openMapOnMember = useMemo(
+    () =>
+      initialMapMemberId != null && initialMapMemberId > 0
+        ? initialMapMemberId
+        : null,
+    [initialMapMemberId]
+  );
+
+  const [viewMode, setViewMode] = useState<"list" | "list-2" | "tree" | "map">(
+    () => (openMapOnMember != null ? "map" : "list")
+  );
   const [mapCenterOnMemberId, setMapCenterOnMemberId] = useState<number | null>(
-    null
+    () => openMapOnMember
   );
 
   const handleViewOnMap = useCallback((memberId: number) => {
@@ -49,18 +63,14 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
           value={viewMode}
           onValueChange={(value) =>
             value &&
-            setViewMode(value as "list" | "list-2" | "map" | "tree")
+            setViewMode(value as "list" | "list" | "map" | "tree")
           }
           className="bg-white/95 backdrop-blur-sm shadow-sm rounded-md"
         >
          
-          <ToggleGroupItem value="list-2">
-            <User className="h-4 w-4" />
-            Liste
-          </ToggleGroupItem>
           <ToggleGroupItem value="list">
             <User className="h-4 w-4" />
-            Liste Old
+            Liste
           </ToggleGroupItem>
           <ToggleGroupItem value="map">
             <MapPin className="h-4 w-4" />
@@ -74,12 +84,7 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
       </div>
 
       <div className="w-full h-full">
-        {viewMode === "list" ? (
-          <ListView
-            familyTree={familyTree}
-            onViewOnMap={handleViewOnMap}
-          />
-        ) : viewMode === "list-2" ? (
+       {viewMode === "list" ? (
           <ListView2
             familyTree={familyTree}
           />

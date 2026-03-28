@@ -8,7 +8,7 @@ import { NewMarriageDialog } from "@/app/admin/family/new-marriage-dialog";
 import { NewBirthDialog } from "@/app/admin/family/new-birth-dialog";
 import { NewDeathDialog } from "@/app/admin/family/new-death-dialog";
 import type { FamilyMemberWithRelations, FamilyTree } from "@/lib/types";
-import { DataTable } from "@/app/family/components/list-view/table/data-table";
+import { DataTable } from "@/app/admin/family/table/data-table";
 import { getAdminColumns } from "@/app/admin/family/admin-table-columns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
