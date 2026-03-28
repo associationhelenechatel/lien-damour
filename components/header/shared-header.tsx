@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MapPinnedIcon } from "lucide-react";
+import { LogInIcon, MapPinnedIcon } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { PersonalInfosTab } from "./personal-infos-tab";
+import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
@@ -86,9 +87,10 @@ export function SharedHeader({ isAdmin = false }: { isAdmin?: boolean }) {
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
-                <span className="font-cera text-slate-500 hover:text-black cursor-pointer">
+                <Button variant="outline" className="font-cera bg-emerald-600 hover:bg-emerald-700 text-white text-sm">
+                  <LogInIcon className="h-4 w-4" />
                   Se connecter
-                </span>
+                </Button>
               </SignInButton>
             </SignedOut>
           </div>

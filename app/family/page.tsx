@@ -10,11 +10,7 @@ export default async function FamilyPage() {
   try {
     const familyTree = await getCompleteFamilyTree();
 
-    return (
-      <div className="w-full h-[calc(100vh-3.5rem-1px)]">
-        <FamilyDashboard familyTree={familyTree} />
-      </div>
-    );
+    return <FamilyDashboard familyTree={familyTree} />;
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Erreur inconnue";

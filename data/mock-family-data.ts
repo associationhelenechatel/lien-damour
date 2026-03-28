@@ -1,213 +1,281 @@
 import * as schema from "@/drizzle/schema";
 
-// ----------------
-// DONNÉES GÉNÉRÉES
-// ----------------
+type MemberInsert = typeof schema.familyMember.$inferInsert;
+export type MemberWithSeedId = MemberInsert & { id: number };
 
-export const familyMembers: Array<typeof schema.familyMember.$inferInsert> = [
+export type FamilyRelationSeed = {
+  parentId: number;
+  childId: number;
+  relationType: string;
+};
+
+export type PartnershipSeed = {
+  partner1Id: number;
+  partner2Id: number;
+  startDate: string | null;
+  endDate: string | null;
+};
+
+const FIRST_NAMES_M = [
+  "Jean", "Pierre", "Paul", "Luc", "Marc", "Thomas", "Nicolas", "Antoine",
+  "Julien", "François", "Henri", "Louis", "Charles", "Olivier", "David",
+  "Sébastien", "Alexandre", "Maxime", "Romain", "Baptiste", "Gabriel",
+  "Hugo", "Arthur", "Léo", "Noah", "Adam", "Ethan", "Tom", "Nathan",
+  "Théo", "Mathis", "Raphaël", "Jules", "Aaron", "Axel", "Eliott",
+  "Gaspard", "Simon", "Valentin", "Victor", "William", "Yann", "Édouard",
+  "Félix", "Guillaume", "Hector", "Ivan", "Jérémy", "Kilian",
+] as const;
+
+const FIRST_NAMES_F = [
+  "Marie", "Sophie", "Emma", "Léa", "Chloé", "Camille", "Julie", "Laura",
+  "Sarah", "Claire", "Anne", "Isabelle", "Nathalie", "Céline", "Valérie",
+  "Hélène", "Patricia", "Sandrine", "Stéphanie", "Caroline", "Émilie",
+  "Pauline", "Charlotte", "Manon", "Lucie", "Inès", "Zoé", "Lola", "Alice",
+  "Rose", "Anna", "Eva", "Nina", "Luna", "Mia", "Lily", "Julia", "Elena",
+  "Clara", "Margaux", "Louise", "Jeanne", "Margot", "Élise", "Amélie",
+  "Bérénice", "Coralie", "Diane", "Éléonore", "Florence", "Gaëlle",
+] as const;
+
+const CITIES = [
   {
-    id: 1,
+    address: "12 Rue de Rivoli, 75004 Paris, France",
+    latitude: "48.8578",
+    longitude: "2.3582",
+    mapboxPlaceId: "seed_paris",
+  },
+  {
+    address: "5 Place Bellecour, 69002 Lyon, France",
+    latitude: "45.7578",
+    longitude: "4.8320",
+    mapboxPlaceId: "seed_lyon",
+  },
+  {
+    address: "3 Quai du Port, 13002 Marseille, France",
+    latitude: "43.2965",
+    longitude: "5.3698",
+    mapboxPlaceId: "seed_marseille",
+  },
+  {
+    address: "8 Place du Capitole, 31000 Toulouse, France",
+    latitude: "43.6047",
+    longitude: "1.4442",
+    mapboxPlaceId: "seed_toulouse",
+  },
+  {
+    address: "4 Place Royale, 44000 Nantes, France",
+    latitude: "47.2184",
+    longitude: "-1.5536",
+    mapboxPlaceId: "seed_nantes",
+  },
+  {
+    address: "1 Place de la Comédie, 34000 Montpellier, France",
+    latitude: "43.6108",
+    longitude: "3.8767",
+    mapboxPlaceId: "seed_montpellier",
+  },
+] as const;
+
+const TARGET_COUNT = 100;
+
+function pickCity(i: number) {
+  return CITIES[i % CITIES.length]!;
+}
+
+function isoDate(year: number, month1to12: number, day1to28: number) {
+  const m = ((month1to12 - 1) % 12) + 1;
+  const d = ((day1to28 - 1) % 28) + 1;
+  return `${year}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+
+function buildHundredMemberSeed(): {
+  familyMembers: MemberWithSeedId[];
+  familyRelations: FamilyRelationSeed[];
+  partnerships: PartnershipSeed[];
+} {
+  const familyMembers: MemberWithSeedId[] = [];
+  const familyRelations: FamilyRelationSeed[] = [];
+  const partnerships: PartnershipSeed[] = [];
+
+  let nameIdx = 0;
+
+  const addMember = (
+    partial: Partial<Omit<MemberInsert, "id">> & { code: string }
+  ): number => {
+    const id = familyMembers.length + 1;
+    const city = pickCity(id);
+    const gender = partial.gender ?? "M";
+    const firstName =
+      partial.firstName ??
+      (gender === "F"
+        ? FIRST_NAMES_F[nameIdx % FIRST_NAMES_F.length]!
+        : FIRST_NAMES_M[nameIdx % FIRST_NAMES_M.length]!);
+    nameIdx++;
+
+    familyMembers.push({
+      id,
+      firstName,
+      lastName: partial.lastName ?? "Moreau",
+      maidenName: partial.maidenName ?? null,
+      gender,
+      birthDate: partial.birthDate ?? null,
+      deathDate: partial.deathDate ?? null,
+      address: partial.address ?? city.address,
+      latitude: partial.latitude ?? city.latitude,
+      longitude: partial.longitude ?? city.longitude,
+      mapboxPlaceId: partial.mapboxPlaceId ?? city.mapboxPlaceId,
+      phone: partial.phone ?? (id % 3 === 0 ? null : `+33 ${6 + (id % 4)} ${10 + (id % 80)} ${20 + (id % 70)} ${30 + (id % 60)} ${40 + (id % 50)}`),
+      mail: partial.mail ?? (id % 5 === 0 ? null : `membre.${id}@example.com`),
+      pictureId: partial.pictureId ?? null,
+      code: partial.code!,
+    });
+    return id;
+  };
+
+  const linkChild = (parentId: number, childId: number) => {
+    familyRelations.push({
+      parentId,
+      childId,
+      relationType: "bio",
+    });
+  };
+
+  const linkPartners = (a: number, b: number) => {
+    partnerships.push({
+      partner1Id: a,
+      partner2Id: b,
+      startDate: "1970-01-15",
+      endDate: null,
+    });
+  };
+
+  type Couple = { p1: number; p2: number; branchCode: string };
+
+  // Racine + conjoint (codes 0 et 0.0)
+  const root = addMember({
+    code: "0",
     firstName: "Hélène",
     lastName: "Moreau",
     maidenName: "Leroy",
     gender: "F",
     birthDate: "1920-05-15",
     deathDate: "1993-03-20",
-    address: "15 Rue de la Paix, 75001 Paris, France",
-    mapboxPlaceId: "dummy_1",
-    latitude: "48.8566",
-    longitude: "2.3522",
     phone: null,
     mail: null,
-    pictureId: null,
-    code: "0",
-  },
-  {
-    id: 2,
-    firstName: "Jean",
+  });
+  const rootSpouse = addMember({
+    code: "0.0",
+    firstName: "Henri",
     lastName: "Moreau",
-    maidenName: null,
     gender: "M",
-    birthDate: "1945-08-22",
-    deathDate: null,
-    address: "22 Rue du Faubourg Saint-Honoré, 75008 Paris, France",
-    mapboxPlaceId: "dummy_2",
-    latitude: "48.8722",
-    longitude: "2.3186",
-    phone: "+33 1 23 45 67 89",
-    mail: "jean.moreau@example.com",
-    pictureId: null,
-    code: "1",
-  },
-  {
-    id: 3,
-    firstName: "Marie",
-    lastName: "Moreau",
-    maidenName: "Dupont",
-    gender: "F",
-    birthDate: "1948-11-10",
-    deathDate: null,
-    address: "8 Rue de Rivoli, 75004 Paris, France",
-    mapboxPlaceId: "dummy_3",
-    latitude: "48.8578",
-    longitude: "2.3582",
-    phone: "+33 1 23 45 67 89",
-    mail: "marie.moreau@example.com",
-    pictureId: null,
-    code: "1.0",
-  },
-  {
-    id: 4,
-    firstName: "Pierre",
-    lastName: "Moreau",
-    maidenName: null,
-    gender: "M",
-    birthDate: "1970-03-15",
-    deathDate: null,
-    address: "1 Place Bellecour, 69002 Lyon, France",
-    mapboxPlaceId: "dummy_4",
-    latitude: "45.7640",
-    longitude: "4.8357",
-    phone: "+33 4 78 12 34 56",
-    mail: "pierre.moreau@example.com",
-    pictureId: null,
-    code: "1.1",
-  },
-  {
-    id: 5,
-    firstName: "Sophie",
-    lastName: "Moreau",
-    maidenName: "Laurent",
-    gender: "F",
-    birthDate: "1972-07-20",
-    deathDate: null,
-    address: "12 Rue de la République, 69002 Lyon, France",
-    mapboxPlaceId: "dummy_5",
-    latitude: "45.7612",
-    longitude: "4.8312",
-    phone: "+33 4 78 12 34 56",
-    mail: "sophie.moreau@example.com",
-    pictureId: null,
-    code: "1.1.0",
-  },
-  {
-    id: 6,
-    firstName: "Lucas",
-    lastName: "Moreau",
-    maidenName: null,
-    gender: "M",
-    birthDate: "2000-12-05",
-    deathDate: null,
-    address: "2 Quai du Port, 13002 Marseille, France",
-    mapboxPlaceId: "dummy_6",
-    latitude: "43.2965",
-    longitude: "5.3698",
-    phone: "+33 6 12 34 56 78",
-    mail: "lucas.moreau@example.com",
-    pictureId: null,
-    code: "1.1.1",
-  },
-  {
-    id: 7,
-    firstName: "Emma",
-    lastName: "Moreau",
-    maidenName: null,
-    gender: "F",
-    birthDate: "2003-05-18",
-    deathDate: null,
-    address: "1 Place du Capitole, 31000 Toulouse, France",
-    mapboxPlaceId: "dummy_7",
-    latitude: "43.6047",
-    longitude: "1.4442",
-    phone: "+33 6 98 76 54 32",
-    mail: "emma.moreau@example.com",
-    pictureId: null,
-    code: "1.1.2",
-  },
-  {
-    id: 8,
-    firstName: "Claire",
-    lastName: "Moreau",
-    maidenName: "Bernard",
-    gender: "F",
-    birthDate: "1975-09-30",
-    deathDate: null,
-    address: "1 Place Royale, 44000 Nantes, France",
-    mapboxPlaceId: "dummy_8",
-    latitude: "47.2184",
-    longitude: "-1.5536",
-    phone: "+33 2 40 55 44 33",
-    mail: "claire.moreau@example.com",
-    pictureId: null,
-    code: "1.2",
-  },
-  {
-    id: 9,
-    firstName: "Thomas",
-    lastName: "Moreau",
-    maidenName: null,
-    gender: "M",
-    birthDate: "2005-02-14",
-    deathDate: null,
-    address: "5 Allée Baco, 44000 Nantes, France",
-    mapboxPlaceId: "dummy_9",
-    latitude: "47.2152",
-    longitude: "-1.5498",
-    phone: null,
-    mail: "thomas.moreau@example.com",
-    pictureId: null,
-    code: "1.2.1",
-  },
-  {
-    id: 10,
-    firstName: "Paul",
-    lastName: "Moreau",
-    maidenName: null,
-    gender: "M",
-    birthDate: "1943-01-25",
-    deathDate: "2010-06-12",
-    address: "Place des Terreaux, 69001 Lyon, France",
-    mapboxPlaceId: "dummy_10",
-    latitude: "45.7676",
-    longitude: "4.8343",
+    birthDate: "1918-11-03",
+    deathDate: "1988-09-12",
     phone: null,
     mail: null,
-    pictureId: null,
-    code: "2",
-  },
-  {
-    id: 11,
-    firstName: "Marc",
-    lastName: "Bernard",
-    maidenName: null,
-    gender: "M",
-    birthDate: "1973-04-08",
-    deathDate: null,
-    address: "10 Rue Crébillon, 44000 Nantes, France",
-    mapboxPlaceId: "dummy_11",
-    latitude: "47.2128",
-    longitude: "-1.5562",
-    phone: "+33 2 40 55 44 33",
-    mail: "marc.bernard@example.com",
-    pictureId: null,
-    code: "1.2.0",
-  },
-];
+  });
+  linkPartners(root, rootSpouse);
 
+  /** Couples prêts à avoir des enfants (file BFS sur l’arbre). */
+  let couples: Couple[] = [];
+
+  // 4 enfants de la racine : codes 1, 2, 3, 4
+  const rootChildCount = 4;
+  for (let i = 1; i <= rootChildCount && familyMembers.length < TARGET_COUNT; i++) {
+    const code = String(i);
+    const y = 1945 + ((i - 1) % 5);
+    const child = addMember({
+      code,
+      gender: i % 2 === 1 ? "M" : "F",
+      birthDate: isoDate(y, 1 + (i % 12), 5 + i),
+    });
+    linkChild(root, child);
+    linkChild(rootSpouse, child);
+
+    const spouseCode = `${code}.0`;
+    const spouse = addMember({
+      code: spouseCode,
+      gender: i % 2 === 1 ? "F" : "M",
+      lastName: i % 2 === 1 ? "Bernard" : "Moreau",
+      birthDate: isoDate(y + 1, 2 + (i % 11), 3 + (i % 25)),
+    });
+    linkPartners(child, spouse);
+    couples.push({
+      p1: i % 2 === 1 ? child : spouse,
+      p2: i % 2 === 1 ? spouse : child,
+      branchCode: code,
+    });
+  }
+
+  while (familyMembers.length < TARGET_COUNT && couples.length > 0) {
+    const nextCouples: Couple[] = [];
+    for (const { p1, p2, branchCode } of couples) {
+      if (familyMembers.length >= TARGET_COUNT) break;
+
+      const parentBirthYear = parseInt(
+        familyMembers[p1 - 1]!.birthDate?.slice(0, 4) ?? "1970",
+        10
+      );
+      const maxKids = Math.min(4, TARGET_COUNT - familyMembers.length);
+      const numKids =
+        familyMembers.length > TARGET_COUNT - 8
+          ? Math.min(maxKids, TARGET_COUNT - familyMembers.length)
+          : maxKids;
+
+      for (let j = 1; j <= numKids && familyMembers.length < TARGET_COUNT; j++) {
+        const childCode = `${branchCode}.${j}`;
+        const childYear = Math.min(2020, parentBirthYear + 22 + j * 2);
+        const child = addMember({
+          code: childCode,
+          gender: j % 2 === 1 ? "M" : "F",
+          birthDate: isoDate(
+            childYear,
+            ((j + branchCode.length) % 12) + 1,
+            (j % 28) + 1
+          ),
+        });
+        linkChild(p1, child);
+        linkChild(p2, child);
+
+        if (familyMembers.length >= TARGET_COUNT) break;
+
+        const spouseCode = `${childCode}.0`;
+        const spouse = addMember({
+          code: spouseCode,
+          gender: j % 2 === 1 ? "F" : "M",
+          lastName: j % 2 === 1 ? "Dubois" : "Moreau",
+          birthDate: isoDate(
+            childYear + 1,
+            ((j + 3) % 12) + 1,
+            ((j + 2) % 28) + 1
+          ),
+        });
+        linkPartners(child, spouse);
+        nextCouples.push({
+          p1: j % 2 === 1 ? child : spouse,
+          p2: j % 2 === 1 ? spouse : child,
+          branchCode: childCode,
+        });
+      }
+    }
+    couples = nextCouples;
+  }
+
+  if (familyMembers.length !== TARGET_COUNT) {
+    throw new Error(
+      `Seed: attendu ${TARGET_COUNT} membres, obtenu ${familyMembers.length}. Ajuster la généalogie.`
+    );
+  }
+
+  return {
+    familyMembers,
+    familyRelations,
+    partnerships: partnerships as PartnershipSeed[],
+  };
+}
+
+const built = buildHundredMemberSeed();
+
+export const familyMembers: MemberWithSeedId[] = built.familyMembers;
 export const familyRelations: Array<typeof schema.familyRelation.$inferInsert> =
-  [
-    { parentId: 1, childId: 2, relationType: "bio" },
-    { parentId: 1, childId: 10, relationType: "bio" },
-    { parentId: 2, childId: 4, relationType: "bio" },
-    { parentId: 2, childId: 8, relationType: "bio" },
-    { parentId: 4, childId: 6, relationType: "bio" },
-    { parentId: 4, childId: 7, relationType: "bio" },
-    { parentId: 8, childId: 9, relationType: "bio" },
-    { parentId: 11, childId: 9, relationType: "bio" },
-  ];
-
-export const partnerships: Array<typeof schema.partnership.$inferInsert> = [
-  { partner1Id: 2, partner2Id: 3, startDate: "1970-06-15", endDate: null },
-  { partner1Id: 4, partner2Id: 5, startDate: "1995-09-10", endDate: null },
-  { partner1Id: 8, partner2Id: 11, startDate: "2000-04-22", endDate: null },
-];
+  built.familyRelations;
+export const partnerships: Array<typeof schema.partnership.$inferInsert> =
+  built.partnerships;

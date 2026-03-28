@@ -5,6 +5,7 @@ import { MapPin, TreePine, User } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { FamilyTree } from "@/lib/types";
 import { ListView } from "./list-view";
+import { ListView2 } from "./list-view-2";
 import { TreeView } from "./tree-view";
 import { MapView } from "./map-view";
 
@@ -13,7 +14,7 @@ interface FamilyDashboardProps {
 }
 
 export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
-  const [viewMode, setViewMode] = useState<"list" | "tree" | "map">("list");
+  const [viewMode, setViewMode] = useState<"list" | "list-2" | "tree" | "map">("list");
   const [mapCenterOnMemberId, setMapCenterOnMemberId] = useState<number | null>(
     null
   );
@@ -40,7 +41,7 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
       {/* Navigation entre vues - superposée au-dessus du contenu */}
       <div
         id="nav"
-        className="fixed top-22 left-1/2 -translate-x-1/2 z-[9999] flex justify-center pointer-events-auto"
+        className="fixed top-18 left-1/2 -translate-x-1/2 z-[9999] flex justify-center pointer-events-auto"
       >
         <ToggleGroup
           variant="outline"
@@ -54,6 +55,10 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
           <ToggleGroupItem value="list">
             <User className="h-4 w-4" />
             Liste
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list-2">
+            <User className="h-4 w-4" />
+            Liste 2
           </ToggleGroupItem>
           <ToggleGroupItem value="map">
             <MapPin className="h-4 w-4" />
@@ -71,6 +76,10 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
           <ListView
             familyTree={familyTree}
             onViewOnMap={handleViewOnMap}
+          />
+        ) : viewMode === "list-2" ? (
+          <ListView2
+            familyTree={familyTree}
           />
         ) : viewMode === "map" ? (
           <MapView
