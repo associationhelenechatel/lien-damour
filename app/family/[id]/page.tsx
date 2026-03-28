@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 
 import { getFamilyMember } from "@/lib/api/family";
 import { MemberProfile } from "./member-profile";
@@ -43,5 +44,14 @@ export default async function FamilyMemberPage({ params }: PageProps) {
     notFound();
   }
 
-  return <MemberProfile member={member} />;
+  const { sessionClaims } = await auth();
+  const linkedMemberId = sessionClaims?.metadata?.familyMemberId as
+    | number
+    | undefined;
+  const isOwnProfile =
+    linkedMemberId != null && Number(linkedMemberId) === num;
+
+  return (
+    <MemberProfile member={member} isOwnProfile={isOwnProfile} />
+  );
 }

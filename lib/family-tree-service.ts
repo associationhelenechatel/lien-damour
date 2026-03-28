@@ -4,13 +4,63 @@
 
 import { db } from "@/drizzle/client";
 import { familyMember, familyRelation, partnership } from "@/drizzle/schema";
-import { asc } from "drizzle-orm";
+import { asc, eq, inArray, or } from "drizzle-orm";
 import type {
   FamilyMember,
   FamilyMemberWithRelations,
   FamilyTree,
 } from "@/lib/types";
-import { getClerkProfileImageUrlByFamilyMemberId } from "@/lib/api/clerk";
+import {
+  getClerkProfileImageUrlByFamilyMemberId,
+  getClerkProfileImageUrlForFamilyMemberId,
+} from "@/lib/api/clerk";
+
+/** Champs dérivés (nom affiché, âge, etc.) — partagé arbre complet et fiche membre. */
+function enrichMemberCore(
+  member: FamilyMember,
+  parents: FamilyMember[],
+  children: FamilyMember[],
+  partner: FamilyMember | null,
+  clerkProfileImageUrl: string | null
+): FamilyMemberWithRelations {
+  const firstName = member.firstName || "";
+  const lastName = member.lastName || "";
+  const maidenName = member.maidenName || "";
+
+  const fullName = `${firstName} ${lastName}`.trim() || "Nom inconnu";
+  const displayName =
+    maidenName && maidenName !== lastName
+      ? `${firstName} ${lastName} (née ${maidenName})`
+      : fullName;
+
+  const birthYear = member.birthDate
+    ? new Date(member.birthDate).getFullYear()
+    : null;
+  const deathYear = member.deathDate
+    ? new Date(member.deathDate).getFullYear()
+    : null;
+  const isAlive = !member.deathDate;
+
+  let age: number | null = null;
+  if (birthYear) {
+    const endYear = deathYear || new Date().getFullYear();
+    age = endYear - birthYear;
+  }
+
+  return {
+    ...member,
+    parents,
+    children,
+    partner,
+    fullName,
+    displayName,
+    birthYear,
+    deathYear,
+    isAlive,
+    age,
+    clerkProfileImageUrl,
+  };
+}
 
 /**
  * Récupère l'arbre généalogique complet avec toutes les relations
@@ -59,63 +109,28 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
       partnershipsMap.set(partnership.partner2Id, partnership.partner1Id);
     });
 
-    // Créer les membres enrichis avec leurs relations
     const enrichedMembers: FamilyMemberWithRelations[] = members.map(
       (member) => {
-        // Récupérer les parents
         const parentIds = parentsMap.get(member.id) || [];
         const parents = parentIds
-          .map((id) => membersMap.get(id))
+          .map((pid) => membersMap.get(pid))
           .filter((parent): parent is FamilyMember => parent !== undefined);
 
-        // Récupérer les enfants
         const childIds = childrenMap.get(member.id) || [];
         const children = childIds
-          .map((id) => membersMap.get(id))
+          .map((cid) => membersMap.get(cid))
           .filter((child): child is FamilyMember => child !== undefined);
 
-        // Récupérer le partenaire
         const partnerId = partnershipsMap.get(member.id);
         const partner = partnerId ? membersMap.get(partnerId) || null : null;
 
-        // Calculer les métadonnées
-        const firstName = member.firstName || "";
-        const lastName = member.lastName || "";
-        const maidenName = member.maidenName || "";
-
-        const fullName = `${firstName} ${lastName}`.trim() || "Nom inconnu";
-        const displayName =
-          maidenName && maidenName !== lastName
-            ? `${firstName} ${lastName} (née ${maidenName})`
-            : fullName;
-
-        const birthYear = member.birthDate
-          ? new Date(member.birthDate).getFullYear()
-          : null;
-        const deathYear = member.deathDate
-          ? new Date(member.deathDate).getFullYear()
-          : null;
-        const isAlive = !member.deathDate;
-
-        let age: number | null = null;
-        if (birthYear) {
-          const endYear = deathYear || new Date().getFullYear();
-          age = endYear - birthYear;
-        }
-
-        return {
-          ...member,
+        return enrichMemberCore(
+          member,
           parents,
           children,
           partner,
-          fullName,
-          displayName,
-          birthYear,
-          deathYear,
-          isAlive,
-          age,
-          clerkProfileImageUrl: clerkAvatars.get(member.id) ?? null,
-        };
+          clerkAvatars.get(member.id) ?? null
+        );
       }
     );
 
@@ -130,5 +145,98 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
       error
     );
     throw new Error("Impossible de récupérer l'arbre généalogique");
+  }
+}
+
+/**
+ * Un seul membre avec parents / enfants / partenaire (lignes DB minimales) + avatar Clerk ciblé.
+ * À utiliser pour `/family/[id]` pour éviter de charger tout l’arbre.
+ */
+export async function getFamilyMemberWithRelationsById(
+  id: number
+): Promise<FamilyMemberWithRelations | null> {
+  try {
+    const [main] = await db
+      .select()
+      .from(familyMember)
+      .where(eq(familyMember.id, id))
+      .limit(1);
+
+    if (!main) return null;
+
+    const [childRelations, parentRelations, partnerRows, clerkUrlResult] =
+      await Promise.all([
+        db
+          .select()
+          .from(familyRelation)
+          .where(eq(familyRelation.parentId, id)),
+        db
+          .select()
+          .from(familyRelation)
+          .where(eq(familyRelation.childId, id)),
+        db
+          .select()
+          .from(partnership)
+          .where(
+            or(
+              eq(partnership.partner1Id, id),
+              eq(partnership.partner2Id, id)
+            )
+          ),
+        getClerkProfileImageUrlForFamilyMemberId(id).catch(() => null),
+      ]);
+
+    const childIds = childRelations.map((r) => r.childId);
+    const parentIds = parentRelations.map((r) => r.parentId);
+    const pr = partnerRows[0];
+    const partnerId = pr
+      ? pr.partner1Id === id
+        ? pr.partner2Id
+        : pr.partner1Id
+      : null;
+
+    const otherIds = [
+      ...new Set([
+        ...childIds,
+        ...parentIds,
+        ...(partnerId != null ? [partnerId] : []),
+      ]),
+    ];
+
+    let relatedRows: FamilyMember[] = [];
+    if (otherIds.length > 0) {
+      relatedRows = await db
+        .select()
+        .from(familyMember)
+        .where(inArray(familyMember.id, otherIds));
+    }
+
+    const membersMap = new Map<number, FamilyMember>([[main.id, main]]);
+    for (const row of relatedRows) {
+      membersMap.set(row.id, row);
+    }
+
+    const parents = parentIds
+      .map((pid) => membersMap.get(pid))
+      .filter((p): p is FamilyMember => p != null);
+    const children = childIds
+      .map((cid) => membersMap.get(cid))
+      .filter((c): c is FamilyMember => c != null);
+    const partner =
+      partnerId != null ? membersMap.get(partnerId) ?? null : null;
+
+    return enrichMemberCore(
+      main,
+      parents,
+      children,
+      partner,
+      clerkUrlResult
+    );
+  } catch (error) {
+    console.error(
+      "❌ Erreur lors de la récupération du membre (relations):",
+      error
+    );
+    throw new Error("Impossible de récupérer la fiche membre");
   }
 }

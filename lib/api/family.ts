@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/drizzle/client";
 import { familyMember, familyRelation, partnership } from "@/drizzle/schema";
-import { getCompleteFamilyTree } from "@/lib/family-tree-service";
+import { getFamilyMemberWithRelationsById } from "@/lib/family-tree-service";
 import type {
   FamilyMember,
   FamilyMemberWithRelations,
@@ -76,13 +76,12 @@ export async function updateCurrentUserFamilyMember(
   return updateFamilyMember(familyMemberId, data);
 }
 
-// Get a single family member by ID with relations (uses full tree)
+// Get a single family member by ID with relations (requêtes ciblées, pas tout l’arbre)
 export async function getFamilyMember(
   id: number
 ): Promise<FamilyMemberWithRelations | null> {
   try {
-    const familyTree = await getCompleteFamilyTree();
-    return familyTree.members.find((member) => member.id === id) || null;
+    return await getFamilyMemberWithRelationsById(id);
   } catch (error) {
     console.error("Error fetching family member:", error);
     return null;
@@ -130,6 +129,7 @@ export async function updateFamilyMember(
 
     revalidatePath("/admin");
     revalidatePath("/family");
+    revalidatePath(`/family/${id}`);
 
     return updatedMember;
   } catch (error) {

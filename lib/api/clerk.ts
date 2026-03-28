@@ -57,6 +57,38 @@ export async function getClerkProfileImageUrlByFamilyMemberId(): Promise<
   return map;
 }
 
+/**
+ * URL de photo Clerk pour un seul membre (pagination avec arrêt dès que le compte est trouvé).
+ */
+export async function getClerkProfileImageUrlForFamilyMemberId(
+  memberId: number
+): Promise<string | null> {
+  const client = await clerkClient();
+  let offset = 0;
+  let lastPageSize = PAGE_SIZE;
+
+  while (lastPageSize === PAGE_SIZE) {
+    const res = await client.users.getUserList({
+      limit: PAGE_SIZE,
+      offset,
+    });
+    for (const user of res.data) {
+      const mid = parseFamilyMemberIdFromMetadata(
+        user.publicMetadata?.familyMemberId
+      );
+      if (mid === memberId) {
+        const url = user.imageUrl?.trim();
+        return url || null;
+      }
+    }
+    lastPageSize = res.data.length;
+    offset += PAGE_SIZE;
+    if (offset >= res.totalCount || lastPageSize < PAGE_SIZE) break;
+  }
+
+  return null;
+}
+
 /** Crée une invitation et envoie l’email (Clerk). */
 export async function createInvitation(params: {
   emailAddress: string;
