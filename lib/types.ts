@@ -37,6 +37,9 @@ export type FamilyMemberWithRelations = FamilyMember & {
   // Coordonnées géographiques (optionnelles)
   latitude?: string | null;
   longitude?: string | null;
+
+  /** Photo profil Clerk si le compte a `publicMetadata.familyMemberId` (hors base). */
+  clerkProfileImageUrl: string | null;
 };
 
 // Type pour l'arbre généalogique complet

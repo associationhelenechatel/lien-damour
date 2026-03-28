@@ -10,23 +10,22 @@ import type {
   FamilyMemberWithRelations,
   FamilyTree,
 } from "@/lib/types";
+import { getClerkProfileImageUrlByFamilyMemberId } from "@/lib/api/clerk";
 
 /**
  * Récupère l'arbre généalogique complet avec toutes les relations
  */
 export async function getCompleteFamilyTree(): Promise<FamilyTree> {
   try {
-    // Récupérer toutes les données en parallèle
-    const [members, relations, partnerships] = await Promise.all([
-      // Tous les membres triés par code pour un ordre logique
-      db.select().from(familyMember).orderBy(asc(familyMember.code)),
+    const [members, relations, partnerships, clerkAvatarsResult] =
+      await Promise.all([
+        db.select().from(familyMember).orderBy(asc(familyMember.code)),
+        db.select().from(familyRelation),
+        db.select().from(partnership),
+        getClerkProfileImageUrlByFamilyMemberId().catch(() => new Map<number, string>()),
+      ]);
 
-      // Toutes les relations parent-enfant
-      db.select().from(familyRelation),
-
-      // Tous les partenariats
-      db.select().from(partnership),
-    ]);
+    const clerkAvatars = clerkAvatarsResult;
 
     // Créer des maps pour un accès rapide
     const membersMap = new Map<number, FamilyMember>();
@@ -115,6 +114,7 @@ export async function getCompleteFamilyTree(): Promise<FamilyTree> {
           deathYear,
           isAlive,
           age,
+          clerkProfileImageUrl: clerkAvatars.get(member.id) ?? null,
         };
       }
     );

@@ -1,0 +1,1 @@
+ALTER TABLE "family_member" DROP COLUMN "picture_id";

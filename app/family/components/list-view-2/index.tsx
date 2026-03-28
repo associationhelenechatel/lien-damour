@@ -27,7 +27,7 @@ function getInitials(member: FamilyMemberWithRelations) {
 
 function DirectoryCard({ member }: { member: FamilyMemberWithRelations }) {
   const [imgFailed, setImgFailed] = useState(false);
-  const pictureSrc = member.pictureId?.trim() ?? "";
+  const pictureSrc = member.clerkProfileImageUrl?.trim() ?? "";
   const canLoadImage =
     Boolean(pictureSrc) &&
     !imgFailed &&
@@ -41,7 +41,7 @@ function DirectoryCard({ member }: { member: FamilyMemberWithRelations }) {
     <article
       className={cn(
         "group flex flex-col rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm",
-        "transition-shadow duration-200 hover:border-slate-300 hover:shadow-md"
+        "transition-shadow duration-200 hover:border-slate-300 hover:shadow-md hover:cursor-pointer"
       )}
     >
       <div
@@ -113,7 +113,7 @@ export function ListView2({ familyTree }: ListViewProps) {
 
   return (
     <div className="w-full pb-10">
-      <div className="container mx-auto flex flex-col gap-6 px-4 py-4 mt-12">
+      <div className="container mx-auto flex flex-col gap-6 px-4 py-4 mt-16">
         <div className="relative w-full max-w-md">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"

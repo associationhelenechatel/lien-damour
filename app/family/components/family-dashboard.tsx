@@ -37,7 +37,7 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
   }, []);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-[calc(100vh-3.5rem-1px)]">
       {/* Navigation entre vues - superposée au-dessus du contenu */}
       <div
         id="nav"
@@ -48,17 +48,19 @@ export function FamilyDashboard({ familyTree }: FamilyDashboardProps) {
           type="single"
           value={viewMode}
           onValueChange={(value) =>
-            value && setViewMode(value as "list" | "map" | "tree")
+            value &&
+            setViewMode(value as "list" | "list-2" | "map" | "tree")
           }
-          className="bg-white/95 backdrop-blur-sm shadow-lg rounded-md"
+          className="bg-white/95 backdrop-blur-sm shadow-sm rounded-md"
         >
-          <ToggleGroupItem value="list">
+         
+          <ToggleGroupItem value="list-2">
             <User className="h-4 w-4" />
             Liste
           </ToggleGroupItem>
-          <ToggleGroupItem value="list-2">
+          <ToggleGroupItem value="list">
             <User className="h-4 w-4" />
-            Liste 2
+            Liste Old
           </ToggleGroupItem>
           <ToggleGroupItem value="map">
             <MapPin className="h-4 w-4" />

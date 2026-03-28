@@ -28,7 +28,36 @@ export async function getAllUsers(): Promise<User[]> {
   return all;
 }
 
-/** Crée une invitation et envoie l'email (Clerk). */
+function parseFamilyMemberIdFromMetadata(raw: unknown): number | null {
+  if (typeof raw === "number" && Number.isInteger(raw) && raw > 0) return raw;
+  if (typeof raw === "string") {
+    const n = parseInt(raw, 10);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return null;
+}
+
+/**
+ * Associe chaque membre de famille (id) à l’URL de photo profil Clerk,
+ * via `publicMetadata.familyMemberId`. Utilise la même pagination que {@link getAllUsers}.
+ */
+export async function getClerkProfileImageUrlByFamilyMemberId(): Promise<
+  Map<number, string>
+> {
+  const users = await getAllUsers();
+  const map = new Map<number, string>();
+  for (const user of users) {
+    const memberId = parseFamilyMemberIdFromMetadata(
+      user.publicMetadata?.familyMemberId
+    );
+    if (memberId == null) continue;
+    const url = user.imageUrl?.trim();
+    if (url) map.set(memberId, url);
+  }
+  return map;
+}
+
+/** Crée une invitation et envoie l’email (Clerk). */
 export async function createInvitation(params: {
   emailAddress: string;
   redirectUrl?: string;

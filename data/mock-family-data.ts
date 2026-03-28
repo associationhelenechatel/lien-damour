@@ -125,7 +125,6 @@ function buildHundredMemberSeed(): {
       mapboxPlaceId: partial.mapboxPlaceId ?? city.mapboxPlaceId,
       phone: partial.phone ?? (id % 3 === 0 ? null : `+33 ${6 + (id % 4)} ${10 + (id % 80)} ${20 + (id % 70)} ${30 + (id % 60)} ${40 + (id % 50)}`),
       mail: partial.mail ?? (id % 5 === 0 ? null : `membre.${id}@example.com`),
-      pictureId: partial.pictureId ?? null,
       code: partial.code!,
     });
     return id;
