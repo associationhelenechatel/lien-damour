@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
@@ -12,13 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Loader2, User, Calendar, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
@@ -45,6 +39,31 @@ export default function OnboardingForm({
   const [phone, setPhone] = useState("");
   const [addressCoordinates, setAddressCoordinates] = useState<{ lat: number; lng: number } | undefined>(undefined);
   const [mapboxPlaceId, setMapboxPlaceId] = useState<string | undefined>(undefined);
+
+  const memberComboboxOptions = useMemo((): ComboboxOption[] => {
+    return familyMembers.map((member) => {
+      const label = (
+        <>
+          {member.firstName} {member.lastName || ""}
+          {member.maidenName ? ` (née ${member.maidenName})` : ""}
+          {member.code ? ` - ${member.code}` : ""}
+        </>
+      );
+      const keywords = [
+        member.firstName,
+        member.lastName,
+        member.maidenName,
+        member.code,
+        member.fullName,
+        member.displayName,
+      ].filter((s): s is string => Boolean(s && String(s).trim()));
+      return {
+        value: member.id.toString(),
+        label,
+        keywords,
+      };
+    });
+  }, [familyMembers]);
 
   // Mettre à jour les infos du membre sélectionné
   useEffect(() => {
@@ -126,25 +145,21 @@ export default function OnboardingForm({
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Sélection du membre */}
               <div className="space-y-2">
-                <h3 className="font-semibold text-base">Qui es-tu ?</h3>
-
-                <Select
-                  value={selectedMemberId}
-                  onValueChange={setSelectedMemberId}
+                <Label
+                  htmlFor="familyMember"
+                  className="text-base font-semibold"
                 >
-                  <SelectTrigger id="familyMember" className="w-full">
-                    <SelectValue placeholder="Sélectionnez un membre de la famille" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {familyMembers.map((member) => (
-                      <SelectItem key={member.id} value={member.id.toString()}>
-                        {member.firstName} {member.lastName || ""}
-                        {member.maidenName && ` (née ${member.maidenName})`}
-                        {member.code && ` - ${member.code}`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  Qui es-tu ?
+                </Label>
+                <Combobox
+                  id="familyMember"
+                  options={memberComboboxOptions}
+                  value={selectedMemberId || undefined}
+                  onValueChange={setSelectedMemberId}
+                  placeholder="Sélectionnez un membre de la famille"
+                  searchPlaceholder="Rechercher par prénom, nom, code…"
+                  emptyText="Aucun membre ne correspond à votre recherche."
+                />
               </div>
 
               {/* Informations à compléter */}
