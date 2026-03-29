@@ -23,7 +23,7 @@ import { getProjects } from "@/lib/api/project";
 import type { Project } from "@/lib/types";
 
 const DEFAULT_PROJECT_IMAGE =
-  "https://picsum.photos/seed/project/160/120";
+  "/assets/logo-square.png";
 
 const categoryColors = {
   Social: "bg-blue-100 text-blue-800",
@@ -97,7 +97,7 @@ export default function Home() {
                   <CardContent className="p-4 flex flex-col gap-3">
                     {/* 1. Logo + nom */}
                     <div className="flex gap-3">
-                      <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-slate-100">
+                      <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden">
                         <Image
                           src={project.logo || DEFAULT_PROJECT_IMAGE}
                           alt=""
