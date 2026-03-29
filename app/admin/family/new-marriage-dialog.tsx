@@ -15,13 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { DatePicker } from "@/components/ui/date-picker";
 import type { FamilyTree, FamilyMemberWithRelations } from "@/lib/types";
 import {
@@ -76,6 +71,25 @@ export function NewMarriageDialog({
     () => membersEligibleForSpouse(familyTree.members),
     [familyTree.members]
   );
+
+  const partnerComboboxOptions = useMemo((): ComboboxOption[] => {
+    return eligibleMembers.map((member) => ({
+      value: String(member.id),
+      label: (
+        <>
+          {member.displayName}
+          {member.code ? ` (${member.code})` : ""}
+        </>
+      ),
+      keywords: [
+        member.displayName,
+        member.firstName,
+        member.lastName,
+        member.code ?? undefined,
+        member.fullName,
+      ].filter((s): s is string => Boolean(s && String(s).trim())),
+    }));
+  }, [eligibleMembers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,30 +179,20 @@ export function NewMarriageDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Membre auquel rattacher le conjoint *</Label>
-            <Select
-              value={selectedMemberId}
+            <Label htmlFor="marriage-anchor-member">
+              Membre auquel rattacher le conjoint *
+            </Label>
+            <Combobox
+              id="marriage-anchor-member"
+              options={partnerComboboxOptions}
+              value={selectedMemberId || undefined}
               onValueChange={setSelectedMemberId}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un membre" />
-              </SelectTrigger>
-              <SelectContent>
-                {eligibleMembers.length === 0 ? (
-                  <SelectItem value="_none" disabled>
-                    Aucun membre sans conjoint
-                  </SelectItem>
-                ) : (
-                  eligibleMembers.map((member) => (
-                    <SelectItem key={member.id} value={String(member.id)}>
-                      {member.displayName}
-                      {member.code ? ` (${member.code})` : ""}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+              placeholder="Sélectionner un membre"
+              searchPlaceholder="Rechercher par nom ou code…"
+              emptyText="Aucun membre ne correspond."
+              disabled={eligibleMembers.length === 0}
+              contentClassName="z-[10001]"
+            />
             {eligibleMembers.length === 0 && (
               <p className="text-xs text-muted-foreground mt-1">
                 Seuls les membres sans conjoint sont proposés.

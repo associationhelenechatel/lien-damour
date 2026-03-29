@@ -77,6 +77,9 @@ const CITIES = [
 
 const TARGET_COUNT = 100;
 
+/** Probabilité qu’un descendant (hors 1re génération) reste sans conjoint. */
+const P_SINGLE_NO_SPOUSE = 0.12;
+
 function pickCity(i: number) {
   return CITIES[i % CITIES.length]!;
 }
@@ -86,6 +89,12 @@ function isoDate(year: number, month1to12: number, day1to28: number) {
   const d = ((day1to28 - 1) % 28) + 1;
   return `${year}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
+
+function randInt(min: number, max: number): number {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+
+type Couple = { p1: number; p2: number; branchCode: string };
 
 function buildHundredMemberSeed(): {
   familyMembers: MemberWithSeedId[];
@@ -123,7 +132,11 @@ function buildHundredMemberSeed(): {
       latitude: partial.latitude ?? city.latitude,
       longitude: partial.longitude ?? city.longitude,
       mapboxPlaceId: partial.mapboxPlaceId ?? city.mapboxPlaceId,
-      phone: partial.phone ?? (id % 3 === 0 ? null : `+33 ${6 + (id % 4)} ${10 + (id % 80)} ${20 + (id % 70)} ${30 + (id % 60)} ${40 + (id % 50)}`),
+      phone:
+        partial.phone ??
+        (id % 3 === 0
+          ? null
+          : `+33 ${6 + (id % 4)} ${10 + (id % 80)} ${20 + (id % 70)} ${30 + (id % 60)} ${40 + (id % 50)}`),
       mail: partial.mail ?? (id % 5 === 0 ? null : `membre.${id}@example.com`),
       code: partial.code!,
     });
@@ -147,9 +160,6 @@ function buildHundredMemberSeed(): {
     });
   };
 
-  type Couple = { p1: number; p2: number; branchCode: string };
-
-  // Racine + conjoint (codes 0 et 0.0)
   const root = addMember({
     code: "0",
     firstName: "Hélène",
@@ -173,14 +183,12 @@ function buildHundredMemberSeed(): {
   });
   linkPartners(root, rootSpouse);
 
-  /** Couples prêts à avoir des enfants (file BFS sur l’arbre). */
   let couples: Couple[] = [];
 
-  // 4 enfants de la racine : codes 1, 2, 3, 4
-  const rootChildCount = 4;
+  const rootChildCount = randInt(3, 5);
   for (let i = 1; i <= rootChildCount && familyMembers.length < TARGET_COUNT; i++) {
     const code = String(i);
-    const y = 1945 + ((i - 1) % 5);
+    const y = 1945 + ((i - 1) % 5) + randInt(-2, 2);
     const child = addMember({
       code,
       gender: i % 2 === 1 ? "M" : "F",
@@ -189,12 +197,18 @@ function buildHundredMemberSeed(): {
     linkChild(root, child);
     linkChild(rootSpouse, child);
 
+    if (familyMembers.length >= TARGET_COUNT) break;
+
     const spouseCode = `${code}.0`;
     const spouse = addMember({
       code: spouseCode,
       gender: i % 2 === 1 ? "F" : "M",
       lastName: i % 2 === 1 ? "Bernard" : "Moreau",
-      birthDate: isoDate(y + 1, 2 + (i % 11), 3 + (i % 25)),
+      birthDate: isoDate(
+        y + 1 + randInt(0, 1),
+        2 + (i % 11),
+        3 + (i % 25)
+      ),
     });
     linkPartners(child, spouse);
     couples.push({
@@ -217,22 +231,30 @@ function buildHundredMemberSeed(): {
       const numKids =
         familyMembers.length > TARGET_COUNT - 8
           ? Math.min(maxKids, TARGET_COUNT - familyMembers.length)
-          : maxKids;
+          : randInt(1, Math.max(1, maxKids));
 
       for (let j = 1; j <= numKids && familyMembers.length < TARGET_COUNT; j++) {
         const childCode = `${branchCode}.${j}`;
-        const childYear = Math.min(2020, parentBirthYear + 22 + j * 2);
+        const childYear = Math.min(
+          2020,
+          parentBirthYear + 20 + randInt(0, 12) + j * 2
+        );
         const child = addMember({
           code: childCode,
           gender: j % 2 === 1 ? "M" : "F",
           birthDate: isoDate(
             childYear,
-            ((j + branchCode.length) % 12) + 1,
+            ((j + branchCode.length + randInt(0, 2)) % 12) + 1,
             (j % 28) + 1
           ),
         });
         linkChild(p1, child);
         linkChild(p2, child);
+
+        if (familyMembers.length >= TARGET_COUNT) break;
+
+        const singleKid = Math.random() < P_SINGLE_NO_SPOUSE;
+        if (singleKid) continue;
 
         if (familyMembers.length >= TARGET_COUNT) break;
 
@@ -242,7 +264,7 @@ function buildHundredMemberSeed(): {
           gender: j % 2 === 1 ? "F" : "M",
           lastName: j % 2 === 1 ? "Dubois" : "Moreau",
           birthDate: isoDate(
-            childYear + 1,
+            childYear + 1 + randInt(0, 2),
             ((j + 3) % 12) + 1,
             ((j + 2) % 28) + 1
           ),
@@ -258,9 +280,26 @@ function buildHundredMemberSeed(): {
     couples = nextCouples;
   }
 
+  let fillIdx = 0;
+  while (familyMembers.length < TARGET_COUNT) {
+    fillIdx++;
+    const code = `+${fillIdx}`;
+    const py = Math.max(
+      parseInt(familyMembers[0]!.birthDate?.slice(0, 4) ?? "1920", 10),
+      parseInt(familyMembers[1]!.birthDate?.slice(0, 4) ?? "1918", 10)
+    );
+    const c = addMember({
+      code,
+      gender: Math.random() < 0.5 ? "M" : "F",
+      birthDate: isoDate(Math.min(2000, py + 28 + (fillIdx % 12)), 3 + (fillIdx % 10), 10),
+    });
+    linkChild(root, c);
+    linkChild(rootSpouse, c);
+  }
+
   if (familyMembers.length !== TARGET_COUNT) {
     throw new Error(
-      `Seed: attendu ${TARGET_COUNT} membres, obtenu ${familyMembers.length}. Ajuster la généalogie.`
+      `Seed: attendu ${TARGET_COUNT} membres, obtenu ${familyMembers.length}.`
     );
   }
 

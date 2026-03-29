@@ -24,7 +24,7 @@ import { EditProjectDialog } from "@/app/admin/projects/edit-project-dialog";
 import { DeleteProjectDialog } from "@/app/admin/projects/delete-project-dialog";
 
 const DEFAULT_PROJECT_IMAGE =
-  "https://picsum.photos/seed/project/160/120";
+  "/assets/logo-square.png";
 
 export default function AdminProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");

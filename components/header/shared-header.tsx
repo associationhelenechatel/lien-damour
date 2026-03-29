@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
   { href: "/family", label: "Annuaire" },
-  { href: "/docs", label: "Documents" },
+  // { href: "/docs", label: "Documents" },
   { href: "/admin", label: "Administration" },
 ] as const;
 
@@ -61,7 +61,6 @@ export function SharedHeader({ isAdmin = false }: { isAdmin?: boolean }) {
 
           <div className="flex-shrink-0 flex items-center py-2 sm:py-0">
             <SignedIn>
-              <div className="w-10 h-10 flex items-center justify-center rounded-full border-2 border-slate-500 p-px shrink-0">
                 <UserButton
                   userProfileProps={{
                   appearance: {
@@ -75,7 +74,6 @@ export function SharedHeader({ isAdmin = false }: { isAdmin?: boolean }) {
               >
                 <UserButton.UserProfilePage label="security" />
               </UserButton>
-              </div>
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
