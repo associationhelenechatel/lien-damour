@@ -26,7 +26,7 @@ export function FamilyDashboard({
     [initialMapMemberId]
   );
 
-  const [viewMode, setViewMode] = useState<"list" | "list-2" | "tree" | "map">(
+  const [viewMode, setViewMode] = useState<"list" | "tree" | "map">(
     () => (openMapOnMember != null ? "map" : "list")
   );
   const [mapCenterOnMemberId, setMapCenterOnMemberId] = useState<number | null>(
@@ -51,7 +51,7 @@ export function FamilyDashboard({
   }, []);
 
   return (
-    <div className="relative w-full h-[calc(100vh-3.5rem-1px)]">
+    <div className="relative w-full min-h-[calc(100vh-3.5rem-1px)]">
       {/* Navigation entre vues - superposée au-dessus du contenu */}
       <div
         id="nav"
@@ -63,7 +63,7 @@ export function FamilyDashboard({
           value={viewMode}
           onValueChange={(value) =>
             value &&
-            setViewMode(value as "list" | "list" | "map" | "tree")
+            setViewMode(value as "list" | "map" | "tree")
           }
           className="bg-white/95 backdrop-blur-sm shadow-sm rounded-md"
         >
@@ -83,7 +83,13 @@ export function FamilyDashboard({
         </ToggleGroup>
       </div>
 
-      <div className="w-full h-full">
+      <div
+        className={
+          viewMode === "list"
+            ? "w-full"
+            : "h-[calc(100vh-3.5rem-1px)] w-full"
+        }
+      >
        {viewMode === "list" ? (
           <ListView2
             familyTree={familyTree}

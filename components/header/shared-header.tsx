@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogInIcon, MapPinnedIcon } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { PersonalInfosTab } from "./personal-infos-tab";
 import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
@@ -74,13 +73,6 @@ export function SharedHeader({ isAdmin = false }: { isAdmin?: boolean }) {
                   },
                 }}
               >
-                <UserButton.UserProfilePage
-                  label="Infos personnelles"
-                  labelIcon={<MapPinnedIcon className="h-4 w-4" />}
-                  url="/informations"
-                >
-                  <PersonalInfosTab />
-                </UserButton.UserProfilePage>
                 <UserButton.UserProfilePage label="security" />
               </UserButton>
               </div>
