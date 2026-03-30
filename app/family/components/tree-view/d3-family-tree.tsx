@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import type { FamilyTree, FamilyMemberWithRelations } from "@/lib/types";
 
@@ -15,6 +15,21 @@ interface TreeNode extends d3.HierarchyNode<FamilyMemberWithRelations> {
 
 export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  // Evite de reconstruire le SVG si seul l'objet parent est recréé.
+  const treeDataSignature = useMemo(
+    () =>
+      `${familyTree.members.length}:${familyTree.members
+        .map(
+          (m) =>
+            `${m.id}:${m.displayName}:${m.birthDate ?? ""}:${m.deathDate ?? ""}:${m.children.length}:${m.parents.length}`
+        )
+        .sort((a, b) => a.localeCompare(b))
+        .join(",")}`,
+    [familyTree.members]
+  );
 
   useEffect(() => {
     if (!svgRef.current || !familyTree.members.length) return;
@@ -107,34 +122,42 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
       .style("stroke-width", (d) => (d.depth === 0 ? 3 : 2)) // Bordure plus épaisse pour la racine
       .style("cursor", "pointer")
       .on("mouseover", function (event, d) {
-        // Tooltip au survol
-        const tooltip = d3
-          .select("body")
-          .append("div")
-          .attr("class", "tooltip")
-          .style("position", "absolute")
-          .style("background", "rgba(0, 0, 0, 0.8)")
-          .style("color", "white")
-          .style("padding", "8px")
-          .style("border-radius", "4px")
-          .style("font-size", "12px")
-          .style("pointer-events", "none")
-          .style("z-index", "1000");
+        // Réutiliser un seul tooltip évite allocations DOM fréquentes.
+        let tooltip = tooltipRef.current;
+        if (!tooltip) {
+          tooltip = document.createElement("div");
+          tooltip.className = "d3-family-tooltip";
+          tooltip.style.position = "absolute";
+          tooltip.style.background = "rgba(0, 0, 0, 0.8)";
+          tooltip.style.color = "white";
+          tooltip.style.padding = "8px";
+          tooltip.style.borderRadius = "4px";
+          tooltip.style.fontSize = "12px";
+          tooltip.style.pointerEvents = "none";
+          tooltip.style.zIndex = "1000";
+          tooltip.style.display = "none";
+          document.body.appendChild(tooltip);
+          tooltipRef.current = tooltip;
+        }
 
-        tooltip
-          .html(
-            `
+        tooltip.innerHTML = `
           <strong>${d.data.displayName}</strong><br/>
           ${d.data.birthDate ? `Né(e): ${d.data.birthDate}` : ""}<br/>
           ${d.data.deathDate ? `Décédé(e): ${d.data.deathDate}` : ""}
           ${d.data.isAlive ? "<br/>Vivant(e)" : ""}
-        `
-          )
-          .style("left", event.pageX + 10 + "px")
-          .style("top", event.pageY - 10 + "px");
+        `;
+        tooltip.style.display = "block";
+        tooltip.style.left = `${event.pageX + 10}px`;
+        tooltip.style.top = `${event.pageY - 10}px`;
+      })
+      .on("mousemove", function (event) {
+        const tooltip = tooltipRef.current;
+        if (!tooltip) return;
+        tooltip.style.left = `${event.pageX + 10}px`;
+        tooltip.style.top = `${event.pageY - 10}px`;
       })
       .on("mouseout", function () {
-        d3.selectAll(".tooltip").remove();
+        if (tooltipRef.current) tooltipRef.current.style.display = "none";
       });
 
     // Labels pour les nœuds avec taille adaptée et espacement
@@ -172,7 +195,12 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.05, 5]) // Plus de zoom pour naviguer dans un grand arbre
       .on("zoom", (event) => {
-        g.attr("transform", event.transform);
+        const pending = event.transform;
+        if (rafRef.current !== null) return;
+        rafRef.current = requestAnimationFrame(() => {
+          g.attr("transform", pending.toString());
+          rafRef.current = null;
+        });
       });
 
     // Appliquer le zoom et centrer l'arbre initialement
@@ -187,9 +215,14 @@ export function D3FamilyTree({ familyTree }: D3FamilyTreeProps) {
 
     // Cleanup function
     return () => {
-      d3.selectAll(".tooltip").remove();
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      tooltipRef.current?.remove();
+      tooltipRef.current = null;
     };
-  }, [familyTree]);
+  }, [treeDataSignature]);
 
   return (
     <div className="w-full h-full overflow-hidden">
@@ -217,15 +250,23 @@ function createHierarchyData(
     current.children.length > prev.children.length ? current : prev
   );
 
+  const byId = new Map<number, FamilyMemberWithRelations>();
+  for (const m of members) byId.set(m.id, m);
+  const visited = new Set<number>();
+
   // Fonction récursive pour construire l'arbre
   function buildTree(
-    person: FamilyMemberWithRelations,
-    depth = 0
+    person: FamilyMemberWithRelations
   ): FamilyMemberWithRelations {
+    if (visited.has(person.id)) {
+      return { ...person, children: [] };
+    }
+    visited.add(person.id);
+
     const children = person.children
-      .map((child) => members.find((m) => m.id === child.id))
+      .map((child) => byId.get(child.id))
       .filter(Boolean)
-      .map((child) => buildTree(child!, depth + 1));
+      .map((child) => buildTree(child!));
 
     return {
       ...person,
