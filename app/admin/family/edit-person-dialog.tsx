@@ -18,6 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import type { FamilyMemberWithRelations } from "@/lib/types";
 import { AddressSearchBox } from "@/components/address-search-box";
+import { Loader2 } from "lucide-react";
 
 function toDateOrUndefined(value: string | null | undefined): Date | undefined {
   if (!value) return undefined;
@@ -29,7 +30,9 @@ interface EditPersonDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   person: FamilyMemberWithRelations;
-  onEditPerson: (person: FamilyMemberWithRelations) => void;
+  onEditPerson: (
+    person: FamilyMemberWithRelations
+  ) => void | Promise<void>;
 }
 
 export function EditPersonDialog({
@@ -40,6 +43,7 @@ export function EditPersonDialog({
 }: EditPersonDialogProps) {
   const [formData, setFormData] = useState<FamilyMemberWithRelations>(person);
   const [isDeceased, setIsDeceased] = useState(!!person.deathDate);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     setFormData(person);
@@ -50,7 +54,7 @@ export function EditPersonDialog({
   const birthDateValue = toDateOrUndefined(formData.birthDate);
   const deathDateValue = toDateOrUndefined(formData.deathDate);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const updatedPerson: FamilyMemberWithRelations = {
@@ -58,8 +62,12 @@ export function EditPersonDialog({
       deathDate: isDeceased ? formData.deathDate : null,
     };
 
-    onEditPerson(updatedPerson);
-    onOpenChange(false);
+    setSubmitting(true);
+    try {
+      await onEditPerson(updatedPerson);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -239,14 +247,23 @@ export function EditPersonDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={submitting}
             >
               Annuler
             </Button>
             <Button
               type="submit"
               className="bg-emerald-600 hover:bg-emerald-700"
+              disabled={submitting}
             >
-              Sauvegarder
+              {submitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enregistrement…
+                </>
+              ) : (
+                "Sauvegarder"
+              )}
             </Button>
           </DialogFooter>
         </form>

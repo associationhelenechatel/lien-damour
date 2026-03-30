@@ -170,6 +170,13 @@
     "@clerk/shared" "^3.41.1"
     tslib "2.8.1"
 
+"@clerk/localizations@^4.2.4":
+  version "4.2.4"
+  resolved "https://registry.yarnpkg.com/@clerk/localizations/-/localizations-4.2.4.tgz#b9c35b3c962ba618725f69f09119bcf453ccbeb9"
+  integrity sha512-yDraD7BEcSFTvpoed8MWzSO+JrxwtS1pydM2uvm1nhnDz4gZNzhSt7gGs+mGIIjWeS8PQGMR0cq8DfvHUxCwwg==
+  dependencies:
+    "@clerk/shared" "^4.3.2"
+
 "@clerk/nextjs@^6.36.5":
   version "6.36.5"
   resolved "https://registry.yarnpkg.com/@clerk/nextjs/-/nextjs-6.36.5.tgz#0d23214dfd088d99c5fa926b6824a9e089c48c03"
@@ -193,6 +200,17 @@
     js-cookie "3.0.5"
     std-env "^3.9.0"
     swr "2.3.4"
+
+"@clerk/shared@^4.3.2":
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/@clerk/shared/-/shared-4.3.2.tgz#04a30af5bd6cf39ed48171bfb69fd03dc701a766"
+  integrity sha512-tYYzdY4Fxb02TO4RHoLRFzEjXJn0iFDfoKhWtGyqf2AaIgkprTksunQtX0hnVssHMr3XD/E2S00Vrb+PzX3jCQ==
+  dependencies:
+    "@tanstack/query-core" "5.90.16"
+    dequal "2.0.3"
+    glob-to-regexp "0.4.1"
+    js-cookie "3.0.5"
+    std-env "^3.9.0"
 
 "@clerk/types@^4.101.9":
   version "4.101.9"
@@ -1881,6 +1899,11 @@
     "@tailwindcss/oxide" "4.1.13"
     postcss "^8.4.41"
     tailwindcss "4.1.13"
+
+"@tanstack/query-core@5.90.16":
+  version "5.90.16"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.90.16.tgz#19a972c2ffbc47727ab6649028af1bee70e28cdf"
+  integrity sha512-MvtWckSVufs/ja463/K4PyJeqT+HMlJWtw6PrCpywznd2NSgO3m4KwO9RqbFqGg6iDE8vVMFWMeQI4Io3eEYww==
 
 "@tanstack/react-table@^8.21.3":
   version "8.21.3"

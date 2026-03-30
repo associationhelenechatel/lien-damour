@@ -6,6 +6,7 @@ import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
+import { frFR } from '@clerk/localizations'
 import { Toaster } from "sonner";
 import { SharedHeader } from "@/components/header/shared-header";
 import { isCurrentUserAdmin } from "@/lib/api/admin";
@@ -30,7 +31,7 @@ export default async function RootLayout({
 }>) {
   const isAdmin = await isCurrentUserAdmin();
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={frFR}>
       <html lang="fr">
         <body
           className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${ceraProFont.variable}`}
