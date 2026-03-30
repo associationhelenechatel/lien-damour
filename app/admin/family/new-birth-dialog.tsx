@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { DatePicker } from "@/components/ui/date-picker";
 import type { FamilyTree, FamilyMemberWithRelations } from "@/lib/types";
 import {
@@ -94,6 +95,20 @@ export function NewBirthDialog({
       ),
     [familyTree.members]
   );
+
+  const parent1ComboboxOptions = useMemo((): ComboboxOption[] => {
+    return parent1Options.map((member) => ({
+      value: String(member.id),
+      label: memberLabel(member),
+      keywords: [
+        member.displayName,
+        member.fullName,
+        member.firstName ?? undefined,
+        member.lastName ?? undefined,
+        member.code ?? undefined,
+      ].filter((s): s is string => Boolean(s && String(s).trim())),
+    }));
+  }, [parent1Options]);
 
   const parent1 = useMemo(
     () => (parent1Id ? familyTree.members.find((m) => m.id === parseInt(parent1Id, 10)) : null),
@@ -203,34 +218,27 @@ export function NewBirthDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Parent 1 *</Label>
-            <Select
-              value={parent1Id}
+            <Label htmlFor="birth-parent1">Parent 1 *</Label>
+            <Combobox
+              id="birth-parent1"
+              options={parent1ComboboxOptions}
+              value={parent1Id || undefined}
               onValueChange={(v) => {
                 setParent1Id(v);
-                const member = v ? familyTree.members.find((m) => m.id === parseInt(v, 10)) : null;
-                const partnerId = member?.partner ? String(member.partner.id) : "_none";
+                const member = v
+                  ? familyTree.members.find((m) => m.id === parseInt(v, 10))
+                  : null;
+                const partnerId = member?.partner
+                  ? String(member.partner.id)
+                  : "_none";
                 setParent2Id(partnerId);
               }}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un parent" />
-              </SelectTrigger>
-              <SelectContent>
-                {parent1Options.length === 0 ? (
-                  <SelectItem value="_none" disabled>
-                    Aucun membre éligible (vivant, 16 ans ou plus)
-                  </SelectItem>
-                ) : (
-                  parent1Options.map((member) => (
-                    <SelectItem key={member.id} value={String(member.id)}>
-                      {memberLabel(member)}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+              placeholder="Sélectionner un parent"
+              searchPlaceholder="Rechercher par nom ou code…"
+              emptyText="Aucun membre ne correspond."
+              disabled={parent1Options.length === 0}
+              contentClassName="z-[10001]"
+            />
             {parent1Options.length === 0 && (
               <p className="text-xs text-muted-foreground mt-1">
                 Seuls les membres vivants de 16 ans ou plus sont proposés.
@@ -284,8 +292,8 @@ export function NewBirthDialog({
                 <SelectValue placeholder="Sélectionner" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="M">Homme</SelectItem>
-                <SelectItem value="F">Femme</SelectItem>
+                <SelectItem value="M">Garçon</SelectItem>
+                <SelectItem value="F">Fille</SelectItem>
               </SelectContent>
             </Select>
           </div>

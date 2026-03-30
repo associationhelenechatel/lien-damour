@@ -13,13 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { DatePicker } from "@/components/ui/date-picker";
 import type { FamilyTree, FamilyMemberWithRelations } from "@/lib/types";
 import { updateFamilyMember } from "@/lib/api/family";
@@ -72,6 +66,20 @@ export function NewDeathDialog({
       ),
     [familyTree.members]
   );
+
+  const livingMemberComboboxOptions = useMemo((): ComboboxOption[] => {
+    return livingMembers.map((member) => ({
+      value: String(member.id),
+      label: memberLabel(member),
+      keywords: [
+        member.displayName,
+        member.fullName,
+        member.firstName ?? undefined,
+        member.lastName ?? undefined,
+        member.code ?? undefined,
+      ].filter((s): s is string => Boolean(s && String(s).trim())),
+    }));
+  }, [livingMembers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,29 +135,18 @@ export function NewDeathDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Membre *</Label>
-            <Select
-              value={selectedMemberId}
+            <Label htmlFor="death-member">Membre *</Label>
+            <Combobox
+              id="death-member"
+              options={livingMemberComboboxOptions}
+              value={selectedMemberId || undefined}
               onValueChange={setSelectedMemberId}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un membre" />
-              </SelectTrigger>
-              <SelectContent>
-                {livingMembers.length === 0 ? (
-                  <SelectItem value="_none" disabled>
-                    Aucun membre sans date de décès
-                  </SelectItem>
-                ) : (
-                  livingMembers.map((member) => (
-                    <SelectItem key={member.id} value={String(member.id)}>
-                      {memberLabel(member)}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+              placeholder="Sélectionner un membre"
+              searchPlaceholder="Rechercher par nom ou code…"
+              emptyText="Aucun membre ne correspond."
+              disabled={livingMembers.length === 0}
+              contentClassName="z-[10001]"
+            />
             {livingMembers.length === 0 && (
               <p className="text-xs text-muted-foreground mt-1">
                 Seuls les membres encore vivants sont proposés.

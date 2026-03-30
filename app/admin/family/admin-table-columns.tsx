@@ -1,10 +1,24 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, FilterFn } from "@tanstack/react-table";
 import { Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { FamilyMemberWithRelations } from "@/lib/types";
+import { normalizeSearchText } from "@/lib/utils";
+
+const fullNameFilterFn: FilterFn<FamilyMemberWithRelations> = (
+  row,
+  columnId,
+  filterValue
+) => {
+  const needle = normalizeSearchText(String(filterValue ?? ""));
+  if (!needle) return true;
+  const haystack = normalizeSearchText(
+    String(row.getValue(columnId) ?? "")
+  );
+  return haystack.includes(needle);
+};
 
 export function getAdminColumns(
   onEdit: (member: FamilyMemberWithRelations) => void
@@ -13,6 +27,7 @@ export function getAdminColumns(
   {
     accessorKey: "fullName",
     header: "Nom",
+    filterFn: fullNameFilterFn,
     cell: ({ row }) => {
       const member = row.original;
       return (
