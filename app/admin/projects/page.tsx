@@ -147,18 +147,18 @@ export default function AdminProjectsPage() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="mb-1 flex flex-wrap items-center gap-2">
                         <FolderKanban className="h-5 w-5 text-emerald-600 shrink-0" />
-                        <h3 className="text-lg font-semibold text-emerald-900">
+                        <h3 className="min-w-0 break-words text-lg font-semibold text-emerald-900">
                           {project.name}
                         </h3>
                         {project.type && (
-                          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                          <span className="max-w-full break-all rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
                             {project.type}
                           </span>
                         )}
                         {project.tag && (
-                          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                          <span className="max-w-full break-all rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
                             {project.tag}
                           </span>
                         )}

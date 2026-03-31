@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from '@clerk/localizations'
 import { Toaster } from "sonner";
-import { SharedHeader } from "@/components/header/shared-header";
+import { Navbar } from "@/components/header/navbar";
 import { isCurrentUserAdmin } from "@/lib/api/admin";
 import "./globals.css";
 
@@ -36,7 +36,7 @@ export default async function RootLayout({
         <body
           className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${ceraProFont.variable}`}
         >
-          <SharedHeader isAdmin={isAdmin} />
+          <Navbar isAdmin={isAdmin} />
           <Suspense fallback={null}>{children}</Suspense>
           <Toaster />
           <Analytics />

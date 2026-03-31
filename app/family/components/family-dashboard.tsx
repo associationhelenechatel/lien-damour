@@ -55,7 +55,7 @@ export function FamilyDashboard({
       {/* Navigation entre vues - superposée au-dessus du contenu */}
       <div
         id="nav"
-        className="fixed top-18 left-1/2 -translate-x-1/2 z-[9999] flex justify-center pointer-events-auto"
+        className="fixed top-18 left-1/2 -translate-x-1/2 z-40 flex justify-center pointer-events-auto"
       >
         <ToggleGroup
           variant="outline"
