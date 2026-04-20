@@ -35,6 +35,10 @@ function memberUpdatePayload(
     mapboxPlaceId: person.mapboxPlaceId ?? null,
     phone: person.phone?.trim() || null,
     mail: person.mail?.trim() || null,
+    bio: person.bio?.trim() || null,
+    profession: person.profession?.trim() || null,
+    company: person.company?.trim() || null,
+    pictureId: person.pictureId?.trim() || null,
   };
 }
 
@@ -42,9 +46,7 @@ interface AdminFamilyContentProps {
   familyTree: FamilyTree;
 }
 
-export function AdminFamilyContent({
-  familyTree,
-}: AdminFamilyContentProps) {
+export function AdminFamilyContent({ familyTree }: AdminFamilyContentProps) {
   const router = useRouter();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showNewEventDialog, setShowNewEventDialog] = useState(false);
@@ -142,6 +144,7 @@ export function AdminFamilyContent({
           onOpenChange={setShowEditDialog}
           person={selectedPerson}
           onEditPerson={handleEditPerson}
+          onPictureUploaded={() => router.refresh()}
         />
       )}
     </>

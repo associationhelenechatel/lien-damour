@@ -40,6 +40,9 @@ export type FamilyMemberWithRelations = FamilyMember & {
 
   /** Photo profil Clerk si le compte a `publicMetadata.familyMemberId` (hors base). */
   clerkProfileImageUrl: string | null;
+
+  /** URL affichée : image R2 (`picture_id`) si disponible, sinon Clerk. */
+  profileImageUrl: string | null;
 };
 
 // Type pour l'arbre généalogique complet

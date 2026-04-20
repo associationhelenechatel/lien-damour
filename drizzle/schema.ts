@@ -12,8 +12,8 @@ export const familyMember = pgTable("family_member", {
   id: serial("id").primaryKey(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name"),
-  maidenName: text("maiden_name"), // TODO: use this
-  gender: text("gender"), // TODO: enum possible ?
+  maidenName: text("maiden_name"),
+  gender: text("gender"),
   birthDate: date("birth_date"),
   deathDate: date("death_date"),
   address: text("address"),
@@ -22,7 +22,11 @@ export const familyMember = pgTable("family_member", {
   mapboxPlaceId: text("mapbox_place_id"),
   phone: text("phone"),
   mail: text("mail"),
-  code: text("code"), // TODO: generated ?
+  bio: text("bio"),
+  profession: text("profession"),
+  company: text("company"),
+  pictureId: text("picture_id"),
+  code: text("code"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

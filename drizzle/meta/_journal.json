@@ -43,6 +43,13 @@
       "when": 1774686666469,
       "tag": "0005_needy_micromacro",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776119526612,
+      "tag": "0006_overjoyed_annihilus",
+      "breakpoints": true
     }
   ]
 }

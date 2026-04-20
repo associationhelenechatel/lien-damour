@@ -28,7 +28,10 @@ function getInitials(member: FamilyMemberWithRelations) {
 
 function DirectoryCard({ member }: { member: FamilyMemberWithRelations }) {
   const [imgFailed, setImgFailed] = useState(false);
-  const pictureSrc = member.clerkProfileImageUrl?.trim() ?? "";
+  const pictureSrc =
+    member.profileImageUrl?.trim() ||
+    member.clerkProfileImageUrl?.trim() ||
+    "";
   const canLoadImage =
     Boolean(pictureSrc) &&
     !imgFailed &&

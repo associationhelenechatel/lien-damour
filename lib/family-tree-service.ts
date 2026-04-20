@@ -14,6 +14,7 @@ import {
   getClerkProfileImageUrlByFamilyMemberId,
   getClerkProfileImageUrlForFamilyMemberId,
 } from "@/lib/api/clerk";
+import { resolveMemberProfileImageUrl } from "@/lib/member-profile-image";
 
 /** Champs dérivés (nom affiché, âge, etc.) — partagé arbre complet et fiche membre. */
 function enrichMemberCore(
@@ -59,6 +60,10 @@ function enrichMemberCore(
     isAlive,
     age,
     clerkProfileImageUrl,
+    profileImageUrl: resolveMemberProfileImageUrl(
+      member.pictureId,
+      clerkProfileImageUrl
+    ),
   };
 }
 

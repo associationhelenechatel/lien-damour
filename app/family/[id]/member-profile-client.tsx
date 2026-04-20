@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -14,23 +13,22 @@ import {
   ChevronRight,
   Pencil,
   Loader2,
+  Briefcase,
+  Building2,
+  AlignLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { updateCurrentUserFamilyMember } from "@/lib/api/family";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
 import { AddressSearchBox } from "@/components/address-search-box";
+import { MemberProfileAvatarHoverUpload } from "@/components/member-profile-picture-upload";
 import type { FamilyMemberWithRelations } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-function memberInitials(member: FamilyMemberWithRelations) {
-  const a = member.firstName?.charAt(0)?.toUpperCase() ?? "?";
-  const b = member.lastName?.charAt(0)?.toUpperCase() ?? "";
-  return (a + b).slice(0, 2);
-}
 
 function formatDate(value: string | null | undefined) {
   if (!value) return null;
@@ -56,59 +54,15 @@ function initFormFromMember(member: FamilyMemberWithRelations) {
     birthDate: toDateOrUndefined(member.birthDate),
     address: member.address ?? "",
     phone: member.phone ?? "",
+    bio: member.bio ?? "",
+    profession: member.profession ?? "",
+    company: member.company ?? "",
     addressCoordinates:
       member.latitude != null && member.longitude != null
         ? { lat: Number(member.latitude), lng: Number(member.longitude) }
         : undefined,
     mapboxPlaceId: member.mapboxPlaceId ?? undefined,
   };
-}
-
-function ProfileAvatar({ member }: { member: FamilyMemberWithRelations }) {
-  const url = member.clerkProfileImageUrl?.trim() ?? "";
-  const isLocal = url.startsWith("/");
-  const isRemote =
-    url.startsWith("http://") || url.startsWith("https://");
-
-  if (url && isLocal) {
-    return (
-      <div className="relative mx-auto aspect-square w-40 shrink-0 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200/80 sm:mx-0 sm:w-44">
-        <Image
-          src={url}
-          alt=""
-          fill
-          className="object-cover"
-          sizes="192px"
-          priority
-        />
-      </div>
-    );
-  }
-
-  if (url && isRemote) {
-    return (
-      <div className="relative mx-auto aspect-square w-40 shrink-0 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200/80 sm:mx-0 sm:w-44">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={url}
-          alt=""
-          className="h-full w-full object-cover"
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "mx-auto flex aspect-square w-40 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200",
-        "text-3xl font-semibold tracking-wide text-slate-600 ring-1 ring-slate-200/80 sm:mx-0 sm:w-44 sm:text-4xl"
-      )}
-      aria-hidden
-    >
-      {memberInitials(member)}
-    </div>
-  );
 }
 
 type RelatedVariant = "partner" | "parent" | "child";
@@ -188,6 +142,9 @@ export function MemberProfileClient({
   const [mapboxPlaceId, setMapboxPlaceId] = useState<string | undefined>(
     undefined
   );
+  const [bio, setBio] = useState("");
+  const [profession, setProfession] = useState("");
+  const [company, setCompany] = useState("");
 
   const applyMemberToForm = useCallback((m: FamilyMemberWithRelations) => {
     const f = initFormFromMember(m);
@@ -196,6 +153,9 @@ export function MemberProfileClient({
     setBirthDate(f.birthDate);
     setAddress(f.address);
     setPhone(f.phone);
+    setBio(f.bio);
+    setProfession(f.profession);
+    setCompany(f.company);
     setAddressCoordinates(f.addressCoordinates);
     setMapboxPlaceId(f.mapboxPlaceId);
   }, []);
@@ -228,6 +188,9 @@ export function MemberProfileClient({
       birthDate: toDateOrUndefined(member.birthDate)?.toISOString() ?? "",
       address: (member.address ?? "").trim(),
       phone: (member.phone ?? "").trim(),
+      bio: (member.bio ?? "").trim(),
+      profession: (member.profession ?? "").trim(),
+      company: (member.company ?? "").trim(),
     }),
     [member]
   );
@@ -239,8 +202,11 @@ export function MemberProfileClient({
       birthDate: birthDate?.toISOString() ?? "",
       address: address.trim(),
       phone: phone.trim(),
+      bio: bio.trim(),
+      profession: profession.trim(),
+      company: company.trim(),
     }),
-    [firstName, lastName, birthDate, address, phone]
+    [firstName, lastName, birthDate, address, phone, bio, profession, company]
   );
 
   const hasFormChanges =
@@ -249,7 +215,10 @@ export function MemberProfileClient({
       snapshotForm.lastName !== snapshotFromServer.lastName ||
       snapshotForm.birthDate !== snapshotFromServer.birthDate ||
       snapshotForm.address !== snapshotFromServer.address ||
-      snapshotForm.phone !== snapshotFromServer.phone);
+      snapshotForm.phone !== snapshotFromServer.phone ||
+      snapshotForm.bio !== snapshotFromServer.bio ||
+      snapshotForm.profession !== snapshotFromServer.profession ||
+      snapshotForm.company !== snapshotFromServer.company);
 
   const saveEnabled = hasFormChanges && formValid && !saving;
 
@@ -273,6 +242,9 @@ export function MemberProfileClient({
         birthDate: birthDate?.toLocaleDateString("fr-CA") ?? null,
         address: address.trim() || null,
         phone: phone.trim() || null,
+        bio: bio.trim() || null,
+        profession: profession.trim() || null,
+        company: company.trim() || null,
         latitude:
           addressCoordinates?.lat != null
             ? String(addressCoordinates.lat)
@@ -310,7 +282,14 @@ export function MemberProfileClient({
         </Button>
 
         <header className="flex flex-col items-center gap-6 border-b border-slate-200/80 pb-10 sm:flex-row sm:items-start sm:gap-10">
-          <ProfileAvatar member={member} />
+          <MemberProfileAvatarHoverUpload
+            memberId={member.id}
+            profileImageUrl={member.profileImageUrl}
+            firstName={member.firstName}
+            lastName={member.lastName}
+            enableUpload={isOwnProfile}
+            onUploaded={() => router.refresh()}
+          />
           <div className="min-w-0 flex-1 text-center sm:pt-1 sm:text-left">
             <div className="flex flex-col items-center gap-4 sm:items-start">
               <div className="w-full sm:flex sm:items-start sm:justify-between sm:gap-4">
@@ -458,11 +437,37 @@ export function MemberProfileClient({
                   className="max-w-[14rem]"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="profile-bio">Biographie</Label>
+                <Textarea
+                  id="profile-bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Présentation, parcours…"
+                  rows={5}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="profile-profession">Profession</Label>
+                <Input
+                  id="profile-profession"
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
+                  placeholder="ex: Ingénieur"
+                  autoComplete="organization-title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="profile-company">Entreprise</Label>
+                <Input
+                  id="profile-company"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="Nom de l’entreprise"
+                  autoComplete="organization"
+                />
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              La photo de profil se modifie depuis le menu de votre compte
-              (Clerk).
-            </p>
           </div>
         ) : (
           <dl className="mt-10 space-y-5 text-sm">
@@ -540,6 +545,35 @@ export function MemberProfileClient({
                     ) : null}
                   </div>
                 </dd>
+              </div>
+            ) : null}
+            {member.bio?.trim() ? (
+              <div className="flex gap-3">
+                <dt className="flex shrink-0 items-start gap-2 pt-0.5 text-muted-foreground">
+                  <AlignLeft className="h-4 w-4" />
+                  Biographie
+                </dt>
+                <dd className="whitespace-pre-wrap text-slate-800">
+                  {member.bio.trim()}
+                </dd>
+              </div>
+            ) : null}
+            {member.profession?.trim() ? (
+              <div className="flex gap-3">
+                <dt className="flex shrink-0 items-center gap-2 text-muted-foreground">
+                  <Briefcase className="h-4 w-4" />
+                  Profession
+                </dt>
+                <dd className="text-slate-800">{member.profession.trim()}</dd>
+              </div>
+            ) : null}
+            {member.company?.trim() ? (
+              <div className="flex gap-3">
+                <dt className="flex shrink-0 items-center gap-2 text-muted-foreground">
+                  <Building2 className="h-4 w-4" />
+                  Entreprise
+                </dt>
+                <dd className="text-slate-800">{member.company.trim()}</dd>
               </div>
             ) : null}
           </dl>

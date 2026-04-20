@@ -13,11 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import type { FamilyMemberWithRelations } from "@/lib/types";
 import { AddressSearchBox } from "@/components/address-search-box";
+import { MemberProfileAvatarHoverUpload } from "@/components/member-profile-picture-upload";
 import { Loader2 } from "lucide-react";
 
 function toDateOrUndefined(value: string | null | undefined): Date | undefined {
@@ -33,6 +35,7 @@ interface EditPersonDialogProps {
   onEditPerson: (
     person: FamilyMemberWithRelations
   ) => void | Promise<void>;
+  onPictureUploaded: () => void;
 }
 
 export function EditPersonDialog({
@@ -40,6 +43,7 @@ export function EditPersonDialog({
   onOpenChange,
   person,
   onEditPerson,
+  onPictureUploaded,
 }: EditPersonDialogProps) {
   const [formData, setFormData] = useState<FamilyMemberWithRelations>(person);
   const [isDeceased, setIsDeceased] = useState(!!person.deathDate);
@@ -72,15 +76,42 @@ export function EditPersonDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Modifier {person.displayName}</DialogTitle>
-          <DialogDescription>
-            Modifiez les informations de ce membre de la famille.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="left-[50%] top-4 max-h-[calc(100dvh-2rem)] w-[calc(100%-1.5rem)] max-w-[500px] translate-x-[-50%] translate-y-0 flex flex-col gap-0 overflow-hidden p-0 sm:top-6 sm:max-h-[calc(100dvh-3rem)] sm:max-w-[500px]">
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        >
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-6 pb-4 pt-6 pr-12">
+            <div className="space-y-3 border-b border-slate-200/80 pb-4">
+              <DialogHeader>
+                <DialogTitle>Modifier {person.displayName}</DialogTitle>
+                <DialogDescription>
+                  Modifiez les informations de ce membre de la famille.
+                </DialogDescription>
+              </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex justify-center">
+                <MemberProfileAvatarHoverUpload
+                  memberId={formData.id}
+                  profileImageUrl={formData.profileImageUrl}
+                  firstName={formData.firstName}
+                  lastName={formData.lastName}
+                  enableUpload
+                  onUploaded={(info) => {
+                    if (info?.pictureId) {
+                      setFormData((fd) => ({
+                        ...fd,
+                        pictureId: info.pictureId,
+                        profileImageUrl:
+                          info.publicUrl?.trim() || fd.profileImageUrl,
+                      }));
+                    }
+                    onPictureUploaded();
+                  }}
+                />
+              </div>
+            </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName">Prénom</Label>
@@ -242,7 +273,48 @@ export function EditPersonDialog({
             </div>
           </div>
 
-          <DialogFooter>
+          <div className="space-y-2">
+            <Label htmlFor="bio">Biographie</Label>
+            <Textarea
+              id="bio"
+              value={formData.bio ?? ""}
+              onChange={(e) =>
+                setFormData({ ...formData, bio: e.target.value })
+              }
+              placeholder="Présentation, parcours, centres d’intérêt…"
+              rows={5}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="profession">Profession</Label>
+              <Input
+                id="profession"
+                value={formData.profession ?? ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, profession: e.target.value })
+                }
+                placeholder="ex: Ingénieur"
+                autoComplete="organization-title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="company">Entreprise</Label>
+              <Input
+                id="company"
+                value={formData.company ?? ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, company: e.target.value })
+                }
+                placeholder="Nom de l’entreprise"
+                autoComplete="organization"
+              />
+            </div>
+          </div>
+          </div>
+
+          <DialogFooter className="shrink-0 gap-2 border-t bg-background px-6 py-4">
             <Button
               type="button"
               variant="outline"
