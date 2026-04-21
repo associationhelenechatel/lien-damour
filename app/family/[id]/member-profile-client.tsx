@@ -285,6 +285,7 @@ export function MemberProfileClient({
           <MemberProfileAvatarHoverUpload
             memberId={member.id}
             profileImageUrl={member.profileImageUrl}
+            pictureId={member.pictureId}
             firstName={member.firstName}
             lastName={member.lastName}
             enableUpload={isOwnProfile}

@@ -62,7 +62,7 @@ export const project = pgTable("project", {
   location: text("location"),
   type: text("type"), // association, project, partnership
   tag: text("tag"), // education, social, humanitarian, etc.
-  logo: text("logo"),
+  logo: text("logo"), // clé objet R2 uniquement : projects/{id}/...
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

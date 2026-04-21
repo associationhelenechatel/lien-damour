@@ -94,6 +94,7 @@ export function EditPersonDialog({
                 <MemberProfileAvatarHoverUpload
                   memberId={formData.id}
                   profileImageUrl={formData.profileImageUrl}
+                  pictureId={formData.pictureId}
                   firstName={formData.firstName}
                   lastName={formData.lastName}
                   enableUpload
@@ -104,6 +105,12 @@ export function EditPersonDialog({
                         pictureId: info.pictureId,
                         profileImageUrl:
                           info.publicUrl?.trim() || fd.profileImageUrl,
+                      }));
+                    } else {
+                      setFormData((fd) => ({
+                        ...fd,
+                        pictureId: null,
+                        profileImageUrl: fd.clerkProfileImageUrl ?? null,
                       }));
                     }
                     onPictureUploaded();

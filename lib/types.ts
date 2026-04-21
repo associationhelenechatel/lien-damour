@@ -11,6 +11,11 @@ export type FamilyRelation = InferSelectModel<typeof familyRelation>;
 export type Partnership = InferSelectModel<typeof partnership>;
 export type Project = InferSelectModel<typeof project>;
 
+/** Projet avec URL de logo résolue côté serveur (affichage sans `NEXT_PUBLIC_*`). */
+export type ProjectWithLogoDisplay = Project & {
+  logoDisplayUrl: string | null;
+};
+
 // Types pour l'insertion (création de nouvelles entrées)
 export type NewFamilyMember = InferInsertModel<typeof familyMember>;
 export type NewFamilyRelation = InferInsertModel<typeof familyRelation>;

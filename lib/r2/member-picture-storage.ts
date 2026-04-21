@@ -36,6 +36,18 @@ export function isMemberPictureObjectKeyForMember(
   return key.startsWith(`family-members/${memberId}/`);
 }
 
+export function projectLogoObjectKey(projectId: number, extension: string): string {
+  const safeExt = extension.replace(/^\./, "").toLowerCase();
+  return `projects/${projectId}/${randomUUID()}.${safeExt}`;
+}
+
+export function isProjectLogoObjectKeyForProject(
+  key: string,
+  projectId: number
+): boolean {
+  return key.startsWith(`projects/${projectId}/`);
+}
+
 export async function putMemberPictureObject(
   objectKey: string,
   body: Buffer,

@@ -10,6 +10,7 @@ import { updateFamilyMember } from "@/lib/api/family";
 import {
   assertR2PictureUploadConfigured,
   getR2PublicBaseUrl,
+  isR2PictureUploadConfigured,
 } from "@/lib/r2/config";
 import {
   assertAllowedImageType,
@@ -18,7 +19,7 @@ import {
   memberPictureObjectKey,
   putMemberPictureObject,
 } from "@/lib/r2/member-picture-storage";
-import { publicUrlForMemberPictureKey } from "@/lib/member-profile-image";
+import { publicUrlR2 } from "@/lib/member-profile-image";
 
 export type UploadMemberProfilePictureResult =
   | { ok: true; pictureId: string; publicUrl: string }
@@ -134,6 +135,61 @@ export async function uploadMemberProfilePictureAction(
     }
   }
 
-  const publicUrl = publicUrlForMemberPictureKey(objectKey) ?? "";
+  const publicUrl = publicUrlR2(objectKey) ?? "";
   return { ok: true, pictureId: objectKey, publicUrl };
+}
+
+export type RemoveMemberProfilePictureResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+/**
+ * Supprime la photo R2 (`picture_id`) et remet la colonne à null.
+ * Tente d’effacer l’objet dans le bucket si les credentials R2 sont configurés.
+ */
+export async function removeMemberProfilePictureAction(
+  memberId: number
+): Promise<RemoveMemberProfilePictureResult> {
+  if (!Number.isFinite(memberId) || memberId < 1) {
+    return { ok: false, error: "Identifiant membre invalide." };
+  }
+
+  if (!(await canEditMemberPicture(memberId))) {
+    return { ok: false, error: "Non autorisé à modifier cette photo." };
+  }
+
+  const [existing] = await db
+    .select({ pictureId: familyMember.pictureId })
+    .from(familyMember)
+    .where(eq(familyMember.id, memberId))
+    .limit(1);
+
+  if (!existing) {
+    return { ok: false, error: "Membre introuvable." };
+  }
+
+  const key = existing.pictureId?.trim() || null;
+  if (!key) {
+    return { ok: true };
+  }
+
+  if (
+    isR2PictureUploadConfigured() &&
+    isMemberPictureObjectKeyForMember(key, memberId)
+  ) {
+    try {
+      await deleteMemberPictureObjectIfPresent(key);
+    } catch (e) {
+      console.error("R2 DeleteObject error:", e);
+    }
+  }
+
+  try {
+    await updateFamilyMember(memberId, { pictureId: null });
+  } catch (e) {
+    console.error("updateFamilyMember after picture remove:", e);
+    return { ok: false, error: "Mise à jour en base impossible." };
+  }
+
+  return { ok: true };
 }

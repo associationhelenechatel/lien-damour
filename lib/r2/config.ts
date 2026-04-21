@@ -4,8 +4,10 @@
  * Upload (serveur) :
  * - R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME
  *
- * Affichage dans le navigateur :
- * - R2_PUBLIC_BASE_URL = URL publique du bucket, sans slash final.
+ * Affichage (URL publique des objets) :
+ * - R2_PUBLIC_BASE_URL = URL publique du bucket, sans slash final (lues côté serveur
+ *   pour construire les liens ; les composants client reçoivent des URL déjà résolues
+ *   quand c’est nécessaire, ex. `logoDisplayUrl` sur les projets).
  *   Ce doit être l’URL « Public bucket » (.r2.dev) ou un domaine personnalisé
  *   configuré sur le bucket (R2 → bucket → Settings → Public access).
  *
@@ -31,6 +33,10 @@ export function isR2S3ApiEndpointUrl(url: string): boolean {
   }
 }
 
+function trimR2PublicBaseUrl(): string | undefined {
+  return trimEnv("R2_PUBLIC_BASE_URL");
+}
+
 /** True si l’upload serveur vers R2 et une base d’URL publique sont définis. */
 export function isR2PictureUploadConfigured(): boolean {
   return Boolean(
@@ -38,7 +44,7 @@ export function isR2PictureUploadConfigured(): boolean {
       trimEnv("R2_ACCESS_KEY_ID") &&
       trimEnv("R2_SECRET_ACCESS_KEY") &&
       trimEnv("R2_BUCKET_NAME") &&
-      trimEnv("R2_PUBLIC_BASE_URL")
+      trimR2PublicBaseUrl()
   );
 }
 
@@ -63,8 +69,10 @@ export function getR2BucketName(): string {
 }
 
 export function getR2PublicBaseUrl(): string {
-  const base = trimEnv("R2_PUBLIC_BASE_URL");
-  if (!base) throw new Error("R2_PUBLIC_BASE_URL manquant");
+  const base = trimR2PublicBaseUrl();
+  if (!base) {
+    throw new Error("R2_PUBLIC_BASE_URL manquant.");
+  }
   const normalized = base.replace(/\/$/, "");
   if (isR2S3ApiEndpointUrl(normalized)) {
     throw new Error(
@@ -79,7 +87,7 @@ export function getR2PublicBaseUrl(): string {
  * pointe par erreur vers l’endpoint API (pour retomber sur la photo Clerk).
  */
 export function getSafeR2PublicBaseUrlForDisplay(): string | null {
-  const base = trimEnv("R2_PUBLIC_BASE_URL");
+  const base = trimR2PublicBaseUrl();
   if (!base) return null;
   const normalized = base.replace(/\/$/, "");
   if (isR2S3ApiEndpointUrl(normalized)) {

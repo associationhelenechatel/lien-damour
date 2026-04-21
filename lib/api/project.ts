@@ -4,26 +4,38 @@ import { revalidatePath } from "next/cache";
 import { eq, asc } from "drizzle-orm";
 import { db } from "@/drizzle/client";
 import { project } from "@/drizzle/schema";
-import type { Project, NewProject } from "@/lib/types";
+import { resolveProjectLogoPublicUrl } from "@/lib/project-logo-url";
+import type { Project, NewProject, ProjectWithLogoDisplay } from "@/lib/types";
 
-export async function getProjects(): Promise<Project[]> {
+function withLogoDisplay(row: Project): ProjectWithLogoDisplay {
+  return {
+    ...row,
+    logoDisplayUrl: resolveProjectLogoPublicUrl(row.logo),
+  };
+}
+
+export async function getProjects(): Promise<ProjectWithLogoDisplay[]> {
   const rows = await db
     .select()
     .from(project)
     .orderBy(asc(project.name));
-  return rows;
+  return rows.map(withLogoDisplay);
 }
 
-export async function getProjectById(id: number): Promise<Project | null> {
+export async function getProjectById(
+  id: number
+): Promise<ProjectWithLogoDisplay | null> {
   const [row] = await db
     .select()
     .from(project)
     .where(eq(project.id, id))
     .limit(1);
-  return row ?? null;
+  return row ? withLogoDisplay(row) : null;
 }
 
-export async function createProject(data: NewProject): Promise<Project> {
+export async function createProject(
+  data: NewProject
+): Promise<ProjectWithLogoDisplay> {
   const [created] = await db
     .insert(project)
     .values({
@@ -34,13 +46,14 @@ export async function createProject(data: NewProject): Promise<Project> {
     .returning();
   revalidatePath("/admin");
   revalidatePath("/admin/projects");
-  return created;
+  revalidatePath("/");
+  return withLogoDisplay(created);
 }
 
 export async function updateProject(
   id: number,
   data: Partial<NewProject>
-): Promise<Project> {
+): Promise<ProjectWithLogoDisplay> {
   const [updated] = await db
     .update(project)
     .set({
@@ -51,11 +64,13 @@ export async function updateProject(
     .returning();
   revalidatePath("/admin");
   revalidatePath("/admin/projects");
-  return updated;
+  revalidatePath("/");
+  return withLogoDisplay(updated);
 }
 
 export async function deleteProject(id: number): Promise<void> {
   await db.delete(project).where(eq(project.id, id));
   revalidatePath("/admin");
   revalidatePath("/admin/projects");
+  revalidatePath("/");
 }

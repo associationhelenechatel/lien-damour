@@ -20,7 +20,12 @@ import {
 } from "@/components/ui/dialog";
 import { Heart, Loader2, GraduationCap, TreePine } from "lucide-react";
 import { getProjects } from "@/lib/api/project";
-import type { Project } from "@/lib/types";
+import {
+  isProjectLogoSrcLocalPath,
+  isProjectLogoSrcRemoteHttp,
+  resolveProjectLogoSrc,
+} from "@/lib/project-logo-url";
+import type { ProjectWithLogoDisplay } from "@/lib/types";
 
 const DEFAULT_PROJECT_IMAGE =
   "/assets/logo-square.png";
@@ -41,7 +46,7 @@ const categoryColors = {
 };
 
 export default function Home() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectWithLogoDisplay[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -89,7 +94,14 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {projects.map((project) => (
+              {projects.map((project) => {
+                const logoSrc =
+                  project.logoDisplayUrl?.trim() ||
+                  resolveProjectLogoSrc(
+                    project.logo,
+                    DEFAULT_PROJECT_IMAGE
+                  );
+                return (
                 <Card
                   key={project.id}
                   className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
@@ -97,15 +109,24 @@ export default function Home() {
                   <CardContent className="p-4 flex flex-col gap-3">
                     {/* 1. Logo + nom */}
                     <div className="flex gap-3">
-                      <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden">
-                        <Image
-                          src={project.logo || DEFAULT_PROJECT_IMAGE}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          unoptimized
-                          sizes="56px"
-                        />
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+                        {isProjectLogoSrcLocalPath(logoSrc) ? (
+                          <Image
+                            src={logoSrc}
+                            alt=""
+                            fill
+                            className="object-cover"
+                            unoptimized
+                            sizes="56px"
+                          />
+                        ) : isProjectLogoSrcRemoteHttp(logoSrc) ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={logoSrc}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : null}
                       </div>
                       <div className="flex-1 min-w-0 flex items-center">
                         <CardTitle className="text-base leading-tight">
@@ -174,7 +195,8 @@ export default function Home() {
                     </Dialog>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

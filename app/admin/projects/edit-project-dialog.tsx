@@ -19,7 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Project } from "@/lib/types";
+import type { Project, ProjectWithLogoDisplay } from "@/lib/types";
+import { sanitizeProjectLogoForDb } from "@/lib/project-logo-url";
+import { ProjectLogoUpload } from "@/components/project-logo-upload";
 
 const PROJECT_TYPES = ["Association", "Projet", "Partenariat"] as const;
 
@@ -41,9 +43,11 @@ const PROJECT_TAGS = [
 interface EditProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  project: Project | null;
+  project: ProjectWithLogoDisplay | null;
   onSubmit: (data: Partial<Project>) => Promise<void>;
   title: string;
+  /** Après upload / suppression du logo (recharger la liste, etc.). */
+  onLogoPersisted?: () => void | Promise<void>;
 }
 
 const emptyForm = {
@@ -62,12 +66,15 @@ export function EditProjectDialog({
   project,
   onSubmit,
   title,
+  onLogoPersisted,
 }: EditProjectDialogProps) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (project) {
+      const logoKey =
+        sanitizeProjectLogoForDb(project.logo, project.id) ?? "";
       setForm({
         name: project.name ?? "",
         description: project.description ?? "",
@@ -75,7 +82,7 @@ export function EditProjectDialog({
         location: project.location ?? "",
         type: project.type ?? "",
         tag: project.tag ?? "",
-        logo: project.logo ?? "",
+        logo: logoKey,
       });
     } else {
       setForm(emptyForm);
@@ -94,7 +101,7 @@ export function EditProjectDialog({
         location: form.location.trim() || null,
         type: form.type.trim() || null,
         tag: form.tag.trim() || null,
-        logo: form.logo.trim() || null,
+        logo: sanitizeProjectLogoForDb(form.logo, project?.id ?? null),
       });
       onOpenChange(false);
     } finally {
@@ -109,15 +116,42 @@ export function EditProjectDialog({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="project-name">Nom *</Label>
-            <Input
-              id="project-name"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="Nom du projet"
-              required
+          <div className="flex flex-col gap-4 border-b border-slate-200/80 pb-4 sm:flex-row sm:items-start sm:gap-6">
+            <ProjectLogoUpload
+              className="shrink-0"
+              projectId={project?.id ?? null}
+              logo={form.logo}
+              serverResolvedLogoUrl={project?.logoDisplayUrl ?? null}
+              onLogoChange={(next) =>
+                setForm((f) => ({ ...f, logo: next ?? "" }))
+              }
+              onPersisted={onLogoPersisted}
             />
+            <div className="min-w-0 flex-1 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="project-name">Nom *</Label>
+                <Input
+                  id="project-name"
+                  value={form.name}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                  placeholder="Nom du projet"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project-location">Lieu</Label>
+                <Input
+                  id="project-location"
+                  value={form.location}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, location: e.target.value }))
+                  }
+                  placeholder="Ville, pays"
+                />
+              </div>
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="project-short">Résumé</Label>
@@ -140,17 +174,6 @@ export function EditProjectDialog({
               }
               placeholder="Description détaillée"
               className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="project-location">Lieu</Label>
-            <Input
-              id="project-location"
-              value={form.location}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, location: e.target.value }))
-              }
-              placeholder="Ville, pays"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -194,15 +217,6 @@ export function EditProjectDialog({
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="project-logo">Logo (URL)</Label>
-            <Input
-              id="project-logo"
-              value={form.logo}
-              onChange={(e) => setForm((f) => ({ ...f, logo: e.target.value }))}
-              placeholder="https://..."
-            />
           </div>
           <DialogFooter>
             <Button

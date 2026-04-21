@@ -19,7 +19,12 @@ import {
   updateProject,
   deleteProject,
 } from "@/lib/api/project";
-import type { Project } from "@/lib/types";
+import type { ProjectWithLogoDisplay } from "@/lib/types";
+import {
+  isProjectLogoSrcLocalPath,
+  isProjectLogoSrcRemoteHttp,
+  resolveProjectLogoSrc,
+} from "@/lib/project-logo-url";
 import { EditProjectDialog } from "@/app/admin/projects/edit-project-dialog";
 import { DeleteProjectDialog } from "@/app/admin/projects/delete-project-dialog";
 
@@ -28,10 +33,12 @@ const DEFAULT_PROJECT_IMAGE =
 
 export default function AdminProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectWithLogoDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectWithLogoDisplay | null>(
+    null
+  );
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -42,6 +49,10 @@ export default function AdminProjectsPage() {
       setError(null);
       const data = await getProjects();
       setProjects(data);
+      setSelectedProject((prev) => {
+        if (!prev) return null;
+        return data.find((p) => p.id === prev.id) ?? prev;
+      });
     } catch (err) {
       setError("Impossible de charger les projets");
       console.error(err);
@@ -65,13 +76,17 @@ export default function AdminProjectsPage() {
       )
     : projects;
 
-  const handleAddProject = async (data: Partial<Project>) => {
-    await createProject(data as Parameters<typeof createProject>[0]);
+  const handleAddProject = async (data: Partial<ProjectWithLogoDisplay>) => {
+    const created = await createProject(
+      data as Parameters<typeof createProject>[0]
+    );
     await loadProjects();
     setShowAddDialog(false);
+    setSelectedProject(created);
+    setShowEditDialog(true);
   };
 
-  const handleEditProject = async (data: Partial<Project>) => {
+  const handleEditProject = async (data: Partial<ProjectWithLogoDisplay>) => {
     if (!selectedProject) return;
     await updateProject(selectedProject.id, data);
     await loadProjects();
@@ -128,7 +143,11 @@ export default function AdminProjectsPage() {
 
       {!loading && !error && (
         <div className="grid gap-4">
-          {filteredProjects.map((project) => (
+          {filteredProjects.map((project) => {
+            const logoSrc =
+              project.logoDisplayUrl?.trim() ||
+              resolveProjectLogoSrc(project.logo, DEFAULT_PROJECT_IMAGE);
+            return (
             <Card
               key={project.id}
               className="border-emerald-200 hover:shadow-md transition-shadow"
@@ -136,15 +155,24 @@ export default function AdminProjectsPage() {
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex gap-4 flex-1 min-w-0">
-                    <div className="relative shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-slate-100">
-                      <Image
-                        src={project.logo || DEFAULT_PROJECT_IMAGE}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        unoptimized
-                        sizes="80px"
-                      />
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                      {isProjectLogoSrcLocalPath(logoSrc) ? (
+                        <Image
+                          src={logoSrc}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          unoptimized
+                          sizes="80px"
+                        />
+                      ) : isProjectLogoSrcRemoteHttp(logoSrc) ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={logoSrc}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : null}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -200,7 +228,8 @@ export default function AdminProjectsPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -222,6 +251,7 @@ export default function AdminProjectsPage() {
         project={null}
         onSubmit={handleAddProject}
         title="Nouveau projet"
+        onLogoPersisted={loadProjects}
       />
 
       {selectedProject && (
@@ -231,6 +261,7 @@ export default function AdminProjectsPage() {
           project={selectedProject}
           onSubmit={handleEditProject}
           title="Modifier le projet"
+          onLogoPersisted={loadProjects}
         />
       )}
 

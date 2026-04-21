@@ -5,7 +5,10 @@ import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { uploadMemberProfilePictureAction } from "@/lib/api/member-picture";
+import {
+  removeMemberProfilePictureAction,
+  uploadMemberProfilePictureAction,
+} from "@/lib/api/member-picture";
 import { cn } from "@/lib/utils";
 
 const frameClass =
@@ -25,6 +28,7 @@ export type MemberPictureUploadedInfo = {
 type MemberProfileAvatarHoverUploadProps = {
   memberId: number;
   profileImageUrl: string | null;
+  pictureId?: string | null;
   firstName?: string | null;
   lastName?: string | null;
   enableUpload: boolean;
@@ -37,6 +41,7 @@ type MemberProfileAvatarHoverUploadProps = {
 export function MemberProfileAvatarHoverUpload({
   memberId,
   profileImageUrl,
+  pictureId,
   firstName,
   lastName,
   enableUpload,
@@ -72,6 +77,21 @@ export function MemberProfileAvatarHoverUpload({
         pictureId: result.pictureId,
         publicUrl: result.publicUrl,
       });
+    });
+  };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (pending) return;
+    startTransition(async () => {
+      const result = await removeMemberProfilePictureAction(memberId);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Photo retirée.");
+      onUploaded();
     });
   };
 
@@ -114,50 +134,64 @@ export function MemberProfileAvatarHoverUpload({
     return <div className={frameClass}>{inner}</div>;
   }
 
+  const hasR2Picture = Boolean(pictureId?.trim());
+
   return (
-    <div
-      className={cn(
-        frameClass,
-        "group relative outline-none",
-        !pending && "cursor-pointer",
-        "focus-visible:ring-2 focus-visible:ring-emerald-600/55 focus-visible:ring-offset-2"
-      )}
-      tabIndex={0}
-      role="button"
-      aria-label="Changer la photo de profil"
-      onClick={triggerFile}
-      onKeyDown={onKeyDown}
-    >
-      {inner}
-
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        className="sr-only"
-        onChange={handleChange}
-        disabled={pending}
-        tabIndex={-1}
-      />
-
-      {/* Survol : voile + libellé (pointer-events-none pour que le clic reste sur le parent) */}
+    <div className="flex flex-col items-center gap-1.5">
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl",
-          "bg-black/0 opacity-0 transition-all duration-200",
-          "group-hover:bg-black/45 group-hover:opacity-100",
-          "group-focus-visible:bg-black/45 group-focus-visible:opacity-100"
+          frameClass,
+          "group relative outline-none",
+          !pending && "cursor-pointer",
+          "focus-visible:ring-2 focus-visible:ring-emerald-600/55 focus-visible:ring-offset-2"
         )}
+        tabIndex={0}
+        role="button"
+        aria-label="Changer la photo de profil"
+        onClick={triggerFile}
+        onKeyDown={onKeyDown}
       >
-        <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-900 shadow-md">
-          Changer la photo
-        </span>
+        {inner}
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="sr-only"
+          onChange={handleChange}
+          disabled={pending}
+          tabIndex={-1}
+        />
+
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl",
+            "bg-black/0 opacity-0 transition-all duration-200",
+            "group-hover:bg-black/45 group-hover:opacity-100",
+            "group-focus-visible:bg-black/45 group-focus-visible:opacity-100"
+          )}
+        >
+          <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-900 shadow-md">
+            Changer la photo
+          </span>
+        </div>
+
+        {pending ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-black/35">
+            <Loader2 className="h-8 w-8 animate-spin text-white" aria-hidden />
+          </div>
+        ) : null}
       </div>
 
-      {pending ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-black/35">
-          <Loader2 className="h-8 w-8 animate-spin text-white" aria-hidden />
-        </div>
+      {hasR2Picture ? (
+        <button
+          type="button"
+          onClick={handleRemove}
+          disabled={pending}
+          className="text-xs font-medium text-slate-500 underline-offset-2 hover:text-red-700 hover:underline disabled:opacity-50"
+        >
+          Supprimer la photo
+        </button>
       ) : null}
     </div>
   );
