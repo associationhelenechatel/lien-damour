@@ -97,5 +97,5 @@ production vers R2.
 - [x] Événement naissance / mariage
 - [x] Gestion des admins
 - [x] Pouvoir inviter des membres
-- [ ] Déploiement clerk en prod
+- [x] Déploiement clerk en prod
 - [x] Upload de fichiers
