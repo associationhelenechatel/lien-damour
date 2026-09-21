@@ -26,5 +26,32 @@ services:
       postgres:
         condition: service_healthy
 
+  # Stockage S3 local pour le dev (photos, logos, documents) : évite d'écrire
+  # dans le bucket R2 de production. Voir R2_ENDPOINT dans .env.example.
+  # Le bucket, son CORS et sa lecture publique sont créés automatiquement au
+  # démarrage par docker/localstack-init/init-s3.sh.
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566" # API S3 (et point d'entrée unique LocalStack)
+    environment:
+      - SERVICES=s3
+      # Requis depuis mars 2026 (LocalStack a fermé sa version communautaire
+      # sans compte) — plan Hobby gratuit, token dans .env (racine, gitignoré,
+      # chargé automatiquement par docker compose).
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - ./docker/localstack-init:/etc/localstack/init/ready.d
+    healthcheck:
+      # Fichier marqueur créé par LocalStack une fois prêt : ne dépend pas de
+      # la présence de curl/wget dans l'image.
+      test: ["CMD", "test", "-f", "/var/lib/localstack/localstack_ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
 volumes:
   db_data:
+  localstack_data:
