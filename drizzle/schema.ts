@@ -67,6 +67,19 @@ export const project = pgTable("project", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const familyMemberDocument = pgTable("family_member_document", {
+  id: serial("id").primaryKey(),
+  memberId: integer("member_id")
+    .references(() => familyMember.id)
+    .notNull(),
+  objectKey: text("object_key").notNull(), // clé objet R2 : family-members/{memberId}/documents/...
+  fileName: text("file_name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  uploadedByUserId: text("uploaded_by_user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const admin = pgTable("admin", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().unique(),

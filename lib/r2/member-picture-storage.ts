@@ -1,10 +1,7 @@
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID } from "node:crypto";
 
-import { getR2BucketName } from "./config";
-import { getR2S3Client } from "./client";
-
-const MAX_BYTES = 5 * 1024 * 1024;
+export const MAX_PICTURE_BYTES = 5 * 1024 * 1024;
+export const PICTURE_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 const ALLOWED_TYPES = new Map<string, string>([
   ["image/jpeg", "jpg"],
@@ -22,6 +19,11 @@ export function assertAllowedImageType(contentType: string): string {
     );
   }
   return ext;
+}
+
+/** Type MIME normalisé à partir de l’extension (fallback quand `file.type` est vide). */
+export function imageContentTypeFromExtension(extension: string): string {
+  return `image/${extension === "jpg" ? "jpeg" : extension}`;
 }
 
 export function memberPictureObjectKey(memberId: number, extension: string): string {
@@ -46,38 +48,4 @@ export function isProjectLogoObjectKeyForProject(
   projectId: number
 ): boolean {
   return key.startsWith(`projects/${projectId}/`);
-}
-
-export async function putMemberPictureObject(
-  objectKey: string,
-  body: Buffer,
-  contentType: string
-): Promise<void> {
-  if (body.length > MAX_BYTES) {
-    throw new Error("Fichier trop volumineux (maximum 5 Mo).");
-  }
-  const client = getR2S3Client();
-  await client.send(
-    new PutObjectCommand({
-      Bucket: getR2BucketName(),
-      Key: objectKey,
-      Body: body,
-      ContentType: contentType.split(";")[0]?.trim(),
-      CacheControl: "public, max-age=31536000, immutable",
-    })
-  );
-}
-
-export async function deleteMemberPictureObjectIfPresent(
-  objectKey: string | null | undefined
-): Promise<void> {
-  const key = objectKey?.trim();
-  if (!key) return;
-  const client = getR2S3Client();
-  await client.send(
-    new DeleteObjectCommand({
-      Bucket: getR2BucketName(),
-      Key: key,
-    })
-  );
 }

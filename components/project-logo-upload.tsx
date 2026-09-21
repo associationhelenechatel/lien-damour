@@ -6,8 +6,9 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
+  confirmProjectLogoUploadAction,
+  createProjectLogoUploadAction,
   removeProjectLogoAction,
-  uploadProjectLogoAction,
 } from "@/lib/api/project-picture";
 import {
   isProjectLogoObjectKeyForProject,
@@ -99,9 +100,41 @@ export function ProjectLogoUpload({
     if (!file || projectId == null) return;
 
     startTransition(async () => {
-      const formData = new FormData();
-      formData.set("file", file);
-      const result = await uploadProjectLogoAction(projectId, formData);
+      const prepared = await createProjectLogoUploadAction(
+        projectId,
+        file.type,
+        file.size
+      );
+      if (!prepared.ok) {
+        toast.error(prepared.error);
+        return;
+      }
+
+      let putResponse: Response;
+      try {
+        putResponse = await fetch(prepared.uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": prepared.contentType,
+            ...(prepared.cacheControl
+              ? { "Cache-Control": prepared.cacheControl }
+              : {}),
+          },
+          body: file,
+        });
+      } catch {
+        toast.error("Échec de l’envoi vers le stockage.");
+        return;
+      }
+      if (!putResponse.ok) {
+        toast.error("Échec de l’envoi vers le stockage.");
+        return;
+      }
+
+      const result = await confirmProjectLogoUploadAction(
+        projectId,
+        prepared.objectKey
+      );
       if (!result.ok) {
         toast.error(result.error);
         return;

@@ -37,10 +37,15 @@ function trimR2PublicBaseUrl(): string | undefined {
   return trimEnv("R2_PUBLIC_BASE_URL");
 }
 
-/** True si l’upload serveur vers R2 et une base d’URL publique sont définis. */
+/**
+ * True si l’upload serveur vers R2 (ou son équivalent local, voir
+ * `R2_ENDPOINT` / LocalStack dans docker-compose.yml) et une base d’URL
+ * publique sont définis. `R2_ACCOUNT_ID` n’est requis que pour l’endpoint R2
+ * réel.
+ */
 export function isR2PictureUploadConfigured(): boolean {
   return Boolean(
-    trimEnv("R2_ACCOUNT_ID") &&
+    (trimEnv("R2_ACCOUNT_ID") || trimEnv("R2_ENDPOINT")) &&
       trimEnv("R2_ACCESS_KEY_ID") &&
       trimEnv("R2_SECRET_ACCESS_KEY") &&
       trimEnv("R2_BUCKET_NAME") &&
@@ -51,7 +56,7 @@ export function isR2PictureUploadConfigured(): boolean {
 export function assertR2PictureUploadConfigured(): void {
   if (!isR2PictureUploadConfigured()) {
     throw new Error(
-      "R2 non configuré : définissez R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME et R2_PUBLIC_BASE_URL."
+      "R2 non configuré : définissez R2_ACCOUNT_ID (ou R2_ENDPOINT en local), R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME et R2_PUBLIC_BASE_URL."
     );
   }
 }
