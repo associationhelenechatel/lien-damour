@@ -6,8 +6,9 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
+  confirmMemberProfilePictureUploadAction,
+  createMemberProfilePictureUploadAction,
   removeMemberProfilePictureAction,
-  uploadMemberProfilePictureAction,
 } from "@/lib/api/member-picture";
 import { cn } from "@/lib/utils";
 
@@ -65,9 +66,41 @@ export function MemberProfileAvatarHoverUpload({
     if (!file) return;
 
     startTransition(async () => {
-      const formData = new FormData();
-      formData.set("file", file);
-      const result = await uploadMemberProfilePictureAction(memberId, formData);
+      const prepared = await createMemberProfilePictureUploadAction(
+        memberId,
+        file.type,
+        file.size
+      );
+      if (!prepared.ok) {
+        toast.error(prepared.error);
+        return;
+      }
+
+      let putResponse: Response;
+      try {
+        putResponse = await fetch(prepared.uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": prepared.contentType,
+            ...(prepared.cacheControl
+              ? { "Cache-Control": prepared.cacheControl }
+              : {}),
+          },
+          body: file,
+        });
+      } catch {
+        toast.error("Échec de l’envoi vers le stockage.");
+        return;
+      }
+      if (!putResponse.ok) {
+        toast.error("Échec de l’envoi vers le stockage.");
+        return;
+      }
+
+      const result = await confirmMemberProfilePictureUploadAction(
+        memberId,
+        prepared.objectKey
+      );
       if (!result.ok) {
         toast.error(result.error);
         return;

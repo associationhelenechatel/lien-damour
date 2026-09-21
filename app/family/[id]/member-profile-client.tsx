@@ -27,7 +27,11 @@ import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
 import { AddressSearchBox } from "@/components/address-search-box";
 import { MemberProfileAvatarHoverUpload } from "@/components/member-profile-picture-upload";
-import type { FamilyMemberWithRelations } from "@/lib/types";
+import { MemberDocumentsSection } from "@/components/member-documents";
+import type {
+  FamilyMemberDocumentWithUrl,
+  FamilyMemberWithRelations,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function formatDate(value: string | null | undefined) {
@@ -123,9 +127,13 @@ function hasMapCoordinates(member: FamilyMemberWithRelations) {
 export function MemberProfileClient({
   member,
   isOwnProfile,
+  documents,
+  canManageDocuments,
 }: {
   member: FamilyMemberWithRelations;
   isOwnProfile: boolean;
+  documents: FamilyMemberDocumentWithUrl[];
+  canManageDocuments: boolean;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -632,6 +640,12 @@ export function MemberProfileClient({
             </ul>
           </section>
         ) : null}
+
+        <MemberDocumentsSection
+          memberId={member.id}
+          initialDocuments={documents}
+          canManage={canManageDocuments}
+        />
       </div>
     </div>
   );

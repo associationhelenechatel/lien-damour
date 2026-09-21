@@ -50,6 +50,13 @@
       "when": 1776119526612,
       "tag": "0006_overjoyed_annihilus",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789946402083,
+      "tag": "0007_faulty_otto_octavius",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,7 @@ import { db } from "@/drizzle/client";
 import { project } from "@/drizzle/schema";
 import { isCurrentUserAdmin } from "@/lib/api/admin";
 import { updateProject } from "@/lib/api/project";
+import { confirmR2Upload, prepareR2Upload } from "@/lib/api/r2-upload-flow";
 import {
   assertR2PictureUploadConfigured,
   getR2PublicBaseUrl,
@@ -13,27 +14,38 @@ import {
 } from "@/lib/r2/config";
 import {
   assertAllowedImageType,
-  deleteMemberPictureObjectIfPresent,
+  imageContentTypeFromExtension,
   isProjectLogoObjectKeyForProject,
+  MAX_PICTURE_BYTES,
+  PICTURE_CACHE_CONTROL,
   projectLogoObjectKey,
-  putMemberPictureObject,
 } from "@/lib/r2/member-picture-storage";
+import { deleteR2ObjectIfPresent } from "@/lib/r2/presigned-upload";
 import { publicUrlR2 } from "@/lib/member-profile-image";
-
-export type UploadProjectLogoResult =
-  | { ok: true; logoKey: string; publicUrl: string }
-  | { ok: false; error: string };
-
-export type RemoveProjectLogoResult = { ok: true } | { ok: false; error: string };
 
 async function assertAdmin(): Promise<boolean> {
   return isCurrentUserAdmin();
 }
 
-export async function uploadProjectLogoAction(
+export type CreateProjectLogoUploadResult =
+  | {
+      ok: true;
+      uploadUrl: string;
+      objectKey: string;
+      contentType: string;
+      cacheControl?: string;
+    }
+  | { ok: false; error: string };
+
+/**
+ * 1ʳᵉ étape : génère une URL présignée R2 pour un envoi direct navigateur → R2.
+ * Réservé aux administrateurs.
+ */
+export async function createProjectLogoUploadAction(
   projectId: number,
-  formData: FormData
-): Promise<UploadProjectLogoResult> {
+  contentType: string,
+  size: number
+): Promise<CreateProjectLogoUploadResult> {
   if (!Number.isFinite(projectId) || projectId < 1) {
     return { ok: false, error: "Identifiant projet invalide." };
   }
@@ -53,14 +65,9 @@ export async function uploadProjectLogoAction(
     };
   }
 
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, error: "Aucun fichier valide." };
-  }
-
   let extension: string;
   try {
-    extension = assertAllowedImageType(file.type || "application/octet-stream");
+    extension = assertAllowedImageType(contentType || "application/octet-stream");
   } catch (err) {
     return {
       ok: false,
@@ -68,21 +75,57 @@ export async function uploadProjectLogoAction(
     };
   }
 
-  const objectKey = projectLogoObjectKey(projectId, extension);
-
-  let buffer: Buffer;
-  try {
-    buffer = Buffer.from(await file.arrayBuffer());
-  } catch {
-    return { ok: false, error: "Lecture du fichier impossible." };
-  }
-
   const [existing] = await db
-    .select({ id: project.id, logo: project.logo })
+    .select({ id: project.id })
     .from(project)
     .where(eq(project.id, projectId))
     .limit(1);
+  if (!existing) {
+    return { ok: false, error: "Projet introuvable." };
+  }
 
+  const objectKey = projectLogoObjectKey(projectId, extension);
+  return prepareR2Upload({
+    objectKey,
+    contentType: contentType || imageContentTypeFromExtension(extension),
+    size,
+    maxBytes: MAX_PICTURE_BYTES,
+    cacheControl: PICTURE_CACHE_CONTROL,
+  });
+}
+
+export type ConfirmProjectLogoUploadResult =
+  | { ok: true; logoKey: string; publicUrl: string }
+  | { ok: false; error: string };
+
+/**
+ * 2ᵉ étape : après un envoi direct réussi vers R2, vérifie l’objet réel puis
+ * enregistre la clé dans `project.logo`.
+ */
+export async function confirmProjectLogoUploadAction(
+  projectId: number,
+  objectKey: string
+): Promise<ConfirmProjectLogoUploadResult> {
+  if (!Number.isFinite(projectId) || projectId < 1) {
+    return { ok: false, error: "Identifiant projet invalide." };
+  }
+
+  if (!(await assertAdmin())) {
+    return { ok: false, error: "Droits administrateur requis." };
+  }
+
+  const confirmed = await confirmR2Upload({
+    objectKey,
+    maxBytes: MAX_PICTURE_BYTES,
+    isOwnedKey: isProjectLogoObjectKeyForProject(objectKey, projectId),
+  });
+  if (!confirmed.ok) return confirmed;
+
+  const [existing] = await db
+    .select({ logo: project.logo })
+    .from(project)
+    .where(eq(project.id, projectId))
+    .limit(1);
   if (!existing) {
     return { ok: false, error: "Projet introuvable." };
   }
@@ -90,25 +133,11 @@ export async function uploadProjectLogoAction(
   const previousKey = existing.logo?.trim() || null;
 
   try {
-    await putMemberPictureObject(
-      objectKey,
-      buffer,
-      file.type || `image/${extension === "jpg" ? "jpeg" : extension}`
-    );
-  } catch (e) {
-    console.error("R2 PutObject (project logo):", e);
-    return {
-      ok: false,
-      error: "Échec de l’envoi vers le stockage. Vérifiez les clés R2.",
-    };
-  }
-
-  try {
     await updateProject(projectId, { logo: objectKey });
   } catch (e) {
     console.error("updateProject after R2 logo upload:", e);
     try {
-      await deleteMemberPictureObjectIfPresent(objectKey);
+      await deleteR2ObjectIfPresent(objectKey);
     } catch {
       /* best effort */
     }
@@ -121,7 +150,7 @@ export async function uploadProjectLogoAction(
     isProjectLogoObjectKeyForProject(previousKey, projectId)
   ) {
     try {
-      await deleteMemberPictureObjectIfPresent(previousKey);
+      await deleteR2ObjectIfPresent(previousKey);
     } catch {
       /* orphelin acceptable */
     }
@@ -130,6 +159,8 @@ export async function uploadProjectLogoAction(
   const publicUrl = publicUrlR2(objectKey) ?? "";
   return { ok: true, logoKey: objectKey, publicUrl };
 }
+
+export type RemoveProjectLogoResult = { ok: true } | { ok: false; error: string };
 
 export async function removeProjectLogoAction(
   projectId: number
@@ -162,7 +193,7 @@ export async function removeProjectLogoAction(
     isProjectLogoObjectKeyForProject(key, projectId)
   ) {
     try {
-      await deleteMemberPictureObjectIfPresent(key);
+      await deleteR2ObjectIfPresent(key);
     } catch (e) {
       console.error("R2 DeleteObject (project logo):", e);
     }

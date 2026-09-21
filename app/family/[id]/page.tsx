@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 
+import { isCurrentUserAdmin } from "@/lib/api/admin";
 import { getFamilyMember } from "@/lib/api/family";
+import { getMemberDocuments } from "@/lib/api/member-documents";
 import { MemberProfile } from "./member-profile";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +53,18 @@ export default async function FamilyMemberPage({ params }: PageProps) {
   const isOwnProfile =
     linkedMemberId != null && Number(linkedMemberId) === num;
 
+  const [isAdmin, documents] = await Promise.all([
+    isCurrentUserAdmin(),
+    getMemberDocuments(num),
+  ]);
+  const canManageDocuments = isOwnProfile || isAdmin;
+
   return (
-    <MemberProfile member={member} isOwnProfile={isOwnProfile} />
+    <MemberProfile
+      member={member}
+      isOwnProfile={isOwnProfile}
+      documents={documents}
+      canManageDocuments={canManageDocuments}
+    />
   );
 }
