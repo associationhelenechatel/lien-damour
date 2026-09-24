@@ -20,6 +20,17 @@
 - **ORM** : Drizzle
 - **Styling** : Tailwind CSS + shadcn/ui
 
+### API Keys required
+
+Avant de lancer l'app, récupérer les secrets necessaires. Tous les comptes utilisent le compte google associationhelenechatel@gmail.com.
+
+
+- **Clerk** — https://dashboard.clerk.com → *API Keys* : `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`. Puis dans *Users*, récupérer l'ID de ton compte admin pour `SEED_ADMIN_CLERK_USER_ID`.
+- **Mapbox** — https://account.mapbox.com/access-tokens/ → `NEXT_PUBLIC_MAPBOX_TOKEN`.
+- **LocalStack** — https://app.localstack.cloud → *Account* > *Auth Tokens* (plan Hobby gratuit) → `LOCALSTACK_AUTH_TOKEN`. Requis pour émuler le stockage S3 (Cloudflare R2) en local, voir `docker-compose.yml`.
+
+`DATABASE_URL` et les identifiants `R2_*` sont déjà préremplis dans `.env.example` pour l'environnement Docker local (Postgres + LocalStack) — aucun compte à créer pour ceux-ci.
+
 ## 🚀 Démarrage Rapide
 
 ### Prérequis
@@ -28,6 +39,7 @@
 - Docker
 
 ### Installation
+
 
 ```bash
 # (Si nvm installé)
@@ -41,7 +53,7 @@ docker compose up -d
 
 # Configurer les variables d'environnement
 cp .env.example .env.local
-# Éditer .env avec vos credentials DB
+# Éditer .env avec vos credentials récupérés sur plateformes (voir la section API KEYS)
 
 # Appliquer les migrations
 yarn db:push
@@ -58,32 +70,6 @@ yarn dev
 1. Modifier `drizzle/schema.ts`
 2. Générer la migration : `yarn db:generate`
 3. Appliquer : `yarn db:push` (dev) ou `yarn db:migrate` (prod)
-
-### Stockage de fichiers en local (LocalStack)
-
-`docker compose up -d` démarre aussi un **LocalStack** (émulateur S3) à côté
-de la base Postgres locale, pour que les uploads (photos, logos, documents)
-en dev n'écrivent jamais dans le bucket Cloudflare R2 de production.
-
-1. Dans `.env.local`, décommenter le bloc `# LocalStack (dev local...)` de
-   `.env.example` (et laisser vide les identifiants R2 juste au-dessus).
-2. Depuis mars 2026, LocalStack exige un compte même pour l'usage gratuit :
-   créer un compte gratuit (plan Hobby, non-commercial) sur
-   https://app.localstack.cloud, récupérer son Auth Token, et créer un
-   fichier `.env` **à la racine** (gitignoré, distinct de `.env.local` —
-   c'est celui que lit `docker compose`, pas Next.js) contenant :
-   ```
-   LOCALSTACK_AUTH_TOKEN=<ton token>
-   ```
-3. `docker compose up -d` crée automatiquement le bucket de dev, son CORS et
-   sa lecture publique (voir `docker/localstack-init/init-s3.sh`) — même
-   configuration que le bucket R2 de prod.
-4. Pour inspecter les fichiers uploadés :
-   `docker compose exec localstack awslocal s3 ls s3://lien-damour-dev --recursive`
-
-Les uploads passent par une URL présignée envoyée directement du navigateur
-vers ce stockage (voir `lib/api/r2-upload-flow.ts`), exactement comme en
-production vers R2.
 
 ## 🎯 Roadmap
 
